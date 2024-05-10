@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>HTML 5 Boilerplate</title>
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+    <script type="module" src="dist/index.js"></script>
+</head>
+
+<body>
+    <script id="movesTemplate" type="text/x-handlebars-template">
+        <ul class="w-full divide-y divide-gray-200 mt-2">
+            {{#each Moves}}
+                <li id="{{ID}}" data-id="{{ID}}" class="p-2 hover:bg-gray-200">
+                    <div class="flex items-center space-x-4 rtl:space-x-reverse">
+                        <div class="flex-1 min-w-0">
+                            <p id="{{ID}}-Name" class="text-sm font-medium text-gray-900 truncate ">
+                                {{Name}}
+                            </p>
+                            <p id="{{ID}}-StartFrame-EndFrame" class="text-sm text-gray-500 truncate ">
+                                From: {{StartFrame}} - To: {{EndFrame}}
+                            </p>
+                        </div>
+                        <div class="deleteMove flex-2 min-w-0">
+                            <svg class="w-4 h-4 text-red-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/>
+                            </svg>
+                        </div>
+                    </div>
+                </li>
+            {{/each}}
+        </ul>
+    </script>
+
+    <script id="actionsTemplate" type="text/x-handlebars-template">
+        <ul>
+            {{#each MoveActions}}
+            <li data-id="{{@index}}">
+                <div
+                    class="basis-3/4 rounded-lg flex items-top shadow-lg flex-col p-4 border border-solid my-4">
+                    <div class="flex justify-between">
+                        <h4 class="font-extrabold leading-none tracking-tight text-gray-900">
+                            Action {{increment @index}}
+                        </h4>
+                        <div>
+                            <svg class="w-4 h-4 text-red-800" aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round"
+                                    stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18 17.94 6M18 18 6.06 6"></path>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <ul class="w-full divide-y divide-gray-200  mt-2">
+                        <li class="pb-3 sm:pb-4">
+                            <div class="flex flex-col">
+                                <div class="mt-2 flex flex-row">
+                                    <div class="basis-24 grow-0 shrink-0 flex items-center">
+                                        <label for="small-input" class="text-sm font-medium text-gray-900 ">Name</label>
+                                    </div>
+                                    <input type="text" id="actionName-{{ID}}"
+                                        class="text-sm basis-full h-8 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <div class="mt-2 flex flex-row space-x-10">
+                                    <div class="basis-1/2 flex flex-row">
+                                        <div class="basis-24 grow-0 shrink-0 flex items-center">
+                                            <label for="small-input"
+                                                class="text-sm font-medium text-gray-900 ">Joint</label>
+                                        </div>
+                                        <div class="basis-full relative flex items-center">
+                                            <select id="actionJoint-{{ID}}"
+                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5">
+                                                {{#select Joint}}
+                                                <option value="Nose">Nose</option>
+                                                <option value="RightShoulder">RightShoulder</option>
+                                                <option value="LeftShoulder">LeftShoulder</option>
+                                                <option value="RightWrist">RightWrist</option>
+                                                <option value="LeftWrist">LeftWrist</option>
+                                                <option value="RightHip">RightHip</option>
+                                                <option value="LeftHip">LeftHip</option>
+                                                <option value="RightAnkle">RightAnkle</option>
+                                                <option value="LeftAnkle">LeftAnkle</option>
+                                                {{/select}}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="basis-1/2 flex flex-row items-center">
+                                        <div class="flex items-centerr">
+                                            <input id="checked-checkbox" type="checkbox" {{checked IsMajor}}
+                                                value=""
+                                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ">
+                                            <label for="checked-checkbox"
+                                                class="ms-2 text-sm font-medium text-gray-900">Is
+                                                Major</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-2 flex flex-row">
+                                    <div class="basis-24 grow-0 shrink-0 flex items-center">
+                                        <label for="small-input"
+                                            class="text-sm font-medium text-gray-900 ">Score
+                                            Radius</label>
+                                    </div>
+                                    <input type="text" id="scoresRadius" value="{{json ScoresRadius}}"
+                                        class="text-sm text-sm basis-full h-8 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
+
+                                </div>
+                                <!-- <div id="movementType" class="mt-2 flex flex-row">
+                                    <div class="basis-24 grow-0 shrink-0 flex items-center">
+                                        <label for="small-input"
+                                            class="text-sm font-medium text-gray-900 ">Type</label>
+                                    </div>
+                                    <div class="basis-full flex items-center my-2">
+                                        <div class="flex items-center me-8">
+                                            <input id="point-{{ID}}" type="radio" value="1" {{radioChecked Movement 1}}
+                                                name="MovementType-{{ID}}"
+                                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2 ">
+                                            <label for="inline-radio"
+                                                class="ms-2 text-sm font-medium text-gray-900 ">Point</label>
+                                        </div>
+                                        <div class="flex items-center me-8">
+                                            <input id="line-{{ID}}" type="radio" value="2" {{radioChecked Movement 2}}
+                                            name="MovementType-{{ID}}"
+                                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500   focus:ring-2  ">
+                                            <label for="inline-2-radio"
+                                                class="ms-2 text-sm font-medium text-gray-900 ">Line</label>
+                                        </div>
+                                        <div class="flex items-center me-8">
+                                            <input id="shake-{{ID}}" type="radio" value="3" {{radioChecked Movement 3}}
+                                            name="MovementType-{{ID}}"
+                                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500   focus:ring-2  ">
+                                            <label for="inline-2-radio"
+                                                class="ms-2 text-sm font-medium text-gray-900 ">Shake</label>
+                                        </div>
+                                        <div class="flex items-center me-8">
+                                            <input id="bezier-{{ID}}" type="radio"
+                                                value="4" name="MovementType-{{ID}}" {{radioChecked Movement 4}}
+                                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500   focus:ring-2  ">
+                                            <label for="inline-checked-radio"
+                                                class="ms-2 text-sm font-medium text-gray-900 ">Bezier</label>
+                                        </div>
+                                    </div>
+                                </div> -->
+                                <div id="TrackingPoints-{{ID}}">
+                                    <!-- Render Tracking Points of a Move Action here -->
+                                    {{> trackingPointsTemplate}}
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            {{/each}}
+        </ul>
+    </script>
+
+    <script id="trackingPointsTemplate" type="text/x-handlebars-template">
+        <div class="rounded-lg flex items-top shadow-lg flex-col p-4 border border-solid mt-2">
+            <!-- All Tracking Points of an Action -->
+            <ul class="w-full divide-y divide-gray-200 mt-2">
+                <li class="{{#unless (isLengthLargerThanOrEqual TrackingPoints 1)}}hidden{{/unless}} pb-3 sm:pb-4">
+                    <div class="flex flex-col">
+                        <h4
+                            class="font-bold leading-none tracking-tight text-gray-900">
+                            Tracking Point 1
+                        </h4>
+                        <div class="mt-2 flex flex-row space-x-10">
+                            <div class="basis-1/2 flex flex-row">
+                                <div
+                                    class="basis-20 grow-0 shrink-0 flex items-center">
+                                    <label for="small-input"
+                                        class="text-sm font-medium text-gray-900 ">X</label>
+                                </div>
+                                <div
+                                    class="basis-full relative flex items-center">
+                                    <button type="button"
+                                        id="decrement-button"
+                                        data-input-counter-decrement="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 2">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M1 1h16" />
+                                        </svg>
+                                    </button>
+                                    <input type="number"
+                                        id="{{getArrayItem TrackingPoints 0 'ID'}}-Pos-X"
+                                        value="{{getArrayItem TrackingPoints 0 'Pos.X'}}"
+                                        data-id="{{getArrayItem TrackingPoints 0 'ID'}}"
+                                        data-path="Pos.X"
+                                        data-input-counter
+                                        aria-describedby="helper-text-explanation"
+                                        class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                        required />
+                                    <button type="button"
+                                        id="increment-button"
+                                        data-input-counter-increment="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 18">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 1v16M1 9h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="basis-1/2 flex flex-row">
+                                <div
+                                    class="basis-20 grow-0 shrink-0 flex items-center">
+                                    <label for="small-input"
+                                        class="text-sm font-medium text-gray-900 ">Y</label>
+                                </div>
+                                <div
+                                    class="basis-full relative flex items-center">
+                                    <button type="button"
+                                        id="decrement-button"
+                                        data-input-counter-decrement="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 2">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M1 1h16" />
+                                        </svg>
+                                    </button>
+                                    <input type="number"
+                                        id="{{getArrayItem TrackingPoints 0 'ID'}}-Pos-Y"
+                                        value="{{getArrayItem TrackingPoints 0 'Pos.Y'}}"
+                                        data-id="{{getArrayItem TrackingPoints 0 'ID'}}"
+                                        data-path="Pos.Y"
+                                        data-input-counter
+                                        aria-describedby="helper-text-explanation"
+                                        class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                        required />
+                                    <button type="button"
+                                        id="increment-button"
+                                        data-input-counter-increment="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 18">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 1v16M1 9h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-2 flex flex-row space-x-10">
+                            <div class="basis-1/2 flex flex-row">
+                                <div
+                                    class="basis-20 grow-0 shrink-0 flex items-center">
+                                    <label for="small-input"
+                                        class="text-sm font-medium text-gray-900 ">Time</label>
+                                </div>
+                                <div
+                                    class="basis-full relative flex items-center">
+                                    <button type="button"
+                                        id="decrement-button"
+                                        data-input-counter-decrement="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 2">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M1 1h16" />
+                                        </svg>
+                                    </button>
+                                    <input type="number"
+                                        id="{{getArrayItem TrackingPoints 0 'ID'}}-Time"
+                                        value="{{getArrayItem TrackingPoints 0 'Time'}}"
+                                        data-id="{{getArrayItem TrackingPoints 0 'ID'}}"
+                                        data-path="Time"
+                                        data-input-counter
+                                        aria-describedby="helper-text-explanation"
+                                        class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                        required />
+                                    <button type="button"
+                                        id="increment-button"
+                                        data-input-counter-increment="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 18">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 1v16M1 9h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="basis-1/2 flex flex-row">
+                                <div
+                                    class="basis-20 grow-0 shrink-0 flex items-center">
+                                    <label for="small-input"
+                                        class="text-sm font-medium text-gray-900 ">Frame</label>
+                                </div>
+                                <div
+                                    class="basis-full relative flex items-center">
+                                    <button type="button"
+                                        id="decrement-button"
+                                        data-input-counter-decrement="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 2">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M1 1h16" />
+                                        </svg>
+                                    </button>
+                                    <input type="number"
+                                        id="{{getArrayItem TrackingPoints 0 'ID'}}-Frame"
+                                        value="{{getArrayItem TrackingPoints 0 'Frame'}}"
+                                        data-id="{{getArrayItem TrackingPoints 0 'ID'}}"
+                                        data-path="Frame"
+                                        data-input-counter
+                                        aria-describedby="helper-text-explanation"
+                                        class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                        required />
+                                    <button type="button"
+                                        id="increment-button"
+                                        data-input-counter-increment="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 18">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 1v16M1 9h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="mt-2 flex flex-row space-x-10">
+                            <div class="basis-1/2 flex flex-row">
+                                <div
+                                    class="basis-20 grow-0 shrink-0 flex items-center">
+                                    <label for="small-input"
+                                        class="text-sm font-medium text-gray-900 ">Hold
+                                        Time</label>
+                                </div>
+                                <div
+                                    class="basis-full relative flex items-center">
+                                    <button type="button"
+                                        id="decrement-button"
+                                        data-input-counter-decrement="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 2">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M1 1h16" />
+                                        </svg>
+                                    </button>
+                                    <input type="number"
+                                        id="{{getArrayItem TrackingPoints 0 'ID'}}-HoldTime"
+                                        value="{{getArrayItem TrackingPoints 0 'HoldTime'}}"
+                                        data-id="{{getArrayItem TrackingPoints 0 'ID'}}"
+                                        data-path="HoldTime"
+                                        data-input-counter
+                                        aria-describedby="helper-text-explanation"
+                                        class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                        required />
+                                    <button type="button"
+                                        id="increment-button"
+                                        data-input-counter-increment="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 18">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 1v16M1 9h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="basis-1/2 flex flex-row"></div>
+                        </div>
+                    </div>
+                </li>
+                <li class="{{#unless (isLengthLargerThanOrEqual TrackingPoints 2)}}hidden{{/unless}} pb-3 sm:pb-4">
+                    <div class="flex flex-col">
+                        <h4
+                            class="mt-4 font-bold leading-none tracking-tight text-gray-900">
+                            Anchor 1
+                        </h4>
+                        <div class="mt-2 flex flex-row space-x-10">
+                            <div class="basis-1/2 flex flex-row">
+                                <div
+                                    class="basis-20 grow-0 shrink-0 flex items-center">
+                                    <label for="small-input"
+                                        class="text-sm font-medium text-gray-900 ">X</label>
+                                </div>
+                                <div
+                                    class="basis-full relative flex items-center">
+                                    <button type="button"
+                                        id="decrement-button"
+                                        data-input-counter-decrement="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 2">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M1 1h16" />
+                                        </svg>
+                                    </button>
+                                    <input type="number"
+                                        id="{{getArrayItem TrackingPoints 1 'ID'}}-Pos-X"
+                                        value="{{getArrayItem TrackingPoints 1 'Pos.X'}}"
+                                        data-id="{{getArrayItem TrackingPoints 1 'ID'}}"
+                                        data-path="Pos.X"
+                                        data-input-counter
+                                        aria-describedby="helper-text-explanation"
+                                        class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                        required />
+                                    <button type="button"
+                                        id="increment-button"
+                                        data-input-counter-increment="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 18">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 1v16M1 9h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="basis-1/2 flex flex-row">
+                                <div
+                                    class="basis-20 grow-0 shrink-0 flex items-center">
+                                    <label for="small-input"
+                                        class="text-sm font-medium text-gray-900 ">Y</label>
+                                </div>
+                                <div
+                                    class="basis-full relative flex items-center">
+                                    <button type="button"
+                                        id="decrement-button"
+                                        data-input-counter-decrement="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 2">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M1 1h16" />
+                                        </svg>
+                                    </button>
+                                    <input type="number"
+                                        id="{{getArrayItem TrackingPoints 1 'ID'}}-Pos-Y"
+                                        value="{{getArrayItem TrackingPoints 1 'Pos.Y'}}"
+                                        data-id="{{getArrayItem TrackingPoints 1 'ID'}}"
+                                        data-path="Pos.Y"
+                                        data-input-counter
+                                        aria-describedby="helper-text-explanation"
+                                        class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                        required />
+                                    <button type="button"
+                                        id="increment-button"
+                                        data-input-counter-increment="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 18">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 1v16M1 9h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li class="{{#unless (isLengthLargerThanOrEqual TrackingPoints 3)}}hidden{{/unless}} pb-3 sm:pb-4">
+                    <div class="flex flex-col">
+                        <h4
+                            class="mt-4 font-bold leading-none tracking-tight text-gray-900">
+                            Anchor 2
+                        </h4>
+                        <div class="mt-2 flex flex-row space-x-10">
+                            <div class="basis-1/2 flex flex-row">
+                                <div
+                                    class="basis-20 grow-0 shrink-0 flex items-center">
+                                    <label for="small-input"
+                                        class="text-sm font-medium text-gray-900 ">X</label>
+                                </div>
+                                <div
+                                    class="basis-full relative flex items-center">
+                                    <button type="button"
+                                        id="decrement-button"
+                                        data-input-counter-decrement="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 2">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M1 1h16" />
+                                        </svg>
+                                    </button>
+                                    <input type="number"
+                                        id="{{getArrayItem TrackingPoints 2 'ID'}}-Pos-X"
+                                        value="{{getArrayItem TrackingPoints 2 'Pos.X'}}"
+                                        data-id="{{getArrayItem TrackingPoints 2 'ID'}}"
+                                        data-path="Pos.X"
+                                        data-input-counter
+                                        aria-describedby="helper-text-explanation"
+                                        class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                        required />
+                                    <button type="button"
+                                        id="increment-button"
+                                        data-input-counter-increment="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 18">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 1v16M1 9h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="basis-1/2 flex flex-row">
+                                <div
+                                    class="basis-20 grow-0 shrink-0 flex items-center">
+                                    <label for="small-input"
+                                        class="text-sm font-medium text-gray-900 ">Y</label>
+                                </div>
+                                <div
+                                    class="basis-full relative flex items-center">
+                                    <button type="button"
+                                        id="decrement-button"
+                                        data-input-counter-decrement="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 2">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M1 1h16" />
+                                        </svg>
+                                    </button>
+                                    <input type="number"
+                                        id="{{getArrayItem TrackingPoints 2 'ID'}}-Pos-Y"
+                                        value="{{getArrayItem TrackingPoints 2 'Pos.Y'}}"
+                                        data-id="{{getArrayItem TrackingPoints 2 'ID'}}"
+                                        data-path="Pos.Y"
+                                        data-input-counter
+                                        aria-describedby="helper-text-explanation"
+                                        class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                        required />
+                                    <button type="button"
+                                        id="increment-button"
+                                        data-input-counter-increment="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 18">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 1v16M1 9h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li class="{{#unless (isLengthLargerThanOrEqual TrackingPoints 4)}}hidden{{/unless}} pb-3 sm:pb-4">
+                    <div class="flex flex-col">
+                        <h4
+                            class="mt-4 font-bold leading-none tracking-tight text-gray-900">
+                            Tracking Point 2
+                        </h4>
+                        <div class="mt-2 flex flex-row space-x-10">
+                            <div class="basis-1/2 flex flex-row">
+                                <div
+                                    class="basis-20 grow-0 shrink-0 flex items-center">
+                                    <label for="small-input"
+                                        class="text-sm font-medium text-gray-900 ">X</label>
+                                </div>
+                                <div
+                                    class="basis-full relative flex items-center">
+                                    <button type="button"
+                                        id="decrement-button"
+                                        data-input-counter-decrement="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 2">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M1 1h16" />
+                                        </svg>
+                                    </button>
+                                    <input type="number"
+                                        id="{{getArrayItem TrackingPoints 3 'ID'}}-Pos-X"
+                                        value="{{getArrayItem TrackingPoints 3 'Pos.X'}}"
+                                        data-id="{{getArrayItem TrackingPoints 3 'ID'}}"
+                                        data-path="Pos.X"
+                                        data-input-counter
+                                        aria-describedby="helper-text-explanation"
+                                        class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                        required />
+                                    <button type="button"
+                                        id="increment-button"
+                                        data-input-counter-increment="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 18">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 1v16M1 9h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="basis-1/2 flex flex-row">
+                                <div
+                                    class="basis-20 grow-0 shrink-0 flex items-center">
+                                    <label for="small-input"
+                                        class="text-sm font-medium text-gray-900 ">Y</label>
+                                </div>
+                                <div
+                                    class="basis-full relative flex items-center">
+                                    <button type="button"
+                                        id="decrement-button"
+                                        data-input-counter-decrement="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 2">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M1 1h16" />
+                                        </svg>
+                                    </button>
+                                    <input type="number"
+                                        id="{{getArrayItem TrackingPoints 3 'ID'}}-Pos-Y"
+                                        value="{{getArrayItem TrackingPoints 3 'Pos.Y'}}"
+                                        data-id="{{getArrayItem TrackingPoints 3 'ID'}}"
+                                        data-path="Pos.Y"
+                                        data-input-counter
+                                        aria-describedby="helper-text-explanation"
+                                        class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                        required />
+                                    <button type="button"
+                                        id="increment-button"
+                                        data-input-counter-increment="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 18">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 1v16M1 9h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-2 flex flex-row space-x-10">
+                            <div class="basis-1/2 flex flex-row">
+                                <div
+                                    class="basis-20 grow-0 shrink-0 flex items-center">
+                                    <label for="small-input"
+                                        class="text-sm font-medium text-gray-900 ">Time</label>
+                                </div>
+                                <div
+                                    class="basis-full relative flex items-center">
+                                    <button type="button"
+                                        id="decrement-button"
+                                        data-input-counter-decrement="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 2">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M1 1h16" />
+                                        </svg>
+                                    </button>
+                                    <input type="number"
+                                        id="{{getArrayItem TrackingPoints 3 'ID'}}-Time"
+                                        value="{{getArrayItem TrackingPoints 3 'Time'}}"
+                                        data-id="{{getArrayItem TrackingPoints 3 'ID'}}"
+                                        data-path="Time"
+                                        data-input-counter
+                                        aria-describedby="helper-text-explanation"
+                                        class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                        required />
+                                    <button type="button"
+                                        id="increment-button"
+                                        data-input-counter-increment="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 18">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 1v16M1 9h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="basis-1/2 flex flex-row">
+                                <div
+                                    class="basis-20 grow-0 shrink-0 flex items-center">
+                                    <label for="small-input"
+                                        class="text-sm font-medium text-gray-900 ">Frame</label>
+                                </div>
+                                <div
+                                    class="basis-full relative flex items-center">
+                                    <button type="button"
+                                        id="decrement-button"
+                                        data-input-counter-decrement="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 2">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M1 1h16" />
+                                        </svg>
+                                    </button>
+                                    <input type="number"
+                                        id="{{getArrayItem TrackingPoints 3 'ID'}}-Frame"
+                                        value="{{getArrayItem TrackingPoints 3 'Frame'}}"
+                                        data-id="{{getArrayItem TrackingPoints 3 'ID'}}"
+                                        data-path="Frame"
+                                        data-input-counter
+                                        aria-describedby="helper-text-explanation"
+                                        class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                        required />
+                                    <button type="button"
+                                        id="increment-button"
+                                        data-input-counter-increment="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 18">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 1v16M1 9h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="mt-2 flex flex-row space-x-10">
+                            <div class="basis-1/2 flex flex-row">
+                                <div
+                                    class="basis-20 grow-0 shrink-0 flex items-center">
+                                    <label for="small-input"
+                                        class="text-sm font-medium text-gray-900 ">Hold
+                                        Time</label>
+                                </div>
+                                <div
+                                    class="basis-full relative flex items-center">
+                                    <button type="button"
+                                        id="decrement-button"
+                                        data-input-counter-decrement="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 2">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M1 1h16" />
+                                        </svg>
+                                    </button>
+                                    <input type="text"
+                                        id="{{getArrayItem TrackingPoints 3 'ID'}}-HoldTime"
+                                        value="{{getArrayItem TrackingPoints 3 'HoldTime'}}"
+                                        data-id="{{getArrayItem TrackingPoints 3 'ID'}}"
+                                        data-path="HoldTime"
+                                        data-input-counter
+                                        aria-describedby="helper-text-explanation"
+                                        class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                        required />
+                                    <button type="button"
+                                        id="increment-button"
+                                        data-input-counter-increment="quantity-input"
+                                        class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                        <svg class="w-2 h-2 text-gray-900 "
+                                            aria-hidden="true"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 18 18">
+                                            <path stroke="currentColor"
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 1v16M1 9h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="basis-1/2 flex flex-row"></div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </script>
+
+    <div class="flex flex-row space-x-4">
+        <div class="basis-1/4 w-full flex justify-start">
+            <h1 class="ml-6 mb-2 text-2xl font-extrabold leading-none tracking-tight text-gray-900">
+                Level Design Tool</h1>
+        </div>
+        <div class="basis-2/4"></div>
+        <div class="basis-1/4"></div>
+    </div>
+
+
+    <div class="flex flex-row space-x-4">
+        <div id="videoView" class="basis-1/4">
+            <div class="sticky-element w-full flex justify-center">
+                <div style="position: relative;width: 405px;height: 750px;">
+                    <video id="my-player" class="video-js">
+                    </video>
+                    <canvas class="pose_canvas" id="pose_canvas" width="405" height="720"
+                        style="position: absolute; left: 0px; top: 0px;display: none;"></canvas>
+                    <div id="beat_canvas" class="beat_canvas"
+                        style="position: absolute; left: 0px; top: 0px;width: 405px;height: 720px;"></div>
+                    <div class="my-12 flex justify-center">
+                        <button id="previousXFrame" type="button"
+                            class="mx-1 text-blue-700 border border-blue-700 hover:bg-blue-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center ">
+                            <svg class="w-6 h-6 text-gray-800 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="2" d="m17 16-4-4 4-4m-6 8-4-4 4-4" />
+                            </svg>
+                            <span class="sr-only">Previous 5 Video Frame</span>
+                        </button>
+                        <button id="previousFrame" type="button"
+                            class="mx-1 text-blue-700 border border-blue-700 hover:bg-blue-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center ">
+                            <svg class="w-6 h-6 text-gray-800 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="2" d="m14 8-4 4 4 4" />
+                            </svg>
+
+                            <span class="sr-only">Previous Video Frame</span>
+                        </button>
+                        <button id="playVideo" type="button"
+                            class="mx-1 text-blue-700 border border-blue-700 hover:bg-blue-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center ">
+                            <svg id="playVideoIcon" class="w-6 h-6 text-gray-800 " aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                                viewBox="0 0 24 24">
+                                <path fill-rule="evenodd"
+                                    d="M8.6 5.2A1 1 0 0 0 7 6v12a1 1 0 0 0 1.6.8l8-6a1 1 0 0 0 0-1.6l-8-6Z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <svg id="pauseVideoIcon" class="hidden w-6 h-6 text-gray-800 " aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                                viewBox="0 0 24 24">
+                                <path fill-rule="evenodd"
+                                    d="M8 5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H8Zm7 0a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1Z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span class="sr-only">Play</span>
+                        </button>
+                        <button id="nextFrame" type="button"
+                            class="mx-1 text-blue-700 border border-blue-700 hover:bg-blue-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center ">
+                            <svg class="w-6 h-6 text-gray-800 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="2" d="m10 16 4-4-4-4" />
+                            </svg>
+                            <span class="sr-only">Next Video Frame</span>
+                        </button>
+                        <button id="nextXFrame" type="button"
+                            class="mx-1 text-blue-700 border border-blue-700 hover:bg-blue-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center ">
+                            <svg class="w-6 h-6 text-gray-800 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="2" d="m7 16 4-4-4-4m6 8 4-4-4-4" />
+                            </svg>
+                            <span class="sr-only">Next 5 Video Frame</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div
+            class="basis-2/4 rounded-lg flex flex-col items-top shadow-lg flex flex-col space-y-2 border border-solid p-4">
+            <h2 class="text-xl font-extrabold leading-none tracking-tight text-gray-900 py-2">Moves</h2>
+            <div class="flex flex-row space-x-4">
+                <button type="button"
+                    class="w-1/4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2   focus:outline-none ">
+                    Add New Move
+                </button>
+            </div>
+            <div class="flex flex-row space-x-4">
+                <div class="basis-1/4 rounded-lg flex flex-col items-top shadow-lg py-4 px-2 border border-solid">
+                    <h3 class=" text-lg font-extrabold leading-none tracking-tight text-gray-900">All Moves</h3>
+                    <div id="allMoves">
+                        <!-- Render All Moves here -->
+                    </div>
+
+                </div>
+                <div class="basis-3/4 rounded-lg flex items-top shadow-lg flex-col p-4 border border-solid">
+                    <div class="sticky-element">
+
+                    </div>
+                    <h3 class="mb-2 text-lg font-extrabold leading-none tracking-tight text-gray-900">Move Detail</h3>
+                    <form>
+                        <div class="flex flex-col">
+                            <div class="mt-2 flex flex-row">
+                                <div class="basis-24 grow-0 shrink-0 flex items-center">
+                                    <label for="moveName" class="text-sm font-medium text-gray-900 ">Name</label>
+                                </div>
+                                <input type="text" id="moveName"
+                                    class="text-sm basis-full h-8 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
+
+                            </div>
+                            <div class="mt-2 flex flex-row space-x-10">
+                                <div class="basis-1/2 flex flex-row">
+                                    <div class="basis-24 grow-0 shrink-0 flex items-center">
+                                        <label for="moveStartTime" class="text-sm font-medium text-gray-900 ">Start Time</label>
+                                    </div>
+                                    <div class="basis-full relative flex items-center">
+                                        <button type="button" id="decrement-button"
+                                            data-input-counter-decrement="quantity-input"
+                                            class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                            <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
+                                            </svg>
+                                        </button>
+                                        <input type="text" id="moveStartTime" data-input-counter
+                                            aria-describedby="helper-text-explanation"
+                                            class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                            required />
+                                        <button type="button" id="increment-button"
+                                            data-input-counter-increment="quantity-input"
+                                            class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                            <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="basis-1/2 flex flex-row">
+                                    <div class="basis-24 grow-0 shrink-0 flex items-center">
+                                        <label for="moveEndTime" class="text-sm font-medium text-gray-900 ">End
+                                            Time</label>
+                                    </div>
+                                    <div class="basis-full relative flex items-center">
+                                        <button type="button" id="decrement-button"
+                                            data-input-counter-decrement="quantity-input"
+                                            class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                            <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
+                                            </svg>
+                                        </button>
+                                        <input type="text" id="moveEndTime" data-input-counter
+                                            aria-describedby="helper-text-explanation"
+                                            class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                            required />
+                                        <button type="button" id="increment-button"
+                                            data-input-counter-increment="quantity-input"
+                                            class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                            <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-2 flex flex-row space-x-10">
+                                <div class="basis-1/2 flex flex-row">
+                                    <div class="basis-24 grow-0 shrink-0 flex items-center">
+                                        <label for="moveStartFrame" class="text-sm font-medium text-gray-900 ">Start
+                                            Frame</label>
+                                    </div>
+                                    <div class="basis-full relative flex items-center">
+                                        <button type="button" id="decrement-button"
+                                            data-input-counter-decrement="quantity-input"
+                                            class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                            <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
+                                            </svg>
+                                        </button>
+                                        <input type="text" id="moveStartFrame" data-input-counter
+                                            aria-describedby="helper-text-explanation"
+                                            class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                            required />
+                                        <button type="button" id="increment-button"
+                                            data-input-counter-increment="quantity-input"
+                                            class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                            <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="basis-1/2 flex flex-row">
+                                    <div class="basis-24 grow-0 shrink-0 flex items-center">
+                                        <label for="moveEndFrame" class="text-sm font-medium text-gray-900 ">End
+                                            Frame</label>
+                                    </div>
+                                    <div class="basis-full relative flex items-center">
+                                        <button type="button" id="decrement-button"
+                                            data-input-counter-decrement="quantity-input"
+                                            class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                            <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
+                                            </svg>
+                                        </button>
+                                        <input type="text" id="moveEndFrame" data-input-counter
+                                            aria-describedby="helper-text-explanation"
+                                            class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                            required />
+                                        <button type="button" id="increment-button"
+                                            data-input-counter-increment="quantity-input"
+                                            class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                            <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                                                <path stroke="currentColor" stroke-linecap="round"
+                                                    stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="flex flex-col mt-6">
+                            <button type="button"
+                                class="h-10 w-48 text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm focus:outline-none ">
+                                Add New Action
+                            </button>
+                        </div>
+                        <div id="actions">
+                            <!-- Render a list of Action here -->
+
+                        </div>
+                        <div class="flex mt-6 flex-row">
+                            <button type="button"
+                                class="w-28 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2   focus:outline-none ">Save</button>
+                            <button type="button"
+                                class="w-28 py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+        <div class="basis-1/4 rounded-lg flex flex-col items-top shadow-lg flex flex-col space-x-4 border border-solid">
+            <h2 class="m-4 text-xl font-extrabold leading-none tracking-tight text-gray-900">Emoticons</h2>
+        </div>
+    </div>
+</body>
+
+</html>
