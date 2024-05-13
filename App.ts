@@ -108,6 +108,21 @@ export class App {
         // Render UI
         this.levelUIController = new LevelUIController(this.applicationState, this.notify.bind(this));
         this.levelUIController.render();
+
+        const self = this;
+        $("#save").on("click", function (event) {
+            const jsonString = JSON.stringify(self.applicationState.levelData, null, 2);
+            // Copy the JSON string to the clipboard
+            navigator.clipboard.writeText(jsonString)
+                .then(() => {
+                    console.log('JSON string copied to clipboard');
+                    console.log(jsonString);
+                })
+                .catch(err => {
+                    alert('ERROR copying JSON string to clipboard:' + err);
+                    console.error('Error copying JSON string to clipboard:', err);
+                });
+        });
     }
 
     public notify(message: Message, data: any) {
@@ -122,6 +137,7 @@ export class App {
 
             case Message.MOVES_ITEM_ADDED:
                 {
+                    this.playerUIController.pause();
                     const [currentFrame, currentTime] = this.playerUIController.getCurrentFrameAndTime();
                     const newMove = Move.build(currentFrame, currentTime);
                     this.applicationState.currentMove = newMove;
@@ -134,6 +150,7 @@ export class App {
 
             case Message.MOVES_ITEM_DELETED:
                 {
+                    this.playerUIController.pause();
                     const move = data as Move;
                     if (this.applicationState.currentMove && move.ID === this.applicationState.currentMove.ID) {
                         this.applicationState.currentMove = undefined;
@@ -153,6 +170,7 @@ export class App {
 
             case Message.MOVE_DETAIL_ACTION_UPDATED:
                 {
+                    this.playerUIController.pause();
                     const [currentFrame] = this.playerUIController.getCurrentFrameAndTime();
                     const size = this.playerUIController.getContainerSize();
                     const moveAction = data as MoveAction;
@@ -165,6 +183,7 @@ export class App {
 
             case Message.MOVE_DETAIL_ACTION_ADDED:
                 {
+                    this.playerUIController.pause();
                     const [currentFrame, currentTime] = this.playerUIController.getCurrentFrameAndTime();
                     const size = this.playerUIController.getContainerSize();
                     const moveAction = data as MoveAction;
@@ -178,6 +197,7 @@ export class App {
 
             case Message.MOVE_DETAIL_ACTION_DELETED:
                 {
+                    this.playerUIController.pause();
                     const moveAction = data as MoveAction;
                     this.drawingTrackingPoint.destroyOrphanPoints(moveAction.TrackingPoints.map(p => p.ID));
                 }
@@ -185,6 +205,7 @@ export class App {
 
             case Message.MOVE_DETAIL_TRACKINGPOINT_UPDATED:
                 {
+                    this.playerUIController.pause();
                     const trackingPoint = data as TrackingPoint;
                     if (trackingPoint.Frame) {
                         this.playerUIController.setCurrentFrame(trackingPoint.Frame);
@@ -194,6 +215,7 @@ export class App {
 
             case Message.MOVE_DETAIL_TRACKINGPOINT_DELETED:
                 {
+                    this.playerUIController.pause();
                     const trackingPoint = data as TrackingPoint;
                     this.drawingTrackingPoint.destroyOrphanPoints([trackingPoint.ID]);
                 }
@@ -201,6 +223,7 @@ export class App {
 
             case Message.PLAYER_TRACKINGPOINT_UPDATE:
                 {
+                    this.playerUIController.pause();
                     let trackingPoint: TrackingPoint;
                     this.applicationState.levelData.Moves.forEach(m => {
                         if (trackingPoint) {

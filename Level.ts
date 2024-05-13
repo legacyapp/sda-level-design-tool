@@ -63,11 +63,20 @@ export class LevelUIController {
         $("#moveEndFrame").val(move.EndFrame);
 
         // clean before render new tracking points
+        $("#moveName").off("input");
         $("#actions").off("input", "input");
+        $("#actions").off("change", "select");
+        $("#actions").off("change", "input");
         $("#addNewAction").off("click");
         $(".add-tracking-point").off("click");
         $(".deleteTrackingPoint").off("click");
         $(".deleteAction").off("click");
+
+        const self = this;
+        $("#moveName").on("input", function (event: JQuery.TriggeredEvent) {
+            self.applicationState.currentMove.Name = event.target.value;
+            $("#" + self.applicationState.currentMove.ID + "-Name").text(self.applicationState.currentMove.Name);
+        });
 
         // TODO Should we do not register for each render move detail???
         Handlebars.registerPartial("trackingPointsTemplate", $("#trackingPointsTemplate").html());
@@ -80,12 +89,26 @@ export class LevelUIController {
         const html = template(move);
         $("#actions").html(html);
 
-        const self = this;
         this.handAddNewTrackingPoint(move, self);
         this.handleAddNewAction(move, self);
         this.handleDeleteMoveAction(self, ".deleteAction");
         this.handleInputEvent(self, "#actions"); // Handle all "input" event of all actions
         this.handleDeleteTrackingPointEvent(self, "#actions");
+        this.handleChangeEvent(self, "#actions");
+    }
+
+    private handleChangeEvent(self: this, containerSelector: string) {
+        $(containerSelector).on("change", "select", function (event) {
+            const currentMove = self.applicationState.currentMove;
+            const moveAction = currentMove.MoveActions.find(m => m.ID === $(this).data("id"));
+            moveAction.Joint = parseInt($(this).val());
+        });
+
+        $(containerSelector).on("change", "input", function (event) {
+            const currentMove = self.applicationState.currentMove;
+            const moveAction = currentMove.MoveActions.find(m => m.ID === $(this).data("id"));
+            moveAction.IsMajor = this.checked;
+        });
     }
 
     private handleAddNewAction(move: Move, self: this) {
@@ -178,8 +201,9 @@ export class LevelUIController {
 
             // update Move Detail
             if (!trackingPoint) {
-                const inputName = $(this).attr("name");
-
+                const currentMove = self.applicationState.currentMove;
+                const moveAction = currentMove.MoveActions.find(m => m.ID === $(this).data("id"));
+                moveAction.Name = $(this).val();
             } else {
                 // update the trackingPoint object and other dependencies
                 deepSet(trackingPoint, input.data("path"), parseNumber(event.target.value));
@@ -221,3 +245,4 @@ export class LevelUIController {
         $("#" + move.ID).trigger("click");
     }
 }
+

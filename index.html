@@ -71,6 +71,7 @@
                                     <label for="small-input" class="text-sm font-medium text-gray-900 ">Name</label>
                                 </div>
                                 <input type="text" id="actionName-{{ID}}"
+                                    data-id="{{ID}}"
                                     value="{{Name}}"
                                     class="text-sm basis-full h-8 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
                             </div>
@@ -81,18 +82,24 @@
                                             class="text-sm font-medium text-gray-900 ">Joint</label>
                                     </div>
                                     <div class="basis-full relative flex items-center">
-                                        <select id="actionJoint-{{ID}}"
+                                        <select id="actionJoint-{{ID}}" data-id="{{ID}}"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5">
                                             {{#select Joint}}
-                                            <option value="Nose">Nose</option>
-                                            <option value="RightShoulder">RightShoulder</option>
-                                            <option value="LeftShoulder">LeftShoulder</option>
-                                            <option value="RightWrist">RightWrist</option>
-                                            <option value="LeftWrist">LeftWrist</option>
-                                            <option value="RightHip">RightHip</option>
-                                            <option value="LeftHip">LeftHip</option>
-                                            <option value="RightAnkle">RightAnkle</option>
-                                            <option value="LeftAnkle">LeftAnkle</option>
+                                            <option value="0">Nose</option>
+                                            <option value="11">Left Shoulder</option>
+                                            <option value="12">Right Shoulder</option>
+                                            <option value="13">Left Elbow</option>
+                                            <option value="14">Right Elbow</option>
+                                            <option value="15">Left Wrist</option>
+                                            <option value="16">Right Wrist</option>
+                                            <option value="19">Left Index</option>
+                                            <option value="20">Right Index</option>
+                                            <option value="23">Left Hip</option>
+                                            <option value="24">Right Hip</option>
+                                            <option value="25">Left Knee</option>
+                                            <option value="26">Right Knee</option>
+                                            <option value="27">Left Ankle</option>
+                                            <option value="28">Right Ankle</option>
                                             {{/select}}
                                         </select>
                                     </div>
@@ -100,6 +107,7 @@
                                 <div class="basis-1/2 flex flex-row items-center">
                                     <div class="flex items-centerr">
                                         <input id="checked-checkbox" type="checkbox" {{checked IsMajor}}
+                                            data-id="{{ID}}"
                                             value=""
                                             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ">
                                         <label for="checked-checkbox"
@@ -115,7 +123,7 @@
                                         class="text-sm font-medium text-gray-900 ">Score
                                         Radius</label>
                                 </div>
-                                <input type="text" id="scoresRadius" value="{{json ScoresRadius}}"
+                                <input type="text" id="scoresRadius" data-id="{{ID}}" value="{{json ScoresRadius}}"
                                     class="text-sm text-sm basis-full h-8 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
 
                             </div>
@@ -1576,7 +1584,7 @@
                         style="position: absolute; left: 0px; top: 0px;display: none;"></canvas>
                     <div id="beat_canvas" class="beat_canvas"
                         style="position: absolute; left: 0px; top: 0px;width: 405px;height: 720px;"></div>
-                    <div class="my-12 flex justify-center">
+                    <div class="mt-10 flex justify-center">
                         <button id="previousXFrame" type="button"
                             class="mx-1 text-blue-700 border border-blue-700 hover:bg-blue-700 hover:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center ">
                             <svg class="w-6 h-6 text-gray-800 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
@@ -1633,6 +1641,14 @@
                             <span class="sr-only">Next 5 Video Frame</span>
                         </button>
                     </div>
+                    <div class="mt-4 flex flex-row justify-around">
+                        <div class="w-1/2 flex flex-row justify-start">
+                            <p id="currentFrame" class="text-sm">Current Frame: </p>
+                        </div>
+                        <div class="w-1/2 flex flex-row justify-start">
+                            <p id="currentTime" class="text-sm">Current Time: </p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1664,7 +1680,7 @@
                                 <div class="basis-24 grow-0 shrink-0 flex items-center">
                                     <label for="moveName" class="text-sm font-medium text-gray-900 ">Name</label>
                                 </div>
-                                <input type="text" id="moveName" readonly
+                                <input type="text" id="moveName"
                                     class="text-sm basis-full h-8 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
 
                             </div>
@@ -1805,10 +1821,14 @@
 
                         </div>
                         <div class="flex mt-6 flex-row">
-                            <button type="button"
-                                class="w-28 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2   focus:outline-none ">Save</button>
-                            <button type="button"
-                                class="w-28 py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">Cancel</button>
+                            <button type="button" id="save"
+                                class="w-28 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ">
+                                Save
+                            </button>
+                            <button type="button" id="cancel"
+                                class="w-28 py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">
+                                Cancel
+                            </button>
                         </div>
                     </form>
                 </div>

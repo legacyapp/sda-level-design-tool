@@ -25,13 +25,11 @@ export class PlayerWrapper {
 
     private requestVideoFrameCallback(now: DOMHighResTimeStamp, metadata: any, forceToRedraw: boolean) {
         if (this.videoFrameCallbacks.length > 0) {
-            //const currentFrame = Math.floor(metadata.mediaTime * this.videoFrameRate);
-            const currentFrame = Math.round(this.player.currentTime() * this.videoFrameRate);
+            const currentTime = this.player.currentTime();
+            const currentFrame = Math.round(currentTime * this.videoFrameRate);
             this.videoFrameCallbacks.forEach(f => f(currentFrame, this.player.el_.clientWidth, this.player.el_.clientHeight, forceToRedraw));
-            // console.log(metadata?.mediaTime);
-            // console.log(currentFrame);
-            // console.log(metadata?.mediaTime * this.videoFrameRate);
-            // console.log("this.player.currentTime(): ", this.player.currentTime())
+            $("#currentTime").text("Current Time: " + currentTime);
+            $("#currentFrame").text("Current Frame: " + currentFrame);
         }
 
         this.player.tech_.requestVideoFrameCallback(this.requestVideoFrameCallback.bind(this));
@@ -57,6 +55,10 @@ export class PlayerWrapper {
                     sefl.player.pause();
                     $("#playVideoIcon").removeClass("hidden");
                     $("#pauseVideoIcon").addClass("hidden");
+                    const currentTime = sefl.player.currentTime();
+                    const currentFrame = Math.round(currentTime * sefl.videoFrameRate);
+                    $("#currentTime").text("Current Time: " + currentTime);
+                    $("#currentFrame").text("Current Frame: " + currentFrame);
                 } else {
                     sefl.player.play();
                     $("#playVideoIcon").addClass("hidden");
@@ -106,5 +108,9 @@ export class PlayerWrapper {
             width: this.player.el_.clientWidth,
             height: this.player.el_.clientHeight
         }
+    }
+
+    pause() {
+        this.player.pause();
     }
 }
