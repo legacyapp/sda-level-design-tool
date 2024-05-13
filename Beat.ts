@@ -329,7 +329,7 @@ export class DrawingTrackingPoints {
 
     }
 
-    destroyOrphanPoints(trackingPointIDs: any) {
+    destroyOrphanPoints(trackingPointIDs: Array<string>) {
         trackingPointIDs.forEach(Id => {
             for (const [key, value] of Object.entries(this.trackMoveActions)) {
                 const trackMoveAction = value as any;

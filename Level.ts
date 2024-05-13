@@ -51,6 +51,9 @@ export class LevelUIController {
                 }
 
                 $("#" + moveId).remove();
+                if (!self.applicationState.levelData.Moves || self.applicationState.levelData.Moves.length === 0) {
+                    $("#moveDetailForm").addClass("hidden");
+                }
             });
         }
     }

@@ -164,7 +164,7 @@ export class App {
                         }
                     }
                     this.applicationState.levelData.Moves.splice(indexToRemove, 1);
-                    console.log(this.applicationState.levelData);
+                    this.drawingTrackingPoint.destroyOrphanPoints(move.MoveActions.flatMap(p => p.TrackingPoints).map(p => p.ID));
                 }
                 break;
 
