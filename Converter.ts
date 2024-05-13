@@ -9,7 +9,7 @@ function convertBeat(oldBeat: any) {
         newBeat.Frame = oldBeat.Frame;
     }
     if (oldBeat.Time) {
-        newBeat.Time = oldBeat.Time;
+        newBeat.Time = newBeat.Frame / 30;
     }
     newBeat.Pos = new Position();
     newBeat.Pos.X = oldBeat.Position[0];
@@ -50,12 +50,12 @@ export function ConvertToVideoBeatData(poseData: any, legacyBeatData: any) {
         move.ID = beatA.id;
         move.Name = JointType[convertJoint(beatA["Joint"])];
 
-        const trackingPoint: MoveAction = new MoveAction();
-        trackingPoint.ID = oldConnection["id"];
-        trackingPoint.Joint = convertJoint(beatA["Joint"]);
-        trackingPoint.TrackingPoints.push(convertBeat(beatA));
-        trackingPoint.IsMajor = true;
-        trackingPoint.ScoresRadius = [
+        const moveAction: MoveAction = new MoveAction();
+        moveAction.ID = oldConnection["id"];
+        moveAction.Joint = convertJoint(beatA["Joint"]);
+        moveAction.TrackingPoints.push(convertBeat(beatA));
+        moveAction.IsMajor = true;
+        moveAction.ScoresRadius = [
             { Scoring: 100, Radius: 100 }
         ];
 
@@ -66,7 +66,10 @@ export function ConvertToVideoBeatData(poseData: any, legacyBeatData: any) {
             anchor1.Pos = new Position();
             anchor1.Pos.X = beatA.AnchorOut[0];
             anchor1.Pos.Y = beatA.AnchorOut[1];
-            trackingPoint.TrackingPoints.push(anchor1);
+            anchor1.Time = moveAction.TrackingPoints[0].Time;
+            anchor1.Frame = moveAction.TrackingPoints[0].Frame;
+            anchor1.HoldTime = moveAction.TrackingPoints[0].HoldTime;
+            moveAction.TrackingPoints.push(anchor1);
         }
 
         const beatB = oldBeats[oldConnection["beatB"]];
@@ -77,12 +80,15 @@ export function ConvertToVideoBeatData(poseData: any, legacyBeatData: any) {
             anchor2.Pos = new Position();
             anchor2.Pos.X = beatB.AnchorIn[0];
             anchor2.Pos.Y = beatB.AnchorIn[1];
-            trackingPoint.TrackingPoints.push(anchor2);
+            anchor2.Time = moveAction.TrackingPoints[0].Time;
+            anchor2.Frame = moveAction.TrackingPoints[0].Frame;
+            anchor2.HoldTime = moveAction.TrackingPoints[0].HoldTime;
+            moveAction.TrackingPoints.push(anchor2);
         }
 
         levelData.Moves.push(move);
-        move.MoveActions.push(trackingPoint);
-        trackingPoint.TrackingPoints.push(convertBeat(beatB));
+        move.MoveActions.push(moveAction);
+        moveAction.TrackingPoints.push(convertBeat(beatB));
 
         move.StartTime = move.MoveActions[0].TrackingPoints[0].Time;
         move.EndTime = move.MoveActions[0].TrackingPoints[move.MoveActions[0].TrackingPoints.length - 1].Time;
@@ -126,9 +132,7 @@ export function ConvertToVideoBeatData(poseData: any, legacyBeatData: any) {
         }
     }
 
-    levelData.Moves = levelData.Moves.sort(function (a, b) {
-        return a.MoveActions[0].TrackingPoints[0].Frame - b.MoveActions[0].TrackingPoints[0].Frame;
-    });
+    levelData.sort();
 
     return levelData;
 }

@@ -94,12 +94,11 @@ export class PlayerWrapper {
 
     }
 
-    getCurrentFrame(): number {
-        return Math.round(this.player.currentTime() * this.videoFrameRate);
-    }
+    getCurrentFrameAndTime(): [number, number] {
+        const currentTime = this.player.currentTime();
+        const currentFrame = Math.round(currentTime * this.videoFrameRate);
 
-    getCurrentTime(): number {
-        return this.player.currentTime();
+        return [currentFrame, currentTime]
     }
 
     getContainerSize() {

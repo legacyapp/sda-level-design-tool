@@ -12,6 +12,12 @@ export class LevelData {
     // *** New scoring system https://docs.google.com/document/d/1Y_A4jWlUhf11H-omHPblzxw00FREIQTM8miHuNF15T0/edit#heading=h.338ki0steug8 ***/
     ID: string;
     Moves: Move[] = [];
+
+    sort() {
+        this.Moves = this.Moves.sort(function (a, b) {
+            return a.MoveActions[0].TrackingPoints[0].Frame - b.MoveActions[0].TrackingPoints[0].Frame;
+        });
+    }
 }
 
 export class Move {
@@ -23,9 +29,11 @@ export class Move {
     EndFrame: number;
     MoveActions: MoveAction[] = []
 
-    update() {
+    updateStartAndEndFrameTime() {
         let startFrame: number = this.MoveActions[0].TrackingPoints[0].Frame;
         let endFrame: number = this.MoveActions[0].TrackingPoints[0].Frame;
+        let startTime: number = this.MoveActions[0].TrackingPoints[0].Time;
+        let endTime: number = this.MoveActions[0].TrackingPoints[0].Time;
 
         this.MoveActions.forEach(m => {
             m.TrackingPoints.forEach(p => {
@@ -35,11 +43,29 @@ export class Move {
                 if (p.Frame >= endFrame) {
                     endFrame = p.Frame;
                 }
+                if (p.Time <= startTime) {
+                    startTime = p.Time;
+                }
+                if (p.Time >= endTime) {
+                    endTime = p.Time;
+                }
             });
         });
 
         this.StartFrame = startFrame;
         this.EndFrame = endFrame;
+        this.StartTime = startTime;
+        this.EndTime = endTime;
+    }
+
+    static build(currentFrame: number, currentTime): Move {
+        const newMove = new Move();
+        newMove.ID = uuidv4();
+        newMove.Name = "New Move";
+        newMove.MoveActions = [MoveAction.build(currentFrame, currentTime)];
+        newMove.updateStartAndEndFrameTime();
+
+        return newMove;
     }
 }
 
@@ -307,11 +333,16 @@ export class DrawingTrackingPoints {
         trackingPointIDs.forEach(Id => {
             for (const [key, value] of Object.entries(this.trackMoveActions)) {
                 const trackMoveAction = value as any;
+                let isFound = false;
                 for (let i = 0; i < trackMoveAction.Circles.length; i++) {
                     if (trackMoveAction.Circles[i].getAttr('data').id === Id) {
                         trackMoveAction.Circles[i].destroy();
+                        trackMoveAction.Circles[i] = undefined;
+                        isFound = true;
                     }
                 }
+
+                trackMoveAction.Circles = trackMoveAction.Circles.filter(c => c !== undefined);
             }
         });
     }

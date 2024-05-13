@@ -16,6 +16,7 @@ export enum Message {
     MOVE_DETAIL_UPDATED,
     MOVE_DETAIL_ACTION_ADDED,
     MOVE_DETAIL_ACTION_UPDATED,
+    MOVE_DETAIL_ACTION_DELETED,
     MOVE_DETAIL_TRACKINGPOINT_UPDATED,
     MOVE_DETAIL_TRACKINGPOINT_DELETED,
     PLAYER_TRACKINGPOINT_UPDATE
@@ -119,25 +120,66 @@ export class App {
                 }
                 break;
 
+            case Message.MOVES_ITEM_ADDED:
+                {
+                    const [currentFrame, currentTime] = this.playerUIController.getCurrentFrameAndTime();
+                    const newMove = Move.build(currentFrame, currentTime);
+                    this.applicationState.currentMove = newMove;
+                    this.applicationState.levelData.Moves.push(newMove);
+                    this.applicationState.levelData.sort();
+                    this.levelUIController.render();
+                    this.levelUIController.focusOnMove(newMove);
+                }
+                break;
+
+            case Message.MOVES_ITEM_DELETED:
+                {
+                    const move = data as Move;
+                    if (this.applicationState.currentMove && move.ID === this.applicationState.currentMove.ID) {
+                        this.applicationState.currentMove = undefined;
+                    }
+
+                    let indexToRemove = 0;
+                    for (let i = 0; i < this.applicationState.levelData.Moves.length; i++) {
+                        if (this.applicationState.levelData.Moves[i].ID === move.ID) {
+                            indexToRemove = i;
+                            break;
+                        }
+                    }
+                    this.applicationState.levelData.Moves.splice(indexToRemove, 1);
+                    console.log(this.applicationState.levelData);
+                }
+                break;
+
             case Message.MOVE_DETAIL_ACTION_UPDATED:
                 {
-                    const currentFrame = this.playerUIController.getCurrentFrame();
+                    const [currentFrame] = this.playerUIController.getCurrentFrameAndTime();
                     const size = this.playerUIController.getContainerSize();
                     const moveAction = data as MoveAction;
                     const trackingPoint = moveAction.TrackingPoints[moveAction.TrackingPoints.length - 1];
                     trackingPoint.Frame = currentFrame;
-                    trackingPoint.Time = this.playerUIController.getCurrentTime();
+                    trackingPoint.Time = currentFrame / this.applicationState.levelData.VideoInfo.FrameRate;
                     this.drawingTrackingPoint.draw(currentFrame, size.width, size.height, true);
                 }
                 break;
 
             case Message.MOVE_DETAIL_ACTION_ADDED:
                 {
-                    const currentFrame = this.playerUIController.getCurrentFrame();
+                    const [currentFrame, currentTime] = this.playerUIController.getCurrentFrameAndTime();
                     const size = this.playerUIController.getContainerSize();
                     const moveAction = data as MoveAction;
-                    moveAction.TrackingPoints.forEach(p => p.Frame = currentFrame);
+                    moveAction.TrackingPoints.forEach(p => {
+                        p.Frame = currentFrame;
+                        p.Time = currentTime;
+                    });
                     this.drawingTrackingPoint.draw(currentFrame, size.width, size.height);
+                }
+                break;
+
+            case Message.MOVE_DETAIL_ACTION_DELETED:
+                {
+                    const moveAction = data as MoveAction;
+                    this.drawingTrackingPoint.destroyOrphanPoints(moveAction.TrackingPoints.map(p => p.ID));
                 }
                 break;
 
