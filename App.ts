@@ -1,4 +1,4 @@
-import { LevelData, Move, FrameData, DrawingBeats, DrawingLandmarks, TrackingPoint } from "./Beat";
+import { LevelData, Move, FrameData, DrawingTrackingPoints, DrawingLandmarks, TrackingPoint, MoveAction } from "./Beat";
 import Handlebars from "handlebars";
 import { PlayerWrapper as PlayerUIController } from "./Player";
 import { LevelUIController } from "./Level";
@@ -14,7 +14,10 @@ export enum Message {
     MOVES_ITEM_ADDED,
     MOVES_ITEM_DELETED,
     MOVE_DETAIL_UPDATED,
+    MOVE_DETAIL_ACTION_ADDED,
+    MOVE_DETAIL_ACTION_UPDATED,
     MOVE_DETAIL_TRACKINGPOINT_UPDATED,
+    MOVE_DETAIL_TRACKINGPOINT_DELETED,
     PLAYER_TRACKINGPOINT_UPDATE
 }
 
@@ -33,7 +36,7 @@ export class App {
     private applicationState: ApplicationState;
 
     playerUIController: PlayerUIController;
-    drawingBeats: DrawingBeats;
+    drawingTrackingPoint: DrawingTrackingPoints;
     drawingLandmarks: DrawingLandmarks;
     levelUIController: LevelUIController;
 
@@ -94,11 +97,11 @@ export class App {
             }
         );
 
-        this.drawingBeats = new DrawingBeats({ ContainerId: "beat_canvas" }, this.applicationState.levelData, this.notify.bind(this));
+        this.drawingTrackingPoint = new DrawingTrackingPoints({ ContainerId: "beat_canvas" }, this.applicationState.levelData, this.notify.bind(this));
         this.drawingLandmarks = new DrawingLandmarks(
             { ContainerId: "pose_canvas" }, this.applicationState.levelData, this.applicationState.frameData);
 
-        this.playerUIController.setVideoFrameCallback(this.drawingBeats.draw.bind(this.drawingBeats));
+        this.playerUIController.setVideoFrameCallback(this.drawingTrackingPoint.draw.bind(this.drawingTrackingPoint));
         this.playerUIController.setVideoFrameCallback(this.drawingLandmarks.draw.bind(this.drawingLandmarks));
 
         // Render UI
@@ -116,6 +119,28 @@ export class App {
                 }
                 break;
 
+            case Message.MOVE_DETAIL_ACTION_UPDATED:
+                {
+                    const currentFrame = this.playerUIController.getCurrentFrame();
+                    const size = this.playerUIController.getContainerSize();
+                    const moveAction = data as MoveAction;
+                    const trackingPoint = moveAction.TrackingPoints[moveAction.TrackingPoints.length - 1];
+                    trackingPoint.Frame = currentFrame;
+                    trackingPoint.Time = this.playerUIController.getCurrentTime();
+                    this.drawingTrackingPoint.draw(currentFrame, size.width, size.height, true);
+                }
+                break;
+
+            case Message.MOVE_DETAIL_ACTION_ADDED:
+                {
+                    const currentFrame = this.playerUIController.getCurrentFrame();
+                    const size = this.playerUIController.getContainerSize();
+                    const moveAction = data as MoveAction;
+                    moveAction.TrackingPoints.forEach(p => p.Frame = currentFrame);
+                    this.drawingTrackingPoint.draw(currentFrame, size.width, size.height);
+                }
+                break;
+
             case Message.MOVE_DETAIL_TRACKINGPOINT_UPDATED:
                 {
                     const trackingPoint = data as TrackingPoint;
@@ -125,17 +150,33 @@ export class App {
                 }
                 break;
 
+            case Message.MOVE_DETAIL_TRACKINGPOINT_DELETED:
+                {
+                    const trackingPoint = data as TrackingPoint;
+                    this.drawingTrackingPoint.destroyOrphanPoints([trackingPoint.ID]);
+                }
+                break;
 
             case Message.PLAYER_TRACKINGPOINT_UPDATE:
                 {
-                    const currentMove = this.applicationState.currentMove;
-                    const trackingPoint = currentMove.MoveActions.flatMap(p => p.TrackingPoints).find(b => b.ID === data.Id);
+                    let trackingPoint: TrackingPoint;
+                    this.applicationState.levelData.Moves.forEach(m => {
+                        if (trackingPoint) {
+                            return;
+                        }
+                        m.MoveActions.forEach(ma => {
+                            trackingPoint = ma.TrackingPoints.find(p => p.ID === data.Id);
+                            if (trackingPoint) {
+                                return;
+                            }
+                        });
+                    });
+
                     const size = this.playerUIController.getContainerSize();
                     trackingPoint.Pos.X = data.Position.x / size.width;
                     trackingPoint.Pos.Y = data.Position.y / size.height;
 
                     this.levelUIController.updateTrackingPointUI(trackingPoint);
-                    console.log(trackingPoint);
                 }
                 break;
 

@@ -94,6 +94,14 @@ export class PlayerWrapper {
 
     }
 
+    getCurrentFrame(): number {
+        return Math.round(this.player.currentTime() * this.videoFrameRate);
+    }
+
+    getCurrentTime(): number {
+        return this.player.currentTime();
+    }
+
     getContainerSize() {
         return {
             width: this.player.el_.clientWidth,

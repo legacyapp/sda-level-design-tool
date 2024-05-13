@@ -4,6 +4,7 @@ import { Stage } from "konva/lib/Stage";
 import { GetColors } from "./util";
 import { DrawingUtils, PoseLandmarker } from "@mediapipe/tasks-vision";
 import { Message, NotifyDelegate } from "./App";
+import { v4 as uuidv4 } from 'uuid';
 
 export class LevelData {
     VideoInfo: VideoInfo;
@@ -31,7 +32,7 @@ export class Move {
                 if (p.Frame <= startFrame) {
                     startFrame = p.Frame;
                 }
-                if (p.Frame >= startFrame) {
+                if (p.Frame >= endFrame) {
                     endFrame = p.Frame;
                 }
             });
@@ -39,8 +40,6 @@ export class Move {
 
         this.StartFrame = startFrame;
         this.EndFrame = endFrame;
-
-        console.log(this)
     }
 }
 
@@ -52,26 +51,42 @@ export class VideoInfo {
 }
 
 export enum JointType {
-    Nose = "Nose",
-    RightShoulder = "RightShoulder",
-    LeftShoulder = "LeftShoulder",
-    RightWrist = "RightWrist",
-    LeftWrist = "LeftWrist",
-    RightHip = "RightHip",
-    LeftHip = "LeftHip",
-    RightAnkle = "RightAnkle",
-    LeftAnkle = "LeftAnkle",
+    Nose = 0,
+    // LeftEyeInner = 1,
+    // LeftEye = 2,
+    // LeftEyeOuter = 3,
+    // RightEyeInner = 4,
+    // RightEye = 5,
+    // RightEyeOuter = 6,
+    // LeftEar = 7,
+    // RightEar = 8,
+    // MouthLleft = 9,
+    // MouthRright = 10,
+    LeftShoulder = 11,
+    RightShoulder = 12,
+    LeftElbow = 13,
+    RightElbow = 14,
+    LeftWrist = 15,
+    RightWrist = 16,
+    // LeftPinky = 17,
+    // RightPinky = 18,
+    LeftIndex = 19,
+    RightIndex = 20,
+    // LeftThumb = 21,
+    // RightThumb = 22,
+    LeftHip = 23,
+    RightHip = 24,
+    LeftKnee = 25,
+    RightKnee = 26,
+    LeftAnkle = 27,
+    RightAnkle = 28,
+    // LeftHeel = 29,
+    // RightHeel = 30,
+    // LeftFootIndex = 31,
+    // RightFootIndex = 32,
 
     // only for old data
-    BothWrists = "BothWrists"
-}
-
-export enum TrackingVFX {
-    None,
-    SimpleDirection,
-    Shake,
-    Swipe,
-    BodyRoll
+    BothWrists = 33
 }
 
 export enum MovementType {
@@ -86,13 +101,31 @@ export class MoveAction {
     ID: string;
     Name: string;
     Joint: JointType;
-    VFX:TrackingVFX;
     IsMajor: boolean;
     TrackingPoints: TrackingPoint[] = [];
-
-    // Movement type can be calculated by number of beat
-    Movement: MovementType;
     ScoresRadius: ScoreRadius[] = [];
+
+    // Index is for UI rendering, not save to database
+    Index: number;
+
+    constructor() { }
+
+    static build(currentFrame: number, currentTime): MoveAction {
+        const newMoveAction = new MoveAction();
+
+        newMoveAction.ID = uuidv4();
+        newMoveAction.Name = "New Action";
+        newMoveAction.Joint = JointType.Nose;
+        newMoveAction.IsMajor = true;
+        newMoveAction.ScoresRadius = [{ "Scoring": 100, "Radius": 100 }];
+        newMoveAction.Index = 0;
+
+        const trackingPoint = TrackingPoint.build(currentFrame, currentTime);
+
+        newMoveAction.TrackingPoints.push(trackingPoint);
+
+        return newMoveAction;
+    }
 }
 
 // should we rename to Point
@@ -102,6 +135,20 @@ export class TrackingPoint {
     Time: number;
     Frame: number;
     HoldTime: number;
+
+    static build(currentFrame: number, currentTime): TrackingPoint {
+        const trackingPoint = new TrackingPoint();
+        trackingPoint.ID = uuidv4();
+        const position = new Position();
+        trackingPoint.Pos = position;
+        trackingPoint.Pos.X = 0.5;
+        trackingPoint.Pos.Y = 0.25;
+        trackingPoint.Frame = currentFrame;
+        trackingPoint.Time = currentTime;
+        trackingPoint.HoldTime = 2;
+
+        return trackingPoint;
+    }
 }
 
 export class Position {
@@ -116,11 +163,11 @@ export class ScoreRadius {
 
 export type FrameData = { normalizedFrames: { landmarks: any; }[]; };
 
-export class DrawingBeats {
+export class DrawingTrackingPoints {
     private stage: Stage;
     private layer: Layer;
     private levelData: LevelData;
-    private trackDrawingBeats = {};
+    private trackMoveActions = {};
     private notify: NotifyDelegate;
 
     // function to build anchor point
@@ -168,117 +215,24 @@ export class DrawingBeats {
         return anchor;
     }
 
-    private drawTrackingPoint(TrackingPoint: MoveAction, videoWidth: number, videoHeight: number) {
-        // if we already draw this TrackingPoint so do nothing
-
-        // draw beat TrackingPoint and add to the track list
-
-        // function to update line points from anchors
-        // const updateDottedLinesFunc = function updateDottedLines(bezier) {
-        //   var b = bezier;
-        //   var bezierLinePath = layer.findOne('#bezierLinePath');
-
-        //   // @ts-ignore
-        //   bezierLinePath.points([
-        //     b.start.x(),
-        //     b.start.y(),
-        //     b.control1.x(),
-        //     b.control1.y(),
-        //     b.control2.x(),
-        //     b.control2.y(),
-        //     b.end.x(),
-        //     b.end.y(),
-        //   ]);
-        // };
-
+    private drawMoveAction(TrackingPoint: MoveAction, videoWidth: number, videoHeight: number) {
         const color = GetColors(TrackingPoint.Joint);
 
-        if (TrackingPoint.TrackingPoints.length === 1) {
-            const holdTime = TrackingPoint.TrackingPoints[0].HoldTime ? TrackingPoint.TrackingPoints[0].HoldTime : 2;
-            const endFrame = TrackingPoint.TrackingPoints[0].Frame + (this.levelData.VideoInfo.FrameRate * holdTime);
-            const trackDrawingBeat = {
-                StartFrame: TrackingPoint.TrackingPoints[0].Frame,
-                EndFrame: endFrame, // TODO: should calculate = Frame + Hold Time
-                Bezier: {
-                    start: this.buildAnchor(
-                        TrackingPoint.TrackingPoints[0].ID,
-                        TrackingPoint.TrackingPoints[0].Pos.X * videoWidth,
-                        TrackingPoint.TrackingPoints[0].Pos.Y * videoHeight,
-                        color),
-                    control1: undefined,
-                    control2: undefined,
-                    end: undefined,
-                },
-                BezierLine: undefined,
-                BezierLinePath: undefined
-            };
-            this.trackDrawingBeats[TrackingPoint.ID] = trackDrawingBeat;
-        }
-
-        if (TrackingPoint.TrackingPoints.length === 4) {
-            const trackDrawingBeat = {
-                StartFrame: TrackingPoint.TrackingPoints[0].Frame,
-                EndFrame: TrackingPoint.TrackingPoints[TrackingPoint.TrackingPoints.length - 1].Frame,
-                Bezier: {
-                    start: this.buildAnchor(
-                        TrackingPoint.TrackingPoints[0].ID,
-                        TrackingPoint.TrackingPoints[0].Pos.X * videoWidth,
-                        TrackingPoint.TrackingPoints[0].Pos.Y * videoHeight,
-                        color),
-                    control1: this.buildAnchor(
-                        TrackingPoint.TrackingPoints[1].ID,
-                        TrackingPoint.TrackingPoints[1].Pos.X * videoWidth,
-                        TrackingPoint.TrackingPoints[1].Pos.Y * videoHeight,
-                        color),
-                    control2: this.buildAnchor(
-                        TrackingPoint.TrackingPoints[2].ID,
-                        TrackingPoint.TrackingPoints[2].Pos.X * videoWidth,
-                        TrackingPoint.TrackingPoints[2].Pos.Y * videoHeight,
-                        color),
-                    end: this.buildAnchor(
-                        TrackingPoint.TrackingPoints[3].ID,
-                        TrackingPoint.TrackingPoints[3].Pos.X * videoWidth,
-                        TrackingPoint.TrackingPoints[3].Pos.Y * videoHeight,
-                        color),
-                },
-                BezierLine: undefined,
-                BezierLinePath: undefined
-            };
-
-            // we will use custom shape for curve
-            var bezierLine = new Konva.Shape({
-                stroke: color.LineStrokeColor,
-                strokeWidth: 5,
-                sceneFunc: (ctx, shape) => {
-                    ctx.beginPath();
-                    ctx.moveTo(trackDrawingBeat.Bezier.start.x(), trackDrawingBeat.Bezier.start.y());
-                    ctx.bezierCurveTo(
-                        trackDrawingBeat.Bezier.control1.x(),
-                        trackDrawingBeat.Bezier.control1.y(),
-                        trackDrawingBeat.Bezier.control2.x(),
-                        trackDrawingBeat.Bezier.control2.y(),
-                        trackDrawingBeat.Bezier.end.x(),
-                        trackDrawingBeat.Bezier.end.y()
-                    );
-                    ctx.fillStrokeShape(shape);
-                },
+        if (TrackingPoint.TrackingPoints && TrackingPoint.TrackingPoints.length > 0) {
+            const trackingPointCircles = TrackingPoint.TrackingPoints.map((p) => {
+                return this.buildAnchor(
+                    p.ID,
+                    p.Pos.X * videoWidth,
+                    p.Pos.Y * videoHeight,
+                    color);
             });
-            this.layer.add(bezierLine);
 
-            trackDrawingBeat.BezierLine = bezierLine;
-
-            // var bezierLinePath = new Konva.Line({
-            //   dash: [10, 10, 0, 10],
-            //   strokeWidth: 3,
-            //   stroke: 'black',
-            //   lineCap: 'round',
-            //   id: 'bezierLinePath',
-            //   opacity: 0.3,
-            //   points: [0, 0],
-            // });
-            // layer.add(bezierLinePath);
-            // trackDrawingBeat.BezierLinePath = bezierLinePath;
-            this.trackDrawingBeats[TrackingPoint.ID] = trackDrawingBeat;
+            const trackDrawingBeat = {
+                StartFrame: TrackingPoint.TrackingPoints[0].Frame,
+                EndFrame: TrackingPoint.TrackingPoints[TrackingPoint.TrackingPoints.length - 1].Frame, // TODO: should calculate = Frame + Hold Time
+                Circles: trackingPointCircles
+            };
+            this.trackMoveActions[TrackingPoint.ID] = trackDrawingBeat;
         }
     }
 
@@ -308,47 +262,72 @@ export class DrawingBeats {
         this.updateStageStyleFunc(videoWidth, videoHeight);
         // find TrackingPoints to draw at the current frame
         this.levelData.Moves.forEach((move: Move) => {
-            move.MoveActions.forEach(p => {
-                let startFrame: number = p.TrackingPoints[0].Frame;
-                let endFrame = p.TrackingPoints[p.TrackingPoints.length - 1].Frame;
-                if (p.TrackingPoints.length === 1) {
-                    const holdTime = p.TrackingPoints[0].HoldTime ? p.TrackingPoints[0].HoldTime : 2;
-                    endFrame = p.TrackingPoints[0].Frame + (this.levelData.VideoInfo.FrameRate * holdTime);
+            move.MoveActions.forEach(moveAction => {
+                let startFrame: number = move.MoveActions[0].TrackingPoints[0].Frame;
+                let endFrame: number = move.MoveActions[0].TrackingPoints[0].Frame;
+
+                move.MoveActions.forEach(m => {
+                    m.TrackingPoints.forEach(p => {
+                        if (p.Frame <= startFrame) {
+                            startFrame = p.Frame;
+                        }
+                        if (p.Frame >= startFrame) {
+                            endFrame = p.Frame;
+                        }
+                    });
+                });
+
+                if (moveAction.TrackingPoints.length === 1) {
+                    const holdTime = moveAction.TrackingPoints[0].HoldTime ? moveAction.TrackingPoints[0].HoldTime : 2;
+                    endFrame = moveAction.TrackingPoints[0].Frame + (this.levelData.VideoInfo.FrameRate * holdTime);
                 }
 
                 if (startFrame <= currentFrame && currentFrame <= endFrame) {
                     // we need to check forceToRedraw in case we want to re-draw on the current frame that already drew
                     if (forceToRedraw) {
-                        this.destroyPoint(p);
-                        this.drawTrackingPoint(p, videoWidth, videoHeight);
+                        this.destroyPoint(moveAction);
+                        this.drawMoveAction(moveAction, videoWidth, videoHeight);
                     } else {
                         // if we already draw so do nothing
-                        if (this.trackDrawingBeats[p.ID]) {
+                        if (this.trackMoveActions[moveAction.ID]) {
                             return;
                         }
-                        this.drawTrackingPoint(p, videoWidth, videoHeight);
+                        this.drawMoveAction(moveAction, videoWidth, videoHeight);
                     }
                 } else {
-                    this.destroyPoint(p);
+                    this.destroyPoint(moveAction);
                 }
             });
+        });
+
+
+    }
+
+    destroyOrphanPoints(trackingPointIDs: any) {
+        trackingPointIDs.forEach(Id => {
+            for (const [key, value] of Object.entries(this.trackMoveActions)) {
+                const trackMoveAction = value as any;
+                for (let i = 0; i < trackMoveAction.Circles.length; i++) {
+                    if (trackMoveAction.Circles[i].getAttr('data').id === Id) {
+                        trackMoveAction.Circles[i].destroy();
+                    }
+                }
+            }
         });
     }
 
     private destroyPoint(p: MoveAction) {
-        if (!this.trackDrawingBeats[p.ID]) {
+        if (!this.trackMoveActions[p.ID]) {
             return;
         }
 
-        const trackDrawingBeat = this.trackDrawingBeats[p.ID];
-        trackDrawingBeat.Bezier.start?.destroy();
-        trackDrawingBeat.Bezier.control1?.destroy();
-        trackDrawingBeat.Bezier.control2?.destroy();
-        trackDrawingBeat.Bezier.end?.destroy();
-        trackDrawingBeat.BezierLine?.destroy();
-        trackDrawingBeat.BezierLinePath?.destroy();
-        this.trackDrawingBeats[p.ID] = undefined;
-        delete this.trackDrawingBeats[p.ID];
+        const trackDrawingMoveAction = this.trackMoveActions[p.ID];
+        if (trackDrawingMoveAction.Circles && trackDrawingMoveAction.Circles.length > 0) {
+            trackDrawingMoveAction.Circles.forEach(c => c.destroy());
+        }
+
+        this.trackMoveActions[p.ID] = undefined;
+        delete this.trackMoveActions[p.ID];
     }
 }
 

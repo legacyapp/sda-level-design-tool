@@ -18,23 +18,12 @@ function convertBeat(oldBeat: any) {
     return newBeat;
 }
 
-function convertJoint(joint: any) {
+function convertJoint(joint: any): JointType {
     if (joint === "HandLeft") return JointType.LeftWrist;
     if (joint === "HandRight") return JointType.RightWrist;
     if (joint === "Hands") return JointType.LeftWrist;
-}
 
-function cloneBeat(originalBeat: TrackingPoint): TrackingPoint {
-    const newBeat = new TrackingPoint();
-
-    newBeat.ID = originalBeat.ID;
-    newBeat.Frame = originalBeat.Frame;
-    newBeat.Time = originalBeat.Time;
-    newBeat.Pos = new Position();
-    newBeat.Pos.X = originalBeat.Pos.X;
-    newBeat.Pos.Y = originalBeat.Pos.Y;
-
-    return newBeat;
+    return JointType.Nose;
 }
 
 export function ConvertToVideoBeatData(poseData: any, legacyBeatData: any) {
@@ -59,11 +48,10 @@ export function ConvertToVideoBeatData(poseData: any, legacyBeatData: any) {
 
         const move: Move = new Move();
         move.ID = beatA.id;
-        move.Name = convertJoint(beatA["Joint"]) as string;
+        move.Name = JointType[convertJoint(beatA["Joint"])];
 
         const trackingPoint: MoveAction = new MoveAction();
         trackingPoint.ID = oldConnection["id"];
-        trackingPoint.Movement = MovementType.Line;
         trackingPoint.Joint = convertJoint(beatA["Joint"]);
         trackingPoint.TrackingPoints.push(convertBeat(beatA));
         trackingPoint.IsMajor = true;
@@ -79,7 +67,6 @@ export function ConvertToVideoBeatData(poseData: any, legacyBeatData: any) {
             anchor1.Pos.X = beatA.AnchorOut[0];
             anchor1.Pos.Y = beatA.AnchorOut[1];
             trackingPoint.TrackingPoints.push(anchor1);
-            trackingPoint.Movement = MovementType.Bezier;
         }
 
         const beatB = oldBeats[oldConnection["beatB"]];
@@ -96,7 +83,6 @@ export function ConvertToVideoBeatData(poseData: any, legacyBeatData: any) {
         levelData.Moves.push(move);
         move.MoveActions.push(trackingPoint);
         trackingPoint.TrackingPoints.push(convertBeat(beatB));
-        trackingPoint.Movement = trackingPoint.TrackingPoints.length as MovementType;
 
         move.StartTime = move.MoveActions[0].TrackingPoints[0].Time;
         move.EndTime = move.MoveActions[0].TrackingPoints[move.MoveActions[0].TrackingPoints.length - 1].Time;
@@ -119,18 +105,16 @@ export function ConvertToVideoBeatData(poseData: any, legacyBeatData: any) {
             const singleBeat = convertBeat(value);
             const move: Move = new Move();
             move.ID = value["id"];
-            move.Name = convertJoint(value["Joint"]) as string;
+            move.Name = JointType[convertJoint(value["Joint"])];
 
             const trackingPoint: MoveAction = new MoveAction();
             trackingPoint.ID = key;
-            trackingPoint.Movement = MovementType.Point;
             trackingPoint.TrackingPoints.push(singleBeat);
             trackingPoint.Joint = convertJoint(value["Joint"]);
             trackingPoint.IsMajor = true;
             trackingPoint.ScoresRadius = [
                 { Scoring: 100, Radius: 100 }
             ];
-            trackingPoint.Movement = trackingPoint.TrackingPoints.length as MovementType;
 
             levelData.Moves.push(move);
             move.MoveActions.push(trackingPoint);

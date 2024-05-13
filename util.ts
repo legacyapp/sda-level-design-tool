@@ -35,6 +35,12 @@ export function GetColors(landmarkType: JointType) {
             LineStrokeColor: "#14532d"
         }
     }
+
+    return {
+        CircleStrokeColor: "#16a34a",
+        CircleFillColor: "#166534",
+        LineStrokeColor: "#14532d"
+    };
 }
 
 export function deepGet(obj, path) {
@@ -83,3 +89,4 @@ export function parseNumber(str) {
 export function dropLastN(arr: any, n = 1) {
     return arr.slice(0, -n);
 }
+
