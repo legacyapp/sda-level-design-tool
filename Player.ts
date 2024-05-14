@@ -28,8 +28,8 @@ export class PlayerWrapper {
             const currentTime = this.player.currentTime();
             const currentFrame = Math.round(currentTime * this.videoFrameRate);
             this.videoFrameCallbacks.forEach(f => f(currentFrame, this.player.el_.clientWidth, this.player.el_.clientHeight, forceToRedraw));
-            $("#currentTime").text("Current Time: " + currentTime);
-            $("#currentFrame").text("Current Frame: " + currentFrame);
+            $("#currentTime").text(currentTime);
+            $("#currentFrame").text(currentFrame);
         }
 
         this.player.tech_.requestVideoFrameCallback(this.requestVideoFrameCallback.bind(this));
@@ -57,8 +57,8 @@ export class PlayerWrapper {
                     $("#pauseVideoIcon").addClass("hidden");
                     const currentTime = sefl.player.currentTime();
                     const currentFrame = Math.round(currentTime * sefl.videoFrameRate);
-                    $("#currentTime").text("Current Time: " + currentTime);
-                    $("#currentFrame").text("Current Frame: " + currentFrame);
+                    $("#currentTime").text(currentTime);
+                    $("#currentFrame").text(currentFrame);
                 } else {
                     sefl.player.play();
                     $("#playVideoIcon").addClass("hidden");
