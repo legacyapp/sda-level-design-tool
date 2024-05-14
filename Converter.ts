@@ -59,9 +59,12 @@ export function ConvertToVideoBeatData(poseData: any, legacyBeatData: any) {
             { Scoring: 100, Radius: 100 }
         ];
 
+
+
         // check if beatA don't have AnchorOut. Don't really understand why they chooses 0.3 as null or undefined value
         if (!(beatA.AnchorOut[0] === 0.3 && beatA.AnchorOut[1] === 0.3)) {
             const anchor1 = new TrackingPoint();
+
             anchor1.ID = uuidv4(); // random ID just for testing
             anchor1.Pos = new Position();
             anchor1.Pos.X = beatA.AnchorOut[0];

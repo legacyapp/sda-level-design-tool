@@ -27,8 +27,8 @@ $(function () {
   // Download video metadata, pose data and beat data
   //fetchVideoData("pose_data/5IJZfPo4Oj2K7uJ5XMfI.json")
   fetchVideoData("pose_data/ENZYm52foFbYJ0KGUIQr.json")
-    // fetchVideoData("pose_data/NkztxSSFV4J7metC9mO5.json")
-    //fetchVideoData("pose_data/UjSKIHRY7XuAciOi0pkj.json")
+  //fetchVideoData("pose_data/NkztxSSFV4J7metC9mO5.json")
+  //fetchVideoData("pose_data/UjSKIHRY7XuAciOi0pkj.json")
     .then(({ FrameData, LevelData }) => {
       const applicationState = new ApplicationState(FrameData, LevelData);
 

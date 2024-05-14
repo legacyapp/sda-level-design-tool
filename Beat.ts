@@ -18,6 +18,18 @@ export class LevelData {
             return a.MoveActions[0].TrackingPoints[0].Frame - b.MoveActions[0].TrackingPoints[0].Frame;
         });
     }
+
+    getTrackingPoint(trackingPointId: string) {
+        for (let i = 0; i < this.Moves.length; i++) {
+            for (let j = 0; j < this.Moves[i].MoveActions.length; j++) {
+                for (let k = 0; k < this.Moves[i].MoveActions[j].TrackingPoints.length; k++) {
+                    if (trackingPointId === this.Moves[i].MoveActions[j].TrackingPoints[k].ID) {
+                        return this.Moves[i].MoveActions[j].TrackingPoints[k];
+                    }
+                }
+            }
+        }
+    }
 }
 
 export class Move {
@@ -161,6 +173,8 @@ export class TrackingPoint {
     Time: number;
     Frame: number;
     HoldTime: number;
+
+    constructor() { }
 
     static build(currentFrame: number, currentTime): TrackingPoint {
         const trackingPoint = new TrackingPoint();

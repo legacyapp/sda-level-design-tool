@@ -46,7 +46,7 @@ export class LevelUIController {
 
                 self.notify(Message.MOVES_ITEM_DELETED, move);
 
-                if (self.applicationState.currentMove && self.applicationState.currentMove.ID === moveId) {
+                if (!self.applicationState.currentMove || self.applicationState.currentMove.ID === moveId) {
                     $("#moveDetailForm").addClass("hidden");
                 }
 
@@ -74,6 +74,8 @@ export class LevelUIController {
         $(".add-tracking-point").off("click");
         $(".deleteTrackingPoint").off("click");
         $(".deleteAction").off("click");
+        $("#actions #decrement-button").off("click");
+        $("#actions #increment-button").off("click");
 
         const self = this;
         $("#moveName").on("input", function (event: JQuery.TriggeredEvent) {
@@ -95,9 +97,41 @@ export class LevelUIController {
         this.handAddNewTrackingPoint(move, self);
         this.handleAddNewAction(move, self);
         this.handleDeleteMoveAction(self, ".deleteAction");
-        this.handleInputEvent(self, "#actions"); // Handle all "input" event of all actions
+        this.handleInputEvent(self, "#actions"); // Handle all "input" event of all actions inputs
         this.handleDeleteTrackingPointEvent(self, "#actions");
-        this.handleChangeEvent(self, "#actions");
+        this.handleChangeEvent(self, "#actions"); // Handle change event of radio and select inputs
+        this.handleIncrementDecrementClickEvent(self, "#actions #decrement-button", "value-change-step", -1);
+        this.handleIncrementDecrementClickEvent(self, "#actions #increment-button", "value-change-step", 1);
+    }
+
+    private handleIncrementDecrementClickEvent(self: this, containerSelector: string, stepAttrName: string, factor: number) {
+        $(containerSelector).on("click", function (event) {
+            const input = factor > 0 ? $(this).prev() : $(this).next();
+            const step = parseNumber($(input).data(stepAttrName));
+
+            if (input && step) {
+                const trackingPoint = self.applicationState.currentMove.MoveActions.flatMap(p => p.TrackingPoints).find(b => b.ID === input.data("id"));
+                // update the trackingPoint object and other dependencies
+                const newValue = deepGet(trackingPoint, input.data("path")) + (factor * step);
+                deepSet(trackingPoint, input.data("path"), newValue);
+                input.val(newValue);
+
+                if (input.data("path") === "Frame") {
+                    trackingPoint.Time = trackingPoint.Frame / self.applicationState.levelData.VideoInfo.FrameRate;
+                    $("#" + trackingPoint.ID + "-Time").val(trackingPoint.Time);
+                }
+
+                if (input.data("path") === "Time") {
+                    trackingPoint.Frame = Math.round(trackingPoint.Time * self.applicationState.levelData.VideoInfo.FrameRate);
+                    $("#" + trackingPoint.ID + "-Frame").val(trackingPoint.Frame);
+                }
+
+                // notify other component to do something when we update a tracking point
+                self.notify(Message.MOVE_DETAIL_TRACKINGPOINT_UPDATED, trackingPoint);
+                // update start/end frame/time of move detail
+                self.updateMoveDetail();
+            }
+        });
     }
 
     private handleChangeEvent(self: this, containerSelector: string) {
@@ -192,7 +226,11 @@ export class LevelUIController {
             $("#trackingPoints-" + moveActionID).append(html);
             self.handleInputEvent(self, "#trackingPointID-" + trackingPoint.ID);
             $(".deleteTrackingPoint").off("click");
+            $("#actions #decrement-button").off("click");
+            $("#actions #increment-button").off("click");
             self.handleDeleteTrackingPointEvent(self, "#actions");
+            self.handleIncrementDecrementClickEvent(self, "#actions #decrement-button", "value-change-step", -1);
+            self.handleIncrementDecrementClickEvent(self, "#actions #increment-button", "value-change-step", 1);
         });
     }
 
@@ -210,6 +248,16 @@ export class LevelUIController {
             } else {
                 // update the trackingPoint object and other dependencies
                 deepSet(trackingPoint, input.data("path"), parseNumber(event.target.value));
+
+                if (input.data("path") === "Frame") {
+                    trackingPoint.Time = trackingPoint.Frame / self.applicationState.levelData.VideoInfo.FrameRate;
+                    $("#" + trackingPoint.ID + "-Time").val(trackingPoint.Time);
+                }
+
+                if (input.data("path") === "Time") {
+                    trackingPoint.Frame = Math.round(trackingPoint.Time * self.applicationState.levelData.VideoInfo.FrameRate);
+                    $("#" + trackingPoint.ID + "-Frame").val(trackingPoint.Frame);
+                }
 
                 // notify other component to do something when we update a tracking point
                 self.notify(Message.MOVE_DETAIL_TRACKINGPOINT_UPDATED, trackingPoint);

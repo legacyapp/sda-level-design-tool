@@ -224,19 +224,7 @@ export class App {
             case Message.PLAYER_TRACKINGPOINT_UPDATE:
                 {
                     this.playerUIController.pause();
-                    let trackingPoint: TrackingPoint;
-                    this.applicationState.levelData.Moves.forEach(m => {
-                        if (trackingPoint) {
-                            return;
-                        }
-                        m.MoveActions.forEach(ma => {
-                            trackingPoint = ma.TrackingPoints.find(p => p.ID === data.Id);
-                            if (trackingPoint) {
-                                return;
-                            }
-                        });
-                    });
-
+                    let trackingPoint: TrackingPoint = this.applicationState.levelData.getTrackingPoint(data.Id);
                     const size = this.playerUIController.getContainerSize();
                     trackingPoint.Pos.X = data.Position.x / size.width;
                     trackingPoint.Pos.Y = data.Position.y / size.height;
