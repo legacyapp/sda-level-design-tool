@@ -6,6 +6,7 @@ import $ from "jquery";
 import { deepGet } from "./util";
 import { Database } from "./Db";
 import { NormalizedLandmarks } from "./Converter";
+import toastr from "toastr"
 
 export interface NotifyDelegate {
     (message: Message, data: any): void;
@@ -187,13 +188,13 @@ export class App {
                     //console.log(jsonString);
                 })
                 .catch(err => {
-                    alert('ERROR copying JSON string to clipboard:' + err);
+                    toastr.error('ERROR copying JSON string to clipboard:' + err);
                     console.error('Error copying JSON string to clipboard:', err);
                 });
 
             self.saveLevelData().then(result => {
                 $("#loading-screen").addClass("hidden");
-                alert("SAVED SUCCESSFULLY.");
+                toastr.success("Saved Successfully.");
             });
         });
 

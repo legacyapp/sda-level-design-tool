@@ -3,6 +3,7 @@ import Handlebars from "handlebars";
 import $ from "jquery";
 import { ApplicationState, Message, NotifyDelegate } from "./App";
 import { deepGet, deepSet, dropLastN, parseNumber } from "./util";
+import toastr from "toastr"
 
 export class LevelUIController {
     private applicationState: ApplicationState;
@@ -56,6 +57,7 @@ export class LevelUIController {
                 if (!self.applicationState.levelData.Moves || self.applicationState.levelData.Moves.length === 0) {
                     $("#moveDetailForm").addClass("hidden");
                 }
+                toastr.success("Delete Move Successfully.");
             });
         }
     }
@@ -171,6 +173,7 @@ export class LevelUIController {
 
             $(".deleteAction").off("click");
             self.handleDeleteMoveAction(self, ".deleteAction");
+            toastr.success("Added New Action Successfully.");
         });
     }
 
@@ -178,7 +181,7 @@ export class LevelUIController {
         $(containerSelector).on("click", function (event) {
             const currentMove = self.applicationState.currentMove;
             if (currentMove.MoveActions.length === 1) {
-                alert("ERROR: cannot delete the last move action of a Move");
+                toastr.error("ERROR: cannot delete the last move action of a Move");
                 return;
             }
             const moveAction = currentMove.MoveActions.find(m => m.ID === $(this).data("id"));
@@ -187,6 +190,7 @@ export class LevelUIController {
                 $("#MoveAction-" + moveAction.ID).remove();
                 self.notify(Message.MOVE_DETAIL_ACTION_DELETED, moveAction);
             }
+            toastr.success("Deleted Move Action Successfully.");
         });
     }
 
@@ -198,7 +202,7 @@ export class LevelUIController {
                 const trackingPoint = currentMove.MoveActions[i].TrackingPoints.find(b => b.ID === trackingPointId);
                 if (trackingPoint) {
                     if (currentMove.MoveActions[i].TrackingPoints.length === 1) {
-                        alert("ERROR: cannot delete the last tracking point of an Action");
+                        toastr.error("ERROR: cannot delete the last tracking point of an Action");
                         return;
                     }
 
@@ -209,6 +213,7 @@ export class LevelUIController {
                     return;
                 }
             }
+            toastr.success("Deleted Tracking Point Successfully.");
         });
     }
 
@@ -234,6 +239,7 @@ export class LevelUIController {
             self.handleDeleteTrackingPointEvent(self, "#actions");
             self.handleIncrementDecrementClickEvent(self, "#actions #decrement-button", "value-change-step", -1);
             self.handleIncrementDecrementClickEvent(self, "#actions #increment-button", "value-change-step", 1);
+            toastr.success("Added New Tracking Point Successfully.");
         });
     }
 
@@ -285,6 +291,7 @@ export class LevelUIController {
         $("#addNewMove").off("click");
         $("#addNewMove").on("click", function (event) {
             self.notify(Message.MOVES_ITEM_ADDED, undefined);
+            toastr.success("Added New Move Successfully.");
         });
 
         this.renderMoveList();
