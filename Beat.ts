@@ -129,6 +129,84 @@ export enum JointType {
     BothWrists = 33
 }
 
+export const JointColors = [
+    {
+        Id: 0,
+        StrokeColor: "#a8a29e", // 400
+        FillColor: "#e7e5e4" // 200
+    },
+    {
+        Id: 11,
+        StrokeColor: "#991b1b", // 800 Red
+        FillColor: "#dc2626" // 600 Red
+    },
+    {
+        Id: 12,
+        StrokeColor: "#9f1239", // 800 Rose
+        FillColor: "#e11d48" // 600 Rose
+    },
+    {
+        Id: 13,
+        StrokeColor: "#9d174d", // 800 Pink
+        FillColor: "#db2777" // 600 Pink
+    },
+    {
+        Id: 14,
+        StrokeColor: "#86198f", // 800 Fuchsia
+        FillColor: "#c026d3" // 600 Fuchsia
+    },
+    {
+        Id: 15,
+        StrokeColor: "#9a3412", // 800 Orange
+        FillColor: "#ea580c" // 400 Orange
+    },
+    {
+        Id: 16,
+        StrokeColor: "#166534", // 800 Green
+        FillColor: "#16a34a" // 400 Green
+    },
+    {
+        Id: 19,
+        StrokeColor: "#92400e", // 800 Amber
+        FillColor: "#d97706" // 400 Orange
+    },
+    {
+        Id: 20,
+        StrokeColor: "#065f46", // 800 Emerald
+        FillColor: "#059669" // 400 Emerald
+    },
+    {
+        Id:23,
+        StrokeColor: "#854d0e", // 800 Yellow
+        FillColor: "#ca8a04" // 400 Yellow
+    },
+    {
+        Id: 24,
+        StrokeColor: "#115e59", // 800 Teal
+        FillColor: "#0d9488" // 400 Teal
+    },
+    {
+        Id: 25,
+        StrokeColor: "#3f6212", // 800 Lime
+        FillColor: "#65a30d" // 400 Orange
+    },
+    {
+        Id: 26,
+        StrokeColor: "#155e75", // 800 Cyan
+        FillColor: "#0891b2" // 400 Cyan
+    },
+    {
+        Id: 27,
+        StrokeColor: "#075985", // 800 Sky
+        FillColor: "#0284c7" // 400 Orange
+    },
+    {
+        Id: 28,
+        StrokeColor: "#1e40af", // 800 Blue
+        FillColor: "#2563eb" // 400 Blue
+    },
+];
+
 export enum MovementType {
     Point = 1,
     Line = 2,

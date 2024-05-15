@@ -85,8 +85,6 @@ const levelConverter = {
             }
         };
 
-        console.log(firestoreObj)
-
         return firestoreObj;
     },
     fromFirestore: (snapshot, options) => {
@@ -182,7 +180,6 @@ export class Database {
             const levelSnapshot = await getDocs(levelCol);
 
             return levelSnapshot.docs.map(docData => {
-                console.log(docData)
                 const data = docData.data();
                 return {
                     id: docData.id,

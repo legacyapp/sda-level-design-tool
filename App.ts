@@ -20,6 +20,7 @@ export enum Message {
     MOVE_DETAIL_ACTION_ADDED,
     MOVE_DETAIL_ACTION_UPDATED,
     MOVE_DETAIL_ACTION_DELETED,
+    MOVE_DETAIL_TRACKINGPOINT_ADDED,
     MOVE_DETAIL_TRACKINGPOINT_UPDATED,
     MOVE_DETAIL_TRACKINGPOINT_DELETED,
     PLAYER_TRACKINGPOINT_UPDATE,
@@ -247,7 +248,7 @@ export class App {
                 }
                 break;
 
-            case Message.MOVE_DETAIL_ACTION_UPDATED:
+            case Message.MOVE_DETAIL_TRACKINGPOINT_ADDED:
                 {
                     this.playerUIController.pause();
                     const [currentFrame] = this.playerUIController.getCurrentFrameAndTime();
@@ -271,6 +272,15 @@ export class App {
                         p.Time = currentTime;
                     });
                     this.drawingTrackingPoint.draw(currentFrame, size.width, size.height);
+                }
+                break;
+
+            case Message.MOVE_DETAIL_ACTION_UPDATED:
+                {
+                    this.playerUIController.pause();
+                    const [currentFrame] = this.playerUIController.getCurrentFrameAndTime();
+                    const size = this.playerUIController.getContainerSize();
+                    this.drawingTrackingPoint.draw(currentFrame, size.width, size.height, true);
                 }
                 break;
 

@@ -1,4 +1,4 @@
-import { JointType } from "./Beat";
+import { JointColors, JointType } from "./Beat";
 
 export function Once(fn: Function, context: any) {
     var result: any;
@@ -12,34 +12,18 @@ export function Once(fn: Function, context: any) {
 }
 
 export function GetColors(landmarkType: JointType) {
-    if (landmarkType === JointType.LeftWrist) {
-        return {
-            CircleStrokeColor: "#991b1b",
-            CircleFillColor: "#dc2626",
-            LineStrokeColor: "#7f1d1d"
-        }
-    }
-
-    if (landmarkType === JointType.RightWrist) {
-        return {
-            CircleStrokeColor: "#2563eb",
-            CircleFillColor: "#1e40af",
-            LineStrokeColor: "#1e3a8a"
-        }
-    }
-
-    if (landmarkType === JointType.BothWrists) {
-        return {
-            CircleStrokeColor: "#16a34a",
-            CircleFillColor: "#166534",
-            LineStrokeColor: "#14532d"
+    for (let i = 0; i < JointColors.length; i++) {
+        if (JointColors[i].Id === landmarkType) {
+            return {
+                CircleStrokeColor: JointColors[i].StrokeColor,
+                CircleFillColor: JointColors[i].FillColor
+            };
         }
     }
 
     return {
         CircleStrokeColor: "#16a34a",
-        CircleFillColor: "#166534",
-        LineStrokeColor: "#14532d"
+        CircleFillColor: "#166534"
     };
 }
 

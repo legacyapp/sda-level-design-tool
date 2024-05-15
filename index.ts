@@ -11,7 +11,6 @@ app.Init();
 $(function () {
   app.loadAllLevelDatas()
     .then(allLevelDatas => {
-      console.log(allLevelDatas);
 
       const videoSelectionData = {
         Videos: []

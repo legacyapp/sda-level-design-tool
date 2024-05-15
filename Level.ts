@@ -144,6 +144,7 @@ export class LevelUIController {
             const currentMove = self.applicationState.currentMove;
             const moveAction = currentMove.MoveActions.find(m => m.ID === $(this).data("id"));
             moveAction.Joint = parseInt($(this).val());
+            self.notify(Message.MOVE_DETAIL_ACTION_UPDATED, moveAction);
         });
 
         $(containerSelector).on("change", "input", function (event) {
@@ -224,7 +225,7 @@ export class LevelUIController {
             const moveAction = move.MoveActions.find(m => m.ID === moveActionID);
             moveAction.TrackingPoints.push(trackingPoint);
 
-            self.notify(Message.MOVE_DETAIL_ACTION_UPDATED, moveAction);
+            self.notify(Message.MOVE_DETAIL_TRACKINGPOINT_ADDED, moveAction);
             // update start/end frame/time of move detail
             self.updateMoveDetail();
 
