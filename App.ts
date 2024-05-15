@@ -336,9 +336,11 @@ export class App {
                 break;
             case Message.PLAYER_TRACKINGPOINT_CLICK:
                 {
-                    const trackingPointId = data as string;
-                    const element = document.getElementById("trackingPoint-" + trackingPointId);
-                    element && element.scrollIntoView();
+                    // TODO: comment this because it's a nice idea but mouse will change position
+
+                    // const trackingPointId = data as string;
+                    // const element = document.getElementById("trackingPoint-" + trackingPointId);
+                    // element && element.scrollIntoView();
                 }
                 break;
             default:
