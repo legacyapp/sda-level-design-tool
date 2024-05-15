@@ -5,6 +5,7 @@ import { GetColors } from "./util";
 import { DrawingUtils, PoseLandmarker } from "@mediapipe/tasks-vision";
 import { Message, NotifyDelegate } from "./App";
 import { v4 as uuidv4 } from 'uuid';
+import { Text } from "konva/lib/shapes/Text";
 
 export class LevelData {
     VideoInfo: VideoInfo;
@@ -234,19 +235,30 @@ export class DrawingTrackingPoints {
         anchor.on('mouseover', function () {
             document.body.style.cursor = 'pointer';
             this.strokeWidth(4);
+            self.notify(Message.PLAYER_TRACKINGPOINT_MOUSEOVER, this.getAttr('data').id)
         });
         anchor.on('mouseout', function () {
             document.body.style.cursor = 'default';
             this.strokeWidth(2);
+
+            self.notify(Message.PLAYER_TRACKINGPOINT_MOUSEOUT, this.getAttr('data').id)
         });
 
-        anchor.on('dragend ', function () {
+        anchor.on('dragstart', function () {
+            self.notify(Message.PLAYER_TRACKINGPOINT_CLICK, this.getAttr('data').id)
+        });
+
+        anchor.on('click', function () {
+            self.notify(Message.PLAYER_TRACKINGPOINT_CLICK, this.getAttr('data').id)
+        });
+
+        anchor.on('dragend', function () {
             const data = anchor.getAttr('data');
             const position = this.absolutePosition();
             self.notify(Message.PLAYER_TRACKINGPOINT_UPDATE, {
                 Id: data.id,
                 Position: position
-            })
+            });
         });
 
         // anchor.on('dragmove', function () {

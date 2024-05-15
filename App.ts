@@ -22,7 +22,10 @@ export enum Message {
     MOVE_DETAIL_ACTION_DELETED,
     MOVE_DETAIL_TRACKINGPOINT_UPDATED,
     MOVE_DETAIL_TRACKINGPOINT_DELETED,
-    PLAYER_TRACKINGPOINT_UPDATE
+    PLAYER_TRACKINGPOINT_UPDATE,
+    PLAYER_TRACKINGPOINT_MOUSEOVER,
+    PLAYER_TRACKINGPOINT_MOUSEOUT,
+    PLAYER_TRACKINGPOINT_CLICK
 }
 
 export class ApplicationState {
@@ -309,6 +312,25 @@ export class App {
                 }
                 break;
 
+            case Message.PLAYER_TRACKINGPOINT_MOUSEOVER:
+                {
+                    const trackingPointId = data as string;
+                    $("#trackingPoint-" + trackingPointId).addClass("bg-gray-200");
+                }
+                break;
+            case Message.PLAYER_TRACKINGPOINT_MOUSEOUT:
+                {
+                    const trackingPointId = data as string;
+                    $("#trackingPoint-" + trackingPointId).removeClass("bg-gray-200");
+                }
+                break;
+            case Message.PLAYER_TRACKINGPOINT_CLICK:
+                {
+                    const trackingPointId = data as string;
+                    const element = document.getElementById("trackingPoint-" + trackingPointId);
+                    element && element.scrollIntoView();
+                }
+                break;
             default:
                 break;
         }
