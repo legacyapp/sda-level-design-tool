@@ -11,6 +11,8 @@ export class LevelUIController {
     constructor(applicationState: ApplicationState, notify: NotifyDelegate) {
         this.applicationState = applicationState;
         this.notify = notify;
+        $("#allMoves").empty();
+        $("#moveDetailForm").addClass("hidden");
     }
 
     private renderMoveList() {
@@ -19,7 +21,7 @@ export class LevelUIController {
             const template = Handlebars.compile(source);
             const html = template(this.applicationState.levelData);
 
-            $("#allMoves").off("click");
+            $("#allMoves").off("click", "li");
             $("#allMoves").empty();
             $("#allMoves").html(html);
 

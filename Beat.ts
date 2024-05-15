@@ -11,6 +11,7 @@ export class LevelData {
     // *** NEW DATA STRUCTURE ***
     // *** New scoring system https://docs.google.com/document/d/1Y_A4jWlUhf11H-omHPblzxw00FREIQTM8miHuNF15T0/edit#heading=h.338ki0steug8 ***/
     ID: string;
+    Title: string;
     Moves: Move[] = [];
 
     sort() {
@@ -406,18 +407,20 @@ export class DrawingLandmarks {
     draw(currentFrame: number, videoWidth: number, videoHeight: number) {
         // Draw landmarks in each frame
         this.updateCanvasStyleFunc(videoWidth, videoHeight);
-        const landmarks = this.frameData.normalizedFrames[currentFrame]?.landmarks;
-        if (landmarks) {
-            this.canvasCtx.save();
-            this.canvasCtx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
-            this.drawingUtils.drawLandmarks(
-                landmarks,
-                {
-                    radius: (data) => DrawingUtils.lerp(data.from!.z, -0.15, 0.1, 5, 1),
-                    lineWidth: 1
-                });
-            this.drawingUtils.drawConnectors(landmarks, PoseLandmarker.POSE_CONNECTIONS, { lineWidth: 1 });
-            this.canvasCtx.restore();
+        if (this.frameData.normalizedFrames && this.frameData.normalizedFrames.length > 0) {
+            const landmarks = this.frameData.normalizedFrames[currentFrame]?.landmarks;
+            if (landmarks) {
+                this.canvasCtx.save();
+                this.canvasCtx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
+                this.drawingUtils.drawLandmarks(
+                    landmarks,
+                    {
+                        radius: (data) => DrawingUtils.lerp(data.from!.z, -0.15, 0.1, 5, 1),
+                        lineWidth: 1
+                    });
+                this.drawingUtils.drawConnectors(landmarks, PoseLandmarker.POSE_CONNECTIONS, { lineWidth: 1 });
+                this.canvasCtx.restore();
+            }
         }
     }
 }

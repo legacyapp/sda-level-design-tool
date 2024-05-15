@@ -1,9 +1,11 @@
-import { LevelData, Move, FrameData, DrawingTrackingPoints, DrawingLandmarks, TrackingPoint, MoveAction } from "./Beat";
+import { LevelData, Move, FrameData, DrawingTrackingPoints, DrawingLandmarks, TrackingPoint, MoveAction, VideoInfo } from "./Beat";
 import Handlebars from "handlebars";
 import { PlayerWrapper as PlayerUIController } from "./Player";
 import { LevelUIController } from "./Level";
 import $ from "jquery";
 import { deepGet } from "./util";
+import { Database } from "./Db";
+import { NormalizedLandmarks } from "./Converter";
 
 export interface NotifyDelegate {
     (message: Message, data: any): void;
@@ -36,10 +38,72 @@ export class ApplicationState {
 export class App {
     private applicationState: ApplicationState;
 
+    public CurrentDocumentId: string;
+    public AllLevelDatas;
+
     playerUIController: PlayerUIController;
     drawingTrackingPoint: DrawingTrackingPoints;
     drawingLandmarks: DrawingLandmarks;
     levelUIController: LevelUIController;
+
+    database: Database;
+
+    async loadAllLevelDatas() {
+        const data = await this.database.getAllLevelDatas();
+
+        this.AllLevelDatas = data;
+
+        return data;
+    }
+
+    async getJson(jsonUrl: string) {
+        const json = await this.database.getJson(jsonUrl);
+
+        // Do other things?
+
+        return json;
+    }
+
+    saveLevelData() {
+        return this.database.saveLevelData(this.CurrentDocumentId, this.applicationState.levelData);
+    }
+
+    // async loadBeatDataFromOldDatabase(levelDataUrl: string) {
+    //     const videoBeatResponse = await fetch(levelDataUrl);
+    //     const videoBeat = await videoBeatResponse.json();
+    //     console.log(videoBeat)
+
+    //     const frameDataResponse = await fetch(videoBeat.danceVideo.frameDataUrl);
+    //     const frameData = await frameDataResponse.json();
+
+
+    //     NormalizedLandmarks(frameData);
+
+    //     const levelData = ConvertToLevelData(frameData, videoBeat);
+
+    //     return {
+    //         FrameData: frameData,
+    //         LevelData: levelData
+    //     }
+    // }
+
+    async loadBeatDataFromOldDatabase(videoBeat, frameData) {
+        NormalizedLandmarks(frameData);
+
+        const levelData: LevelData = new LevelData();
+        const videoInfo: VideoInfo = new VideoInfo();
+
+        videoInfo.FrameRate = frameData.frame_rate;
+        videoInfo.Height = frameData.size[0];
+        videoInfo.Width = frameData.size[1];
+        videoInfo.VideoUrl = videoBeat.danceVideo.videoUrl;
+        levelData.VideoInfo = videoInfo;
+
+        return {
+            FrameData: frameData,
+            LevelData: levelData
+        }
+    }
 
     public Init() {
         Handlebars.registerHelper("increment", function (val) {
@@ -76,6 +140,8 @@ export class App {
 
             return deepGet(array[index], path);
         });
+
+        this.database = new Database();
     }
 
     public run(applicationState: ApplicationState) {
@@ -110,19 +176,28 @@ export class App {
         this.levelUIController.render();
 
         const self = this;
+        $("#save").off("click");
         $("#save").on("click", function (event) {
+            $("#loading-screen").removeClass("hidden");
             const jsonString = JSON.stringify(self.applicationState.levelData, null, 2);
             // Copy the JSON string to the clipboard
             navigator.clipboard.writeText(jsonString)
                 .then(() => {
                     console.log('JSON string copied to clipboard');
-                    console.log(jsonString);
+                    //console.log(jsonString);
                 })
                 .catch(err => {
                     alert('ERROR copying JSON string to clipboard:' + err);
                     console.error('Error copying JSON string to clipboard:', err);
                 });
+
+            self.saveLevelData().then(result => {
+                $("#loading-screen").addClass("hidden");
+                alert("SAVED SUCCESSFULLY.");
+            });
         });
+
+        $("#loading-screen").addClass("hidden");
     }
 
     public notify(message: Message, data: any) {

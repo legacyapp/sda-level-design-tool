@@ -26,119 +26,119 @@ function convertJoint(joint: any): JointType {
     return JointType.Nose;
 }
 
-export function ConvertToVideoBeatData(poseData: any, legacyBeatData: any) {
-    const levelData: LevelData = new LevelData();
-    const videoInfo: VideoInfo = new VideoInfo();
+// export function ConvertToVideoBeatData(poseData: any, legacyBeatData: any) {
+//     const levelData: LevelData = new LevelData();
+//     const videoInfo: VideoInfo = new VideoInfo();
 
-    videoInfo.FrameRate = poseData.frame_rate;
-    videoInfo.Height = poseData.size[0];
-    videoInfo.Width = poseData.size[1];
-    videoInfo.VideoUrl = legacyBeatData.danceVideo.videoUrl;
-    levelData.VideoInfo = videoInfo;
+//     videoInfo.FrameRate = poseData.frame_rate;
+//     videoInfo.Height = poseData.size[0];
+//     videoInfo.Width = poseData.size[1];
+//     videoInfo.VideoUrl = legacyBeatData.danceVideo.videoUrl;
+//     levelData.VideoInfo = videoInfo;
 
-    const oldBeats = legacyBeatData.beatMapper.Beats;
+//     const oldBeats = legacyBeatData.beatMapper.Beats;
 
-    // convert connections that have more than 2 beats
-    for (const [oldConnectionId, oldConnection] of Object.entries(legacyBeatData.beatMapper.Connections)) {
-        if (!oldBeats[oldConnection["beatA"]] || !oldBeats[oldConnection["beatB"]]) {
-            continue; // Need to investigate why beatA or beatB is null
-        }
+//     // convert connections that have more than 2 beats
+//     for (const [oldConnectionId, oldConnection] of Object.entries(legacyBeatData.beatMapper.Connections)) {
+//         if (!oldBeats[oldConnection["beatA"]] || !oldBeats[oldConnection["beatB"]]) {
+//             continue; // Need to investigate why beatA or beatB is null
+//         }
 
-        const beatA = oldBeats[oldConnection["beatA"]];
+//         const beatA = oldBeats[oldConnection["beatA"]];
 
-        const move: Move = new Move();
-        move.ID = beatA.id;
-        move.Name = JointType[convertJoint(beatA["Joint"])];
+//         const move: Move = new Move();
+//         move.ID = beatA.id;
+//         move.Name = JointType[convertJoint(beatA["Joint"])];
 
-        const moveAction: MoveAction = new MoveAction();
-        moveAction.ID = oldConnection["id"];
-        moveAction.Joint = convertJoint(beatA["Joint"]);
-        moveAction.TrackingPoints.push(convertBeat(beatA));
-        moveAction.IsMajor = true;
-        moveAction.ScoresRadius = [
-            { Scoring: 100, Radius: 100 }
-        ];
+//         const moveAction: MoveAction = new MoveAction();
+//         moveAction.ID = oldConnection["id"];
+//         moveAction.Joint = convertJoint(beatA["Joint"]);
+//         moveAction.TrackingPoints.push(convertBeat(beatA));
+//         moveAction.IsMajor = true;
+//         moveAction.ScoresRadius = [
+//             { Scoring: 100, Radius: 100 }
+//         ];
 
 
 
-        // check if beatA don't have AnchorOut. Don't really understand why they chooses 0.3 as null or undefined value
-        if (!(beatA.AnchorOut[0] === 0.3 && beatA.AnchorOut[1] === 0.3)) {
-            const anchor1 = new TrackingPoint();
+//         // check if beatA don't have AnchorOut. Don't really understand why they chooses 0.3 as null or undefined value
+//         if (!(beatA.AnchorOut[0] === 0.3 && beatA.AnchorOut[1] === 0.3)) {
+//             const anchor1 = new TrackingPoint();
 
-            anchor1.ID = uuidv4(); // random ID just for testing
-            anchor1.Pos = new Position();
-            anchor1.Pos.X = beatA.AnchorOut[0];
-            anchor1.Pos.Y = beatA.AnchorOut[1];
-            anchor1.Time = moveAction.TrackingPoints[0].Time;
-            anchor1.Frame = moveAction.TrackingPoints[0].Frame;
-            anchor1.HoldTime = moveAction.TrackingPoints[0].HoldTime;
-            moveAction.TrackingPoints.push(anchor1);
-        }
+//             anchor1.ID = uuidv4(); // random ID just for testing
+//             anchor1.Pos = new Position();
+//             anchor1.Pos.X = beatA.AnchorOut[0];
+//             anchor1.Pos.Y = beatA.AnchorOut[1];
+//             anchor1.Time = moveAction.TrackingPoints[0].Time;
+//             anchor1.Frame = moveAction.TrackingPoints[0].Frame;
+//             anchor1.HoldTime = moveAction.TrackingPoints[0].HoldTime;
+//             moveAction.TrackingPoints.push(anchor1);
+//         }
 
-        const beatB = oldBeats[oldConnection["beatB"]];
-        // check if beatB don't have AnchorIn. Don't really understand why they chooses 0.3 as null or undefined value
-        if (!(beatB.AnchorIn[0] === 0.3 && beatB.AnchorIn[1] === 0.3)) {
-            const anchor2 = new TrackingPoint();
-            anchor2.ID = uuidv4(); // random ID just for testing
-            anchor2.Pos = new Position();
-            anchor2.Pos.X = beatB.AnchorIn[0];
-            anchor2.Pos.Y = beatB.AnchorIn[1];
-            anchor2.Time = moveAction.TrackingPoints[0].Time;
-            anchor2.Frame = moveAction.TrackingPoints[0].Frame;
-            anchor2.HoldTime = moveAction.TrackingPoints[0].HoldTime;
-            moveAction.TrackingPoints.push(anchor2);
-        }
+//         const beatB = oldBeats[oldConnection["beatB"]];
+//         // check if beatB don't have AnchorIn. Don't really understand why they chooses 0.3 as null or undefined value
+//         if (!(beatB.AnchorIn[0] === 0.3 && beatB.AnchorIn[1] === 0.3)) {
+//             const anchor2 = new TrackingPoint();
+//             anchor2.ID = uuidv4(); // random ID just for testing
+//             anchor2.Pos = new Position();
+//             anchor2.Pos.X = beatB.AnchorIn[0];
+//             anchor2.Pos.Y = beatB.AnchorIn[1];
+//             anchor2.Time = moveAction.TrackingPoints[0].Time;
+//             anchor2.Frame = moveAction.TrackingPoints[0].Frame;
+//             anchor2.HoldTime = moveAction.TrackingPoints[0].HoldTime;
+//             moveAction.TrackingPoints.push(anchor2);
+//         }
 
-        levelData.Moves.push(move);
-        move.MoveActions.push(moveAction);
-        moveAction.TrackingPoints.push(convertBeat(beatB));
+//         levelData.Moves.push(move);
+//         move.MoveActions.push(moveAction);
+//         moveAction.TrackingPoints.push(convertBeat(beatB));
 
-        move.StartTime = move.MoveActions[0].TrackingPoints[0].Time;
-        move.EndTime = move.MoveActions[0].TrackingPoints[move.MoveActions[0].TrackingPoints.length - 1].Time;
-        move.StartFrame = move.MoveActions[0].TrackingPoints[0].Frame;
-        move.EndFrame = move.MoveActions[0].TrackingPoints[move.MoveActions[0].TrackingPoints.length - 1].Frame;
-    }
+//         move.StartTime = move.MoveActions[0].TrackingPoints[0].Time;
+//         move.EndTime = move.MoveActions[0].TrackingPoints[move.MoveActions[0].TrackingPoints.length - 1].Time;
+//         move.StartFrame = move.MoveActions[0].TrackingPoints[0].Frame;
+//         move.EndFrame = move.MoveActions[0].TrackingPoints[move.MoveActions[0].TrackingPoints.length - 1].Frame;
+//     }
 
-    // convert connections that has only one beat
-    for (const [key, value] of Object.entries(legacyBeatData.beatMapper.Beats)) {
-        let isFound = false;
+//     // convert connections that has only one beat
+//     for (const [key, value] of Object.entries(legacyBeatData.beatMapper.Beats)) {
+//         let isFound = false;
 
-        for (const [oldConnectionId, oldConnection] of Object.entries(legacyBeatData.beatMapper.Connections)) {
-            if ((oldConnection["beatA"] === key) || (oldConnection["beatB"] === key)) {
-                isFound = true;
-            }
-        }
+//         for (const [oldConnectionId, oldConnection] of Object.entries(legacyBeatData.beatMapper.Connections)) {
+//             if ((oldConnection["beatA"] === key) || (oldConnection["beatB"] === key)) {
+//                 isFound = true;
+//             }
+//         }
 
-        // if a beat is not in beatA or beatB of a connection, creat a Single Point Beat
-        if (!isFound) {
-            const singleBeat = convertBeat(value);
-            const move: Move = new Move();
-            move.ID = value["id"];
-            move.Name = JointType[convertJoint(value["Joint"])];
+//         // if a beat is not in beatA or beatB of a connection, creat a Single Point Beat
+//         if (!isFound) {
+//             const singleBeat = convertBeat(value);
+//             const move: Move = new Move();
+//             move.ID = value["id"];
+//             move.Name = JointType[convertJoint(value["Joint"])];
 
-            const trackingPoint: MoveAction = new MoveAction();
-            trackingPoint.ID = key;
-            trackingPoint.TrackingPoints.push(singleBeat);
-            trackingPoint.Joint = convertJoint(value["Joint"]);
-            trackingPoint.IsMajor = true;
-            trackingPoint.ScoresRadius = [
-                { Scoring: 100, Radius: 100 }
-            ];
+//             const trackingPoint: MoveAction = new MoveAction();
+//             trackingPoint.ID = key;
+//             trackingPoint.TrackingPoints.push(singleBeat);
+//             trackingPoint.Joint = convertJoint(value["Joint"]);
+//             trackingPoint.IsMajor = true;
+//             trackingPoint.ScoresRadius = [
+//                 { Scoring: 100, Radius: 100 }
+//             ];
 
-            levelData.Moves.push(move);
-            move.MoveActions.push(trackingPoint);
+//             levelData.Moves.push(move);
+//             move.MoveActions.push(trackingPoint);
 
-            move.StartTime = move.MoveActions[0].TrackingPoints[0].Time;
-            move.EndTime = move.MoveActions[0].TrackingPoints[move.MoveActions[0].TrackingPoints.length - 1].Time;
-            move.StartFrame = move.MoveActions[0].TrackingPoints[0].Frame;
-            move.EndFrame = move.MoveActions[0].TrackingPoints[move.MoveActions[0].TrackingPoints.length - 1].Frame;
-        }
-    }
+//             move.StartTime = move.MoveActions[0].TrackingPoints[0].Time;
+//             move.EndTime = move.MoveActions[0].TrackingPoints[move.MoveActions[0].TrackingPoints.length - 1].Time;
+//             move.StartFrame = move.MoveActions[0].TrackingPoints[0].Frame;
+//             move.EndFrame = move.MoveActions[0].TrackingPoints[move.MoveActions[0].TrackingPoints.length - 1].Frame;
+//         }
+//     }
 
-    levelData.sort();
+//     levelData.sort();
 
-    return levelData;
-}
+//     return levelData;
+// }
 
 export function NormalizedLandmarks(poseData: any) {
     poseData.normalizedFrames = poseData.frames.map(poseObj => {

@@ -4,7 +4,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 module.exports = {
   entry: './index.ts',
   mode: 'development',
-  watch: false,
+  watch: true,
   module: {
     rules: [
       {
@@ -26,10 +26,11 @@ module.exports = {
     title: 'Level Design Tool',
     filename: 'index.html',
     template: 'index.html'
-  }), new MiniCssExtractPlugin({filename:"style.css"})],
+  }), new MiniCssExtractPlugin({ filename: "style.css" })],
   output: {
     filename: 'index.js',
     path: path.resolve(__dirname, 'dist'),
+    clean: true,
   },
   devServer: {
     static: './',
