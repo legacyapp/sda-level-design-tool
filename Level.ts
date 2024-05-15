@@ -88,6 +88,7 @@ export class LevelUIController {
         // TODO Should we do not register for each render move detail???
         Handlebars.registerPartial("trackingPointsTemplate", $("#trackingPointsTemplate").html());
         Handlebars.registerPartial("anActionTemplate", $("#anActionTemplate").html());
+        Handlebars.registerPartial("aTrackingPointTemplate", $("#aTrackingPointTemplate").html());
 
         // Render tracking points
         const source = $("#actionsTemplate").html();
