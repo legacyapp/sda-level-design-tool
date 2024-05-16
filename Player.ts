@@ -11,9 +11,10 @@ class VideoConfiguration {
 
 export class PlayerWrapper {
     private player: Player;
-    private isPlaying: boolean;
     private videoFrameRate: number = 30;
-    private videoFrameCallbacks: Array<(currentFrame: number, videoWidth: number, videoHeight: number, forceToRedraw: boolean) => void> = [];
+    private videoFrameCallbacks: Array<(currentFrame: number, videoWidth: number, videoHeight: number, forceToRedraw: boolean, isPlaying: boolean) => void> = [];
+
+    isPlaying: boolean;
 
     private setNextFrames(step_size: number) {
         // First, we need to pause the video
@@ -27,7 +28,7 @@ export class PlayerWrapper {
         if (this.videoFrameCallbacks.length > 0) {
             const currentTime = this.player.currentTime();
             const currentFrame = Math.round(currentTime * this.videoFrameRate);
-            this.videoFrameCallbacks.forEach(f => f(currentFrame, this.player.el_.clientWidth, this.player.el_.clientHeight, forceToRedraw));
+            this.videoFrameCallbacks.forEach(f => f(currentFrame, this.player.el_.clientWidth, this.player.el_.clientHeight, forceToRedraw, this.isPlaying));
             $("#currentTime").text(currentTime);
             $("#currentFrame").text(currentFrame);
         }
@@ -78,6 +79,7 @@ export class PlayerWrapper {
             $('#previousXFrame').on("click", sefl.setNextFrames.bind(sefl, -5));
         });
 
+        this.isPlaying = false;
         this.player.on(['waiting', 'pause'], () => sefl.isPlaying = false);
         this.player.on('playing', () => sefl.isPlaying = true);
     }

@@ -169,7 +169,7 @@ export class App {
             }
         );
 
-        this.drawingTrackingPoint = new DrawingTrackingPoints({ ContainerId: "beat_canvas" }, this.applicationState.levelData, this.notify.bind(this));
+        this.drawingTrackingPoint = new DrawingTrackingPoints({ ContainerId: "beat_canvas" }, this.applicationState, this.notify.bind(this));
         this.drawingLandmarks = new DrawingLandmarks(
             { ContainerId: "pose_canvas" }, this.applicationState.levelData, this.applicationState.frameData);
 
@@ -210,8 +210,8 @@ export class App {
             case Message.MOVES_ITEM_CLICKED:
                 {
                     const move = data as Move;
-                    this.playerUIController.setCurrentFrame(move.StartFrame);
                     this.applicationState.currentMove = move;
+                    this.playerUIController.setCurrentFrame(move.StartFrame);
                 }
                 break;
 
@@ -257,7 +257,7 @@ export class App {
                     const trackingPoint = moveAction.TrackingPoints[moveAction.TrackingPoints.length - 1];
                     trackingPoint.Frame = currentFrame;
                     trackingPoint.Time = currentFrame / this.applicationState.levelData.VideoInfo.FrameRate;
-                    this.drawingTrackingPoint.draw(currentFrame, size.width, size.height, true);
+                    this.drawingTrackingPoint.draw(currentFrame, size.width, size.height, true, this.playerUIController.isPlaying);
                 }
                 break;
 
@@ -271,7 +271,7 @@ export class App {
                         p.Frame = currentFrame;
                         p.Time = currentTime;
                     });
-                    this.drawingTrackingPoint.draw(currentFrame, size.width, size.height);
+                    this.drawingTrackingPoint.draw(currentFrame, size.width, size.height, false, this.playerUIController.isPlaying);
                 }
                 break;
 
@@ -280,7 +280,7 @@ export class App {
                     this.playerUIController.pause();
                     const [currentFrame] = this.playerUIController.getCurrentFrameAndTime();
                     const size = this.playerUIController.getContainerSize();
-                    this.drawingTrackingPoint.draw(currentFrame, size.width, size.height, true);
+                    this.drawingTrackingPoint.draw(currentFrame, size.width, size.height, true, this.playerUIController.isPlaying);
                 }
                 break;
 

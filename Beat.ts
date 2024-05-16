@@ -3,7 +3,7 @@ import { Layer } from "konva/lib/Layer";
 import { Stage } from "konva/lib/Stage";
 import { GetColors } from "./util";
 import { DrawingUtils, PoseLandmarker } from "@mediapipe/tasks-vision";
-import { Message, NotifyDelegate } from "./App";
+import { ApplicationState, Message, NotifyDelegate } from "./App";
 import { v4 as uuidv4 } from 'uuid';
 import { Text } from "konva/lib/shapes/Text";
 
@@ -36,7 +36,7 @@ export class LevelData {
 
 export class Move {
     ID: string;
-    Name: string="";
+    Name: string = "";
     StartTime: number;
     EndTime: number;
     StartFrame: number;
@@ -176,7 +176,7 @@ export const JointColors = [
         FillColor: "#059669" // 400 Emerald
     },
     {
-        Id:23,
+        Id: 23,
         StrokeColor: "#854d0e", // 800 Yellow
         FillColor: "#ca8a04" // 400 Yellow
     },
@@ -227,8 +227,8 @@ export class MoveAction {
     Index: number;
 
     constructor() {
-        this.Name =""
-     }
+        this.Name = ""
+    }
 
     static build(currentFrame: number, currentTime): MoveAction {
         const newMoveAction = new MoveAction();
@@ -288,7 +288,7 @@ export type FrameData = { normalizedFrames: { landmarks: any; }[]; };
 export class DrawingTrackingPoints {
     private stage: Stage;
     private layer: Layer;
-    private levelData: LevelData;
+    private ApplicationState: ApplicationState;
     private trackMoveActions = {};
     private notify: NotifyDelegate;
 
@@ -348,11 +348,11 @@ export class DrawingTrackingPoints {
         return anchor;
     }
 
-    private drawMoveAction(TrackingPoint: MoveAction, videoWidth: number, videoHeight: number) {
-        const color = GetColors(TrackingPoint.Joint);
+    private drawMoveAction(moveAction: MoveAction, videoWidth: number, videoHeight: number) {
+        const color = GetColors(moveAction.Joint);
 
-        if (TrackingPoint.TrackingPoints && TrackingPoint.TrackingPoints.length > 0) {
-            const trackingPointCircles = TrackingPoint.TrackingPoints.map((p) => {
+        if (moveAction.TrackingPoints && moveAction.TrackingPoints.length > 0) {
+            const trackingPointCircles = moveAction.TrackingPoints.map((p) => {
                 return this.buildAnchor(
                     p.ID,
                     p.Pos.X * videoWidth,
@@ -361,11 +361,11 @@ export class DrawingTrackingPoints {
             });
 
             const trackDrawingBeat = {
-                StartFrame: TrackingPoint.TrackingPoints[0].Frame,
-                EndFrame: TrackingPoint.TrackingPoints[TrackingPoint.TrackingPoints.length - 1].Frame, // TODO: should calculate = Frame + Hold Time
+                StartFrame: moveAction.TrackingPoints[0].Frame,
+                EndFrame: moveAction.TrackingPoints[moveAction.TrackingPoints.length - 1].Frame, // TODO: should calculate = Frame + Hold Time
                 Circles: trackingPointCircles
             };
-            this.trackMoveActions[TrackingPoint.ID] = trackDrawingBeat;
+            this.trackMoveActions[moveAction.ID] = trackDrawingBeat;
         }
     }
 
@@ -379,22 +379,22 @@ export class DrawingTrackingPoints {
         }
     };
 
-    constructor(configuration: any, videoBeats: LevelData, notify: NotifyDelegate) {
+    constructor(configuration: any, applicationState: ApplicationState, notify: NotifyDelegate) {
         // Init Konva
         this.stage = new Konva.Stage({
             container: configuration.ContainerId
         });
         this.layer = new Konva.Layer();
         this.stage.add(this.layer);
-        this.levelData = videoBeats;
+        this.ApplicationState = applicationState;
         this.notify = notify;
     }
 
-    draw(currentFrame: number, videoWidth: number, videoHeight: number, forceToRedraw = false) {
+    draw(currentFrame: number, videoWidth: number, videoHeight: number, forceToRedraw: boolean, isPlaying: boolean) {
         // Draw beat data in each frame
         this.updateStageStyleFunc(videoWidth, videoHeight);
         // find TrackingPoints to draw at the current frame
-        this.levelData.Moves.forEach((move: Move) => {
+        this.ApplicationState.levelData.Moves.forEach((move: Move) => {
             move.MoveActions.forEach(moveAction => {
                 let startFrame: number = move.MoveActions[0].TrackingPoints[0].Frame;
                 let endFrame: number = move.MoveActions[0].TrackingPoints[0].Frame;
@@ -412,20 +412,28 @@ export class DrawingTrackingPoints {
 
                 if (moveAction.TrackingPoints.length === 1) {
                     const holdTime = moveAction.TrackingPoints[0].HoldTime ? moveAction.TrackingPoints[0].HoldTime : 2;
-                    endFrame = moveAction.TrackingPoints[0].Frame + (this.levelData.VideoInfo.FrameRate * holdTime);
+                    endFrame = moveAction.TrackingPoints[0].Frame + (this.ApplicationState.levelData.VideoInfo.FrameRate * holdTime);
                 }
 
                 if (startFrame <= currentFrame && currentFrame <= endFrame) {
                     // we need to check forceToRedraw in case we want to re-draw on the current frame that already drew
                     if (forceToRedraw) {
-                        this.destroyPoint(moveAction);
-                        this.drawMoveAction(moveAction, videoWidth, videoHeight);
+                        if (isPlaying || (this.ApplicationState.currentMove && this.ApplicationState.currentMove.ID === move.ID)) {
+                            this.destroyPoint(moveAction);
+                            this.drawMoveAction(moveAction, videoWidth, videoHeight);
+                        } else {
+                            this.destroyPoint(moveAction);
+                        }
                     } else {
                         // if we already draw so do nothing
                         if (this.trackMoveActions[moveAction.ID]) {
                             return;
                         }
-                        this.drawMoveAction(moveAction, videoWidth, videoHeight);
+                        if (isPlaying || (this.ApplicationState.currentMove && this.ApplicationState.currentMove.ID === move.ID)) {
+                            this.drawMoveAction(moveAction, videoWidth, videoHeight);
+                        } else {
+                            this.destroyPoint(moveAction);
+                        }
                     }
                 } else {
                     this.destroyPoint(moveAction);
