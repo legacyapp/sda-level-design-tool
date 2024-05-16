@@ -74,9 +74,9 @@ export class LevelUIController {
         $("#actions").off("input", "input");
         $("#actions").off("change", "select");
         $("#actions").off("change", "input");
+        $("#actions").off("click", ".deleteTrackingPoint");
         $("#addNewAction").off("click");
         $(".add-tracking-point").off("click");
-        $(".deleteTrackingPoint").off("click");
         $(".deleteAction").off("click");
         $("#actions #decrement-button").off("click");
         $("#actions #increment-button").off("click");
@@ -236,7 +236,7 @@ export class LevelUIController {
             const html = template(trackingPoint);
             $("#trackingPoints-" + moveActionID).append(html);
             self.handleInputEvent(self, "#trackingPointID-" + trackingPoint.ID);
-            $(".deleteTrackingPoint").off("click");
+            $("#actions").off("click", ".deleteTrackingPoint");
             $("#actions #decrement-button").off("click");
             $("#actions #increment-button").off("click");
             self.handleDeleteTrackingPointEvent(self, "#actions");
