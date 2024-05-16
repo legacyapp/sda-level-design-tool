@@ -72,7 +72,7 @@ const levelConverter = {
                 StartTime: m.StartTime,
                 EndTime: m.EndTime,
                 StartFrame: m.StartFrame,
-                EndFrame: m.StartFrame,
+                EndFrame: m.EndFrame,
                 MoveActions: moveActions
             };
         });
@@ -150,7 +150,7 @@ const levelConverter = {
                 move.StartTime = m.StartTime;
                 move.EndTime = m.EndTime;
                 move.StartFrame = m.StartFrame;
-                move.EndFrame = m.StartFrame;
+                move.EndFrame = m.EndFrame;
                 move.MoveActions = moveActions;
 
                 return move;

@@ -404,7 +404,7 @@ export class DrawingTrackingPoints {
                         if (p.Frame <= startFrame) {
                             startFrame = p.Frame;
                         }
-                        if (p.Frame >= startFrame) {
+                        if (p.Frame >= endFrame) {
                             endFrame = p.Frame;
                         }
                     });
@@ -417,7 +417,7 @@ export class DrawingTrackingPoints {
 
                 if (startFrame <= currentFrame && currentFrame <= endFrame) {
                     // we need to check forceToRedraw in case we want to re-draw on the current frame that already drew
-                    if (forceToRedraw) {
+                    if (forceToRedraw) { // TODO: remove forceToRedraw. We always force to redraw
                         if (isPlaying || (this.ApplicationState.currentMove && this.ApplicationState.currentMove.ID === move.ID)) {
                             this.destroyPoint(moveAction);
                             this.drawMoveAction(moveAction, videoWidth, videoHeight);
@@ -425,11 +425,8 @@ export class DrawingTrackingPoints {
                             this.destroyPoint(moveAction);
                         }
                     } else {
-                        // if we already draw so do nothing
-                        if (this.trackMoveActions[moveAction.ID]) {
-                            return;
-                        }
                         if (isPlaying || (this.ApplicationState.currentMove && this.ApplicationState.currentMove.ID === move.ID)) {
+                            this.destroyPoint(moveAction);
                             this.drawMoveAction(moveAction, videoWidth, videoHeight);
                         } else {
                             this.destroyPoint(moveAction);
