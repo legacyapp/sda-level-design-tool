@@ -49,6 +49,7 @@ export class PlayerWrapper {
                 sefl.player.tech_.requestVideoFrameCallback(sefl.requestVideoFrameCallback.bind(sefl));
             }
 
+            $('#playVideo').off("click");
             // play or pause video when click play button
             $('#playVideo').on("click", function () {
                 if (sefl.isPlaying) {
@@ -65,6 +66,11 @@ export class PlayerWrapper {
                     $("#pauseVideoIcon").removeClass("hidden");
                 }
             });
+
+            $('#nextFrame').off("click");
+            $('#previousFrame').off("click");
+            $('#nextXFrame').off("click");
+            $('#previousXFrame').off("click");
 
             $('#nextFrame').on("click", sefl.setNextFrames.bind(sefl, 1));
             $('#previousFrame').on("click", sefl.setNextFrames.bind(sefl, -1));
