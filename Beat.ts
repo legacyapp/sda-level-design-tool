@@ -36,7 +36,7 @@ export class LevelData {
 
 export class Move {
     ID: string;
-    Name: string;
+    Name: string="";
     StartTime: number;
     EndTime: number;
     StartFrame: number;
@@ -226,7 +226,9 @@ export class MoveAction {
     // Index is for UI rendering, not save to database
     Index: number;
 
-    constructor() { }
+    constructor() {
+        this.Name =""
+     }
 
     static build(currentFrame: number, currentTime): MoveAction {
         const newMoveAction = new MoveAction();

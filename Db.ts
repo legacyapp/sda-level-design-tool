@@ -134,7 +134,7 @@ const levelConverter = {
                     const moveAction = new MoveAction();
 
                     moveAction.ID = ma.ID;
-                    moveAction.Name = ma.Name;
+                    moveAction.Name = ma.Name ? ma.Name : "";
                     moveAction.Joint = ma.Joint;
                     moveAction.IsMajor = ma.IsMajor;
                     moveAction.TrackingPoints = trackingPoints,
