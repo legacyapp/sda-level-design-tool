@@ -185,16 +185,16 @@ export class App {
         $("#save").on("click", function (event) {
             $("#loading-screen").removeClass("hidden");
             const jsonString = JSON.stringify(self.applicationState.levelData, null, 2);
-            // Copy the JSON string to the clipboard
-            navigator.clipboard.writeText(jsonString)
-                .then(() => {
-                    console.log('JSON string copied to clipboard');
-                    //console.log(jsonString);
-                })
-                .catch(err => {
-                    toastr.error('ERROR copying JSON string to clipboard:' + err);
-                    console.error('Error copying JSON string to clipboard:', err);
-                });
+            // // Copy the JSON string to the clipboard
+            // navigator.clipboard.writeText(jsonString)
+            //     .then(() => {
+            //         console.log('JSON string copied to clipboard');
+            //         //console.log(jsonString);
+            //     })
+            //     .catch(err => {
+            //         toastr.error('ERROR copying JSON string to clipboard:' + err);
+            //         console.error('Error copying JSON string to clipboard:', err);
+            //     });
 
             self.saveLevelData().then(result => {
                 $("#loading-screen").addClass("hidden");

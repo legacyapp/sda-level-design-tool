@@ -150,7 +150,9 @@ export class LevelUIController {
         $(containerSelector).on("change", "input", function (event) {
             const currentMove = self.applicationState.currentMove;
             const moveAction = currentMove.MoveActions.find(m => m.ID === $(this).data("id"));
-            moveAction.IsMajor = this.checked;
+            if ($(this).data("path") === "IsMajor") {
+                moveAction.IsMajor = this.checked;
+            }
         });
     }
 
@@ -254,7 +256,21 @@ export class LevelUIController {
             if (!trackingPoint) {
                 const currentMove = self.applicationState.currentMove;
                 const moveAction = currentMove.MoveActions.find(m => m.ID === $(this).data("id"));
-                moveAction.Name = $(this).val();
+                const path = $(this).data("path");
+                if (path === "Name") {
+                    moveAction.Name = $(this).val();
+                }
+                else if (path === "ScoresRadius") {
+                    try {
+                        const scoreRadius = JSON.parse($(this).val());
+                        moveAction.ScoresRadius = scoreRadius;
+                    }
+                    catch (e) {
+                        toastr.error("ERROR: Invalid Scores Radius values");
+                    }
+                }
+
+
             } else {
                 // update the trackingPoint object and other dependencies
                 deepSet(trackingPoint, input.data("path"), parseNumber(event.target.value));
