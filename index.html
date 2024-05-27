@@ -15,7 +15,7 @@
 
 <body>
     <script id="movesTemplate" type="text/x-handlebars-template">
-        <ul class="w-full divide-y divide-gray-200 mt-2">
+        <ul class="w-full divide-y divide-gray-200 mt-2 h-[calc(100vh-18rem)] overflow-y-auto">
             {{#each Moves}}
                 <li id="{{ID}}" data-id="{{ID}}" class="group p-2 hover:bg-gray-200">
                     <div class="flex items-center space-x-4 rtl:space-x-reverse">
@@ -48,7 +48,7 @@
     <script id="anActionTemplate" type="text/x-handlebars-template">
         <li id="MoveAction-{{ID}}" data-id="{{Index}}">
             <div
-                class="basis-3/4 rounded-lg flex items-top shadow-lg flex-col p-4 border border-solid my-4">
+                class="basis-3/4 rounded-lg flex items-top shadow-lg flex-col px-4 pt-4 border border-solid mt-4">
                 <div class="flex justify-start items-center">
                     <h4 class="font-extrabold leading-none tracking-tight text-green-700">
                         Action
@@ -573,10 +573,22 @@
             class="basis-3/4 rounded-lg flex flex-col items-top shadow-lg flex flex-col space-y-2 border border-solid p-4">
             <h2 class="text-xl font-extrabold leading-none tracking-tight text-gray-900 py-2">Moves</h2>
             <div class="flex flex-row space-x-4">
-                <button id="addNewMove" type="button"
-                    class="w-1/4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2   focus:outline-none ">
-                    Add New Move
-                </button>
+                <div class="basis-1/4 flex flex-row">
+                    <button id="addNewMove" type="button"
+                        class="basis-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2   focus:outline-none ">
+                        Add New Move
+                    </button>
+                </div>
+                <div class="basis-3/4 flex flex-row justify-end">
+                    <button type="button" id="save"
+                        class="w-28 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ">
+                        Save
+                    </button>
+                    <button type="button" id="copy"
+                        class="hidden w-28 py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">
+                        Copy
+                    </button>
+                </div>
             </div>
             <div class="flex flex-row space-x-4">
                 <div class="basis-1/4 rounded-lg flex flex-col items-top shadow-lg py-4 px-2 border border-solid">
@@ -586,10 +598,7 @@
                     </div>
 
                 </div>
-                <div class="basis-3/4 rounded-lg flex items-top shadow-lg flex-col p-4 border border-solid">
-                    <div class="sticky-element">
-
-                    </div>
+                <div class="basis-3/4 rounded-lg flex items-top shadow-lg flex-col p-4 border border-solid h-[calc(100vh-14rem)] overflow-y-auto">
                     <h3 class="mb-2 text-lg font-extrabold leading-none tracking-tight text-blue-700">Move Detail</h3>
                     <form id="moveDetailForm" class="hidden">
                         <div class="flex flex-col">
@@ -738,19 +747,8 @@
 
                         </div>
                     </form>
-                    <div class="flex mt-6 flex-row">
-                        <button type="button" id="save"
-                            class="w-28 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ">
-                            Save
-                        </button>
-                        <button type="button" id="cancel"
-                            class="w-28 py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">
-                            Cancel
-                        </button>
-                    </div>
                 </div>
             </div>
-
         </div>
     </div>
 </body>

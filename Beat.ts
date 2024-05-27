@@ -236,7 +236,7 @@ export class MoveAction {
         newMoveAction.ID = uuidv4();
         newMoveAction.Name = "New Action";
         newMoveAction.Joint = JointType.Nose;
-        newMoveAction.IsMajor = true;
+        newMoveAction.IsMajor = false;
         newMoveAction.ScoresRadius = [{ "Scoring": 100, "Radius": 100 }];
         newMoveAction.Index = 0;
 
@@ -291,6 +291,33 @@ export class DrawingTrackingPoints {
     private ApplicationState: ApplicationState;
     private trackMoveActions = {};
     private notify: NotifyDelegate;
+    private anim: any;
+
+    private startAnimation(circle) {
+        this.anim = new Konva.Animation(function (frame) {
+            var scale = Math.sin(frame.time * 0.005) + 1;
+            //circle.scale({ x: scale, y: scale });
+
+            // Animate stroke width and shadow blur
+            var strokeWidth = 4 + Math.sin(frame.time * 0.01) * 2;
+            //var shadowBlur = 10 + Math.sin(frame.time * 0.01) * 5;
+            circle.strokeWidth(strokeWidth);
+            //circle.shadowBlur(shadowBlur);
+        }, this.layer);
+
+        this.anim.start();
+    }
+
+    private stopAnimation(circle) {
+        if (this.anim) {
+            this.anim.stop();
+            this.anim = null;
+            // Reset circle properties
+            //circle.scale({ x: 1, y: 1 });
+            circle.strokeWidth(2);
+            //circle.shadowBlur(10);
+        }
+    }
 
     // function to build anchor point
     private buildAnchor(Id: string, x: number, y: number, color: { CircleStrokeColor: string, CircleFillColor: string }) {
@@ -299,8 +326,12 @@ export class DrawingTrackingPoints {
             y: y,
             radius: 20,
             stroke: color.CircleStrokeColor,
-            fill: color.CircleFillColor,
             strokeWidth: 2,
+            fill: color.CircleFillColor,
+            // shadowColor: 'black',
+            // shadowBlur: 10,
+            // shadowOffset: { x: 5, y: 5 },
+            // shadowOpacity: 0.6,
             draggable: true,
             opacity: 0.8,
             // Add custom data
@@ -315,13 +346,15 @@ export class DrawingTrackingPoints {
         anchor.on('mouseover', function () {
             document.body.style.cursor = 'pointer';
             this.strokeWidth(4);
-            self.notify(Message.PLAYER_TRACKINGPOINT_MOUSEOVER, this.getAttr('data').id)
+            self.notify(Message.PLAYER_TRACKINGPOINT_MOUSEOVER, this.getAttr('data').id);
+            //self.startAnimation(this);
         });
         anchor.on('mouseout', function () {
             document.body.style.cursor = 'default';
             this.strokeWidth(2);
 
-            self.notify(Message.PLAYER_TRACKINGPOINT_MOUSEOUT, this.getAttr('data').id)
+            self.notify(Message.PLAYER_TRACKINGPOINT_MOUSEOUT, this.getAttr('data').id);
+            //self.stopAnimation(this);
         });
 
         anchor.on('dragstart', function () {

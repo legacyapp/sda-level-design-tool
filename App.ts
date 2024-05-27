@@ -338,9 +338,13 @@ export class App {
                 {
                     // TODO: comment this because it's a nice idea but mouse will change position
 
-                    // const trackingPointId = data as string;
-                    // const element = document.getElementById("trackingPoint-" + trackingPointId);
-                    // element && element.scrollIntoView();
+                    const trackingPointId = data as string;
+                    const element = document.getElementById("trackingPoint-" + trackingPointId);
+                    element && element.scrollIntoView({
+                        behavior: 'auto',
+                        block: 'center',
+                        inline: 'center'
+                    });
                 }
                 break;
             default:
