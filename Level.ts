@@ -14,6 +14,7 @@ export class LevelUIController {
         this.notify = notify;
         $("#allMoves").empty();
         $("#moveDetailForm").addClass("hidden");
+        $("#addNewAction").addClass("hidden");
     }
 
     private renderMoveList() {
@@ -39,6 +40,7 @@ export class LevelUIController {
 
                 // Show Move Detail Form;
                 $("#moveDetailForm").removeClass("hidden");
+                $("#addNewAction").removeClass("hidden");
                 self.notify(Message.MOVES_ITEM_CLICKED, move);
             });
 
@@ -51,11 +53,13 @@ export class LevelUIController {
 
                 if (!self.applicationState.currentMove || self.applicationState.currentMove.ID === moveId) {
                     $("#moveDetailForm").addClass("hidden");
+                    $("#addNewAction").addClass("hidden");
                 }
 
                 $("#" + moveId).remove();
                 if (!self.applicationState.levelData.Moves || self.applicationState.levelData.Moves.length === 0) {
                     $("#moveDetailForm").addClass("hidden");
+                    $("#addNewAction").addClass("hidden");
                 }
                 toastr.success("Delete Move Successfully.");
             });
@@ -177,6 +181,13 @@ export class LevelUIController {
             $(".deleteAction").off("click");
             self.handleDeleteMoveAction(self, ".deleteAction");
             toastr.success("Added New Action Successfully.");
+
+            const element = document.getElementById("MoveAction-" + newMoveAction.ID);
+            element && element.scrollIntoView({
+                behavior: 'auto',
+                block: 'center',
+                inline: 'center'
+            });
         });
     }
 
