@@ -165,7 +165,7 @@ export class App {
                     //responsive: true
                 },
                 InitVideoSource: this.applicationState.levelData.VideoInfo.VideoUrl,
-                VideoFrameRate: 30
+                VideoFrameRate: this.applicationState.levelData.VideoInfo.FrameRate
             }
         );
 
