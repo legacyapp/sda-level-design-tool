@@ -15,15 +15,15 @@ export function GetColors(landmarkType: JointType) {
     for (let i = 0; i < JointColors.length; i++) {
         if (JointColors[i].Id === landmarkType) {
             return {
-                CircleStrokeColor: JointColors[i].StrokeColor,
-                CircleFillColor: JointColors[i].FillColor
+                stroke: JointColors[i].StrokeColor,
+                fill: JointColors[i].FillColor
             };
         }
     }
 
     return {
-        CircleStrokeColor: "#16a34a",
-        CircleFillColor: "#166534"
+        stroke: "#16a34a",
+        fill: "#166534"
     };
 }
 

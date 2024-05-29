@@ -154,8 +154,20 @@ export class LevelUIController {
         $(containerSelector).on("change", "input", function (event) {
             const currentMove = self.applicationState.currentMove;
             const moveAction = currentMove.MoveActions.find(m => m.ID === $(this).data("id"));
+            const trackingPoint = currentMove.MoveActions.flatMap(p => p.TrackingPoints).find(b => b.ID === $(this).data("id"));
             if ($(this).data("path") === "IsMajor") {
                 moveAction.IsMajor = this.checked;
+            }
+            if ($(this).data("path") === "IsShowScoreRadius") {
+                if (moveAction) {
+                    moveAction.IsShowScoreRadius = this.checked;
+                    self.notify(Message.MOVE_DETAIL_ACTION_UPDATED, moveAction);
+                }
+
+                if (trackingPoint) {
+                    trackingPoint.IsShowScoreRadius = this.checked;
+                    self.notify(Message.MOVE_DETAIL_TRACKINGPOINT_UPDATED, trackingPoint);
+                }
             }
         });
     }
@@ -275,6 +287,7 @@ export class LevelUIController {
                     try {
                         const scoreRadius = JSON.parse($(this).val());
                         moveAction.ScoresRadius = scoreRadius;
+                        self.notify(Message.MOVE_DETAIL_ACTION_UPDATED, moveAction);
                     }
                     catch (e) {
                         toastr.error("ERROR: Invalid Scores Radius values");

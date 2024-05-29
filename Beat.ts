@@ -7,6 +7,13 @@ import { ApplicationState, Message, NotifyDelegate } from "./App";
 import { v4 as uuidv4 } from 'uuid';
 import { Text } from "konva/lib/shapes/Text";
 
+interface TrackDrawingBeat {
+    StartFrame: number,
+    EndFrame: number,
+    Circles: Konva.Circle[],
+    ScoreRadiusCircles: Konva.Circle[]
+};
+
 export class LevelData {
     VideoInfo: VideoInfo;
     // *** NEW DATA STRUCTURE ***
@@ -222,6 +229,7 @@ export class MoveAction {
     IsMajor: boolean;
     TrackingPoints: TrackingPoint[] = [];
     ScoresRadius: ScoreRadius[] = [];
+    IsShowScoreRadius: boolean = false;
 
     // Index is for UI rendering, not save to database
     Index: number;
@@ -255,6 +263,8 @@ export class TrackingPoint {
     Time: number;
     Frame: number;
     HoldTime: number;
+    ScoresRadius: ScoreRadius[] = [];
+    IsShowScoreRadius: boolean = false;
 
     constructor() { }
 
@@ -289,7 +299,7 @@ export class DrawingTrackingPoints {
     private stage: Stage;
     private layer: Layer;
     private ApplicationState: ApplicationState;
-    private trackMoveActions = {};
+    private trackMoveActions: { [key: string]: TrackDrawingBeat; } = {};
     private notify: NotifyDelegate;
     private anim: any;
 
@@ -319,54 +329,54 @@ export class DrawingTrackingPoints {
         }
     }
 
-    // function to build anchor point
-    private buildAnchor(Id: string, x: number, y: number, color: { CircleStrokeColor: string, CircleFillColor: string }) {
-        var anchor = new Konva.Circle({
+    // function to build tracking point circle
+    private buildTrackingPointCircle(
+        data: object,
+        x: number,
+        y: number,
+        color: { stroke: string, fill: string },
+        radius = 20
+    ) {
+        var circle = new Konva.Circle({
             x: x,
             y: y,
-            radius: 20,
-            stroke: color.CircleStrokeColor,
-            strokeWidth: 2,
-            fill: color.CircleFillColor,
-            // shadowColor: 'black',
-            // shadowBlur: 10,
-            // shadowOffset: { x: 5, y: 5 },
-            // shadowOpacity: 0.6,
+            radius: radius,
+            stroke: color.stroke,
+            strokeWidth: 3,
+            fill: color.fill,
             draggable: true,
-            opacity: 0.8,
+            opacity: 0.7,
             // Add custom data
-            data: {
-                id: Id
-            }
+            data: data
         });
-        this.layer.add(anchor);
+        this.layer.add(circle);
 
         const self = this;
         // add hover styling
-        anchor.on('mouseover', function () {
+        circle.on('mouseover', function () {
             document.body.style.cursor = 'pointer';
-            this.strokeWidth(4);
+            this.strokeWidth(5);
             self.notify(Message.PLAYER_TRACKINGPOINT_MOUSEOVER, this.getAttr('data').id);
             //self.startAnimation(this);
         });
-        anchor.on('mouseout', function () {
+        circle.on('mouseout', function () {
             document.body.style.cursor = 'default';
-            this.strokeWidth(2);
+            this.strokeWidth(3);
 
             self.notify(Message.PLAYER_TRACKINGPOINT_MOUSEOUT, this.getAttr('data').id);
             //self.stopAnimation(this);
         });
 
-        anchor.on('dragstart', function () {
+        circle.on('dragstart', function () {
             self.notify(Message.PLAYER_TRACKINGPOINT_CLICK, this.getAttr('data').id)
         });
 
-        anchor.on('click', function () {
+        circle.on('click', function () {
             self.notify(Message.PLAYER_TRACKINGPOINT_CLICK, this.getAttr('data').id)
         });
 
-        anchor.on('dragend', function () {
-            const data = anchor.getAttr('data');
+        circle.on('dragend', function () {
+            const data = circle.getAttr('data');
             const position = this.absolutePosition();
             self.notify(Message.PLAYER_TRACKINGPOINT_UPDATE, {
                 Id: data.id,
@@ -374,29 +384,141 @@ export class DrawingTrackingPoints {
             });
         });
 
+        circle.on('dragmove', function () {
+            // update the score radius circles
+            const trackingPointId = this.getAttr('data').id;
+            const moveActionId = this.getAttr('data').moveActionId;
+            const trackMoveAction = self.trackMoveActions[moveActionId];
+            const position = this.absolutePosition();
+            if (trackMoveAction.ScoreRadiusCircles && trackMoveAction.ScoreRadiusCircles.length > 0) {
+                trackMoveAction.ScoreRadiusCircles.forEach(c => {
+                    if (trackingPointId === c.getAttr('data').id) {
+                        c.x(position.x);
+                        c.y(position.y);
+                        self.layer.draw();
+                    }
+                });
+            }
+        });
+
+        return circle;
+    }
+
+    private buildScoreRadiusCircle(
+        data: object,
+        x: number,
+        y: number,
+        color: { stroke: string, fill: string },
+        radius = 20
+    ) {
+        var circle = new Konva.Circle({
+            x: x,
+            y: y,
+            radius: radius,
+            stroke: color.stroke,
+            strokeWidth: 3,
+            fill: color.fill,
+            opacity: 0.7,
+            // Add custom data
+            data: data,
+            hitFunc: function (context) {
+                context.beginPath();
+                context.arc(0, 0, this.radius(), 0, Math.PI * 2, true);
+                context.closePath();
+                context.strokeShape(this);
+            },
+        });
+        this.layer.add(circle);
+
+        const self = this;
+        // add hover styling
+        circle.on('mouseover', function () {
+            document.body.style.cursor = 'pointer';
+            this.strokeWidth(5);
+            self.notify(Message.PLAYER_TRACKINGPOINT_MOUSEOVER, this.getAttr('data').id);
+            //self.startAnimation(this);
+        });
+        circle.on('mouseout', function () {
+            document.body.style.cursor = 'default';
+            this.strokeWidth(3);
+
+            self.notify(Message.PLAYER_TRACKINGPOINT_MOUSEOUT, this.getAttr('data').id);
+            //self.stopAnimation(this);
+        });
+
+        // circle.on('dragstart', function () {
+        //     self.notify(Message.PLAYER_TRACKINGPOINT_CLICK, this.getAttr('data').id)
+        // });
+
+        circle.on('click', function () {
+            self.notify(Message.PLAYER_TRACKINGPOINT_CLICK, this.getAttr('data').id)
+        });
+
+        // circle.on('dragend', function () {
+        //     const data = circle.getAttr('data');
+        //     const position = this.absolutePosition();
+        //     self.notify(Message.PLAYER_TRACKINGPOINT_UPDATE, {
+        //         Id: data.id,
+        //         Position: position
+        //     });
+        // });
+
         // anchor.on('dragmove', function () {
         //   updateDottedLinesFunc();
         // });
 
-        return anchor;
+        return circle;
     }
+
 
     private drawMoveAction(moveAction: MoveAction, videoWidth: number, videoHeight: number) {
         const color = GetColors(moveAction.Joint);
 
         if (moveAction.TrackingPoints && moveAction.TrackingPoints.length > 0) {
             const trackingPointCircles = moveAction.TrackingPoints.map((p) => {
-                return this.buildAnchor(
-                    p.ID,
+                return this.buildTrackingPointCircle(
+                    { id: p.ID, moveActionId: moveAction.ID },
                     p.Pos.X * videoWidth,
                     p.Pos.Y * videoHeight,
                     color);
             });
 
-            const trackDrawingBeat = {
+            let scoreRadiusCircles: Konva.Circle[] = [];
+            for (let i = 0; i < moveAction.TrackingPoints.length; i++) {
+                const p = moveAction.TrackingPoints[i];
+                if (p.ScoresRadius && p.ScoresRadius.length > 0) {
+                    for (let j = 0; j < p.ScoresRadius.length; j++) {
+                        if (moveAction.IsShowScoreRadius || p.IsShowScoreRadius) {
+                            const circle = this.buildScoreRadiusCircle(
+                                { id: p.ID, moveActionId: moveAction.ID },
+                                p.Pos.X * videoWidth,
+                                p.Pos.Y * videoHeight,
+                                { stroke: color.stroke, fill: null },
+                                p.ScoresRadius[j].Radius * videoWidth);
+                            scoreRadiusCircles.push(circle);
+                        }
+                    }
+
+                } else if (moveAction.ScoresRadius && moveAction.ScoresRadius.length > 0) {
+                    for (let j = 0; j < moveAction.ScoresRadius.length; j++) {
+                        if (moveAction.IsShowScoreRadius || p.IsShowScoreRadius) {
+                            const circle = this.buildScoreRadiusCircle(
+                                { id: p.ID, moveActionId: moveAction.ID },
+                                p.Pos.X * videoWidth,
+                                p.Pos.Y * videoHeight,
+                                { stroke: color.stroke, fill: null },
+                                moveAction.ScoresRadius[j].Radius * videoWidth);
+                            scoreRadiusCircles.push(circle);
+                        }
+                    }
+                }
+            }
+
+            const trackDrawingBeat: TrackDrawingBeat = {
                 StartFrame: moveAction.TrackingPoints[0].Frame,
                 EndFrame: moveAction.TrackingPoints[moveAction.TrackingPoints.length - 1].Frame, // TODO: should calculate = Frame + Hold Time
-                Circles: trackingPointCircles
+                Circles: trackingPointCircles,
+                ScoreRadiusCircles: scoreRadiusCircles
             };
             this.trackMoveActions[moveAction.ID] = trackDrawingBeat;
         }
@@ -452,21 +574,21 @@ export class DrawingTrackingPoints {
                     // we need to check forceToRedraw in case we want to re-draw on the current frame that already drew
                     if (forceToRedraw) { // TODO: remove forceToRedraw. We always force to redraw
                         if (isPlaying || (this.ApplicationState.currentMove && this.ApplicationState.currentMove.ID === move.ID)) {
-                            this.destroyPoint(moveAction);
+                            this.destroyCircles(moveAction);
                             this.drawMoveAction(moveAction, videoWidth, videoHeight);
                         } else {
-                            this.destroyPoint(moveAction);
+                            this.destroyCircles(moveAction);
                         }
                     } else {
                         if (isPlaying || (this.ApplicationState.currentMove && this.ApplicationState.currentMove.ID === move.ID)) {
-                            this.destroyPoint(moveAction);
+                            this.destroyCircles(moveAction);
                             this.drawMoveAction(moveAction, videoWidth, videoHeight);
                         } else {
-                            this.destroyPoint(moveAction);
+                            this.destroyCircles(moveAction);
                         }
                     }
                 } else {
-                    this.destroyPoint(moveAction);
+                    this.destroyCircles(moveAction);
                 }
             });
         });
@@ -492,7 +614,7 @@ export class DrawingTrackingPoints {
         });
     }
 
-    private destroyPoint(p: MoveAction) {
+    private destroyCircles(p: MoveAction) {
         if (!this.trackMoveActions[p.ID]) {
             return;
         }
@@ -500,6 +622,10 @@ export class DrawingTrackingPoints {
         const trackDrawingMoveAction = this.trackMoveActions[p.ID];
         if (trackDrawingMoveAction.Circles && trackDrawingMoveAction.Circles.length > 0) {
             trackDrawingMoveAction.Circles.forEach(c => c.destroy());
+        }
+
+        if (trackDrawingMoveAction.ScoreRadiusCircles && trackDrawingMoveAction.ScoreRadiusCircles.length > 0) {
+            trackDrawingMoveAction.ScoreRadiusCircles.forEach(c => c.destroy());
         }
 
         this.trackMoveActions[p.ID] = undefined;
