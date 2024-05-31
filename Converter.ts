@@ -147,14 +147,16 @@ export function NormalizedLandmarks(poseData: any) {
             timestamp: poseObj.timestamp
         };
 
-        normalizedFrame.landmarks = poseObj.pose.map(landmark => {
-            return {
-                x: landmark[0],
-                y: landmark[1],
-                z: landmark[2],
-                visibility: landmark[3]
-            };
-        });
+        if (poseObj.pose) {
+            normalizedFrame.landmarks = poseObj.pose.map(landmark => {
+                return {
+                    x: landmark[0],
+                    y: landmark[1],
+                    z: landmark[2],
+                    visibility: landmark[3]
+                };
+            });
+        }
 
         return normalizedFrame;
     });

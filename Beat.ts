@@ -665,7 +665,7 @@ export class DrawingLandmarks {
         this.updateCanvasStyleFunc(videoWidth, videoHeight);
         if (this.frameData.normalizedFrames && this.frameData.normalizedFrames.length > 0) {
             const landmarks = this.frameData.normalizedFrames[currentFrame]?.landmarks;
-            if (landmarks) {
+            if (landmarks && landmarks.length > 0) {
                 this.canvasCtx.save();
                 this.canvasCtx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
                 this.drawingUtils.drawLandmarks(
