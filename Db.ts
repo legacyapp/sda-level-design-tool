@@ -4,7 +4,7 @@ import { FirebaseApp, initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, Firestore, doc, updateDoc, setDoc, FirestoreDataConverter } from 'firebase/firestore/lite';
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
-const collectionName = "level_gear_demo";
+const collectionName = "level_gear_phase2";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCf5GU2w4JDKbIMCutiaSPX7yHNVmTRwLI",
@@ -37,6 +37,13 @@ const levelConverter = {
         const moves = level.levelData.Moves.map(m => {
             const moveActions = m.MoveActions.map(ma => {
                 const trackingPoints = ma.TrackingPoints.map(tp => {
+                    const scoreRadiues = tp.ScoresRadius.map(s => {
+                        return {
+                            Radius: s.Radius,
+                            Scoring: s.Scoring
+                        };
+                    });
+
                     return {
                         ID: tp.ID,
                         Pos: {
@@ -45,7 +52,8 @@ const levelConverter = {
                         },
                         Time: tp.Time,
                         Frame: tp.Frame,
-                        HoldTime: tp.HoldTime
+                        HoldTime: tp.HoldTime,
+                        ScoresRadius: scoreRadiues
                     };
                 });
                 const scoreRadiues = ma.ScoresRadius.map(s => {
@@ -121,6 +129,15 @@ const levelConverter = {
                         trackingPoint.Time = tp.Time;
                         trackingPoint.Frame = tp.Frame;
                         trackingPoint.HoldTime = tp.HoldTime;
+                        if (tp.ScoresRadius && tp.ScoresRadius.length > 0) {
+                            const scoreRadiues = tp.ScoresRadius.map(s => {
+                                const scoreRadius = new ScoreRadius();
+                                scoreRadius.Radius = s.Radius;
+                                scoreRadius.Scoring = s.Scoring;
+                                return scoreRadius;
+                            });
+                            trackingPoint.ScoresRadius = scoreRadiues;
+                        }
 
                         return trackingPoint;
                     });
@@ -137,8 +154,8 @@ const levelConverter = {
                     moveAction.Name = ma.Name ? ma.Name : "";
                     moveAction.Joint = ma.Joint;
                     moveAction.IsMajor = ma.IsMajor;
-                    moveAction.TrackingPoints = trackingPoints,
-                        moveAction.ScoresRadius = scoreRadiues;
+                    moveAction.TrackingPoints = trackingPoints;
+                    moveAction.ScoresRadius = scoreRadiues;
 
                     return moveAction;
                 })
@@ -149,9 +166,12 @@ const levelConverter = {
                 move.Name = m.Name;
                 move.StartTime = m.StartTime;
                 move.EndTime = m.EndTime;
-                move.StartFrame = m.StartFrame;
-                move.EndFrame = m.EndFrame;
+                move.StartFrame = m.StartFrame || 0;
+                move.EndFrame = m.EndFrame || 0;
                 move.MoveActions = moveActions;
+
+                // If the start frame/time and the end frame/time are incorrect, we should re-calculate them.
+                move.updateStartAndEndFrameTime();
 
                 return move;
             });
@@ -184,7 +204,7 @@ export class Database {
                 return {
                     id: docData.id,
                     danceVideo: data.danceVideo,
-                    data: levelConverter.fromFirestoreData( docData.id, data)
+                    data: levelConverter.fromFirestoreData(docData.id, data)
                 };
             });
         }

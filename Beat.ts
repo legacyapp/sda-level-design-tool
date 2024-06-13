@@ -46,9 +46,10 @@ export class Move {
     Name: string = "";
     StartTime: number;
     EndTime: number;
-    StartFrame: number;
-    EndFrame: number;
+    StartFrame: number = 0;
+    EndFrame: number = 0;
     MoveActions: MoveAction[] = []
+    IsShowScoreRadius: boolean = false;
 
     updateStartAndEndFrameTime() {
         let startFrame: number = this.MoveActions[0].TrackingPoints[0].Frame;
@@ -245,7 +246,7 @@ export class MoveAction {
         newMoveAction.Name = "New Action";
         newMoveAction.Joint = JointType.Nose;
         newMoveAction.IsMajor = false;
-        newMoveAction.ScoresRadius = [{ "Scoring": 100, "Radius": 100 }];
+        newMoveAction.ScoresRadius = [{ "Scoring": 100, "Radius": 0.15 }];
         newMoveAction.Index = 0;
 
         const trackingPoint = TrackingPoint.build(currentFrame, currentTime);
@@ -471,7 +472,7 @@ export class DrawingTrackingPoints {
     }
 
 
-    private drawMoveAction(moveAction: MoveAction, videoWidth: number, videoHeight: number) {
+    private drawMoveAction(move: Move, moveAction: MoveAction, videoWidth: number, videoHeight: number) {
         const color = GetColors(moveAction.Joint);
 
         if (moveAction.TrackingPoints && moveAction.TrackingPoints.length > 0) {
@@ -488,7 +489,7 @@ export class DrawingTrackingPoints {
                 const p = moveAction.TrackingPoints[i];
                 if (p.ScoresRadius && p.ScoresRadius.length > 0) {
                     for (let j = 0; j < p.ScoresRadius.length; j++) {
-                        if (moveAction.IsShowScoreRadius || p.IsShowScoreRadius) {
+                        if (move.IsShowScoreRadius || moveAction.IsShowScoreRadius || p.IsShowScoreRadius) {
                             const circle = this.buildScoreRadiusCircle(
                                 { id: p.ID, moveActionId: moveAction.ID },
                                 p.Pos.X * videoWidth,
@@ -501,7 +502,7 @@ export class DrawingTrackingPoints {
 
                 } else if (moveAction.ScoresRadius && moveAction.ScoresRadius.length > 0) {
                     for (let j = 0; j < moveAction.ScoresRadius.length; j++) {
-                        if (moveAction.IsShowScoreRadius || p.IsShowScoreRadius) {
+                        if (move.IsShowScoreRadius || moveAction.IsShowScoreRadius || p.IsShowScoreRadius) {
                             const circle = this.buildScoreRadiusCircle(
                                 { id: p.ID, moveActionId: moveAction.ID },
                                 p.Pos.X * videoWidth,
@@ -575,14 +576,14 @@ export class DrawingTrackingPoints {
                     if (forceToRedraw) { // TODO: remove forceToRedraw. We always force to redraw
                         if (isPlaying || (this.ApplicationState.currentMove && this.ApplicationState.currentMove.ID === move.ID)) {
                             this.destroyCircles(moveAction);
-                            this.drawMoveAction(moveAction, videoWidth, videoHeight);
+                            this.drawMoveAction(move, moveAction, videoWidth, videoHeight);
                         } else {
                             this.destroyCircles(moveAction);
                         }
                     } else {
                         if (isPlaying || (this.ApplicationState.currentMove && this.ApplicationState.currentMove.ID === move.ID)) {
                             this.destroyCircles(moveAction);
-                            this.drawMoveAction(moveAction, videoWidth, videoHeight);
+                            this.drawMoveAction(move, moveAction, videoWidth, videoHeight);
                         } else {
                             this.destroyCircles(moveAction);
                         }
