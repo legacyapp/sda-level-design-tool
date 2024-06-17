@@ -246,7 +246,7 @@ export class MoveAction {
         newMoveAction.Name = "New Action";
         newMoveAction.Joint = JointType.Nose;
         newMoveAction.IsMajor = false;
-        newMoveAction.ScoresRadius = [{ "Scoring": 100, "Radius": 0.15 }];
+        newMoveAction.ScoresRadius = [{ "Scoring": 100, "Radius": 3 }];
         newMoveAction.Index = 0;
 
         const trackingPoint = TrackingPoint.build(currentFrame, currentTime);
@@ -495,7 +495,7 @@ export class DrawingTrackingPoints {
                                 p.Pos.X * videoWidth,
                                 p.Pos.Y * videoHeight,
                                 { stroke: color.stroke, fill: null },
-                                p.ScoresRadius[j].Radius * videoWidth);
+                                p.ScoresRadius[j].Radius * videoWidth * 0.0266);
                             scoreRadiusCircles.push(circle);
                         }
                     }
@@ -508,7 +508,7 @@ export class DrawingTrackingPoints {
                                 p.Pos.X * videoWidth,
                                 p.Pos.Y * videoHeight,
                                 { stroke: color.stroke, fill: null },
-                                moveAction.ScoresRadius[j].Radius * videoWidth);
+                                moveAction.ScoresRadius[j].Radius * videoWidth * 0.0266);
                             scoreRadiusCircles.push(circle);
                         }
                     }

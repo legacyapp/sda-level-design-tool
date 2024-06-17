@@ -1,5 +1,5 @@
 import { Move, MoveAction, MovementType, TrackingPoint } from "./Beat";
-import Handlebars from "handlebars";
+import Handlebars, { Exception } from "handlebars";
 import $ from "jquery";
 import { ApplicationState, Message, NotifyDelegate } from "./App";
 import { deepGet, deepSet, dropLastN, parseNumber } from "./util";
@@ -175,7 +175,7 @@ export class LevelUIController {
                 }
 
                 if (currentMove) {
-                    currentMove.IsShowScoreRadius  = this.checked;
+                    currentMove.IsShowScoreRadius = this.checked;
                     self.notify(Message.MOVE_DETAIL_UPDATED, currentMove);
                     return;
                 }
@@ -303,6 +303,11 @@ export class LevelUIController {
                 else if (path === "ScoresRadius") {
                     try {
                         const scoreRadius = JSON.parse($(this).val());
+                        for (let i = 0; i < scoreRadius.length; i++) {
+                            if (scoreRadius[i].Radius < 0.01) {
+                                throw new Error("Radius must be larger than 0.01");
+                            }
+                        }
                         moveAction.ScoresRadius = scoreRadius;
                         self.notify(Message.MOVE_DETAIL_ACTION_UPDATED, moveAction);
                     }
@@ -330,6 +335,11 @@ export class LevelUIController {
                 if (path === "ScoresRadius") {
                     try {
                         const scoreRadius = JSON.parse($(this).val());
+                        for (let i = 0; i < scoreRadius.length; i++) {
+                            if (scoreRadius[i].Radius < 0.01) {
+                                throw new Error("Radius must be larger than 0.01");
+                            }
+                        }
                         trackingPoint.ScoresRadius = scoreRadius;
                     }
                     catch (e) {
