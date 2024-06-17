@@ -4,7 +4,7 @@ import { FirebaseApp, initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, Firestore, doc, updateDoc, setDoc, FirestoreDataConverter } from 'firebase/firestore/lite';
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
-const collectionName = "level_gear_phase2";
+const collectionName = "level_gear_demo";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCf5GU2w4JDKbIMCutiaSPX7yHNVmTRwLI",
