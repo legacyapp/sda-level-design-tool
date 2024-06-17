@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Level Design Tool</title>
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
@@ -202,7 +203,7 @@
                 <div class="mt-2 flex flex-row space-x-10">
                     <div class="basis-1/2 flex flex-row">
                         <div
-                            class="basis-20 grow-0 shrink-0 flex items-center">
+                            class="basis-24 grow-0 shrink-0 flex items-center">
                             <label for="{{ID}}-Pos-X"
                                 class="text-sm font-medium text-gray-900 ">X</label>
                         </div>
@@ -254,7 +255,7 @@
                     </div>
                     <div class="basis-1/2 flex flex-row">
                         <div
-                            class="basis-20 grow-0 shrink-0 flex items-center">
+                            class="basis-24 grow-0 shrink-0 flex items-center">
                             <label for="{{ID}}-Pos-Y"
                                 class="text-sm font-medium text-gray-900 ">Y</label>
                         </div>
@@ -308,7 +309,7 @@
                 <div class="mt-2 flex flex-row space-x-10">
                     <div class="basis-1/2 flex flex-row">
                         <div
-                            class="basis-20 grow-0 shrink-0 flex items-center">
+                            class="basis-24 grow-0 shrink-0 flex items-center">
                             <label for="{{ID}}-Time"
                                 class="text-sm font-medium text-gray-900 ">Time</label>
                         </div>
@@ -360,7 +361,7 @@
                     </div>
                     <div class="basis-1/2 flex flex-row">
                         <div
-                            class="basis-20 grow-0 shrink-0 flex items-center">
+                            class="basis-24 grow-0 shrink-0 flex items-center">
                             <label for="{{ID}}-Frame"
                                 class="text-sm font-medium text-gray-900 ">Frame</label>
                         </div>
@@ -415,7 +416,7 @@
                 <div class="mt-2 flex flex-row space-x-10">
                     <div class="basis-1/2 flex flex-row">
                         <div
-                            class="basis-20 grow-0 shrink-0 flex items-center">
+                            class="basis-24 grow-0 shrink-0 flex items-center">
                             <label for="{{ID}}-HoldTime"
                                 class="text-sm font-medium text-gray-900 ">Hold
                                 Time</label>
@@ -467,6 +468,15 @@
                         </div>
                     </div>
                     <div class="basis-1/2 flex flex-row"></div>
+                </div>
+                <div class="mt-2 flex flex-row">
+                    <div class="basis-24 grow-0 shrink-0 flex items-center">
+                        <label for="{{ID}}-ScoresRadius"
+                            class="text-sm font-medium text-gray-900 ">Score Radius</label>
+                    </div>
+                    <input type="text" id="{{ID}}-ScoresRadius" data-id="{{ID}}" value="{{json ScoresRadius}}" data-path="ScoresRadius"
+                        class="text-sm text-sm basis-full h-8 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
+
                 </div>
             </div>
         </li>
@@ -630,7 +640,21 @@
                 </div>
                 <div
                     class="basis-3/4 rounded-lg flex items-top shadow-lg flex-col p-4 border border-solid h-[calc(100vh-14rem)] overflow-y-auto">
-                    <h3 class="mb-2 text-lg font-extrabold leading-none tracking-tight text-blue-700">Move Detail</h3>
+                    <div id="moveDetailHeader" class="flex justify-between items-center">
+                        <div>
+                            <h3 class="mb-2 text-lg font-extrabold leading-none tracking-tight text-blue-700">Move Detail</h3>
+                        </div>
+                        <div class="flex items-centerr">
+                            <input id="moveDetailIsShowScoreRadius" type="checkbox" {{checked IsShowScoreRadius}}
+                                data-id=""
+                                data-path="IsShowScoreRadius"
+                                value=""
+                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ">
+                            <label for="moveDetailIsShowScoreRadius"
+                                class="ms-2 text-sm font-small text-gray-900">Show Score Radius</label>
+                        </div>
+                    </div>
+
                     <form id="moveDetailForm" class="hidden">
                         <div class="flex flex-col">
                             <div class="mt-2 flex flex-row">

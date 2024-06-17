@@ -1,5 +1,5 @@
 import { Move, MoveAction, MovementType, TrackingPoint } from "./Beat";
-import Handlebars from "handlebars";
+import Handlebars, { Exception } from "handlebars";
 import $ from "jquery";
 import { ApplicationState, Message, NotifyDelegate } from "./App";
 import { deepGet, deepSet, dropLastN, parseNumber } from "./util";
@@ -72,12 +72,14 @@ export class LevelUIController {
         $("#moveEndTime").val(move.EndTime);
         $("#moveStartFrame").val(move.StartFrame);
         $("#moveEndFrame").val(move.EndFrame);
+        $("#moveDetailIsShowScoreRadius").prop("checked", move.IsShowScoreRadius);
 
         // clean before render new tracking points
         $("#moveName").off("input");
         $("#actions").off("input", "input");
         $("#actions").off("change", "select");
         $("#actions").off("change", "input");
+        $("#moveDetailHeader").off("change", "input");
         $("#actions").off("click", ".deleteTrackingPoint");
         $("#addNewAction").off("click");
         $(".add-tracking-point").off("click");
@@ -109,6 +111,7 @@ export class LevelUIController {
         this.handleInputEvent(self, "#actions"); // Handle all "input" event of all actions inputs
         this.handleDeleteTrackingPointEvent(self, "#actions");
         this.handleChangeEvent(self, "#actions"); // Handle change event of radio and select inputs
+        this.handleChangeEvent(self, "#moveDetailHeader");
         this.handleIncrementDecrementClickEvent(self, "#actions #decrement-button", "value-change-step", -1);
         this.handleIncrementDecrementClickEvent(self, "#actions #increment-button", "value-change-step", 1);
     }
@@ -162,11 +165,19 @@ export class LevelUIController {
                 if (moveAction) {
                     moveAction.IsShowScoreRadius = this.checked;
                     self.notify(Message.MOVE_DETAIL_ACTION_UPDATED, moveAction);
+                    return;
                 }
 
                 if (trackingPoint) {
                     trackingPoint.IsShowScoreRadius = this.checked;
                     self.notify(Message.MOVE_DETAIL_TRACKINGPOINT_UPDATED, trackingPoint);
+                    return;
+                }
+
+                if (currentMove) {
+                    currentMove.IsShowScoreRadius = this.checked;
+                    self.notify(Message.MOVE_DETAIL_UPDATED, currentMove);
+                    return;
                 }
             }
         });
@@ -192,6 +203,12 @@ export class LevelUIController {
 
             $(".deleteAction").off("click");
             self.handleDeleteMoveAction(self, ".deleteAction");
+
+            $("#actions #decrement-button").off("click");
+            $("#actions #increment-button").off("click");
+            self.handleIncrementDecrementClickEvent(self, "#actions #decrement-button", "value-change-step", -1);
+            self.handleIncrementDecrementClickEvent(self, "#actions #increment-button", "value-change-step", 1);
+
             toastr.success("Added New Action Successfully.");
 
             const element = document.getElementById("MoveAction-" + newMoveAction.ID);
@@ -286,6 +303,11 @@ export class LevelUIController {
                 else if (path === "ScoresRadius") {
                     try {
                         const scoreRadius = JSON.parse($(this).val());
+                        for (let i = 0; i < scoreRadius.length; i++) {
+                            if (scoreRadius[i].Radius < 0.01) {
+                                throw new Error("Radius must be larger than 0.01");
+                            }
+                        }
                         moveAction.ScoresRadius = scoreRadius;
                         self.notify(Message.MOVE_DETAIL_ACTION_UPDATED, moveAction);
                     }
@@ -299,6 +321,7 @@ export class LevelUIController {
                 // update the trackingPoint object and other dependencies
                 deepSet(trackingPoint, input.data("path"), parseNumber(event.target.value));
 
+                const path = $(this).data("path");
                 if (input.data("path") === "Frame") {
                     trackingPoint.Time = trackingPoint.Frame / self.applicationState.levelData.VideoInfo.FrameRate;
                     $("#" + trackingPoint.ID + "-Time").val(trackingPoint.Time);
@@ -307,6 +330,21 @@ export class LevelUIController {
                 if (input.data("path") === "Time") {
                     trackingPoint.Frame = Math.round(trackingPoint.Time * self.applicationState.levelData.VideoInfo.FrameRate);
                     $("#" + trackingPoint.ID + "-Frame").val(trackingPoint.Frame);
+                }
+
+                if (path === "ScoresRadius") {
+                    try {
+                        const scoreRadius = JSON.parse($(this).val());
+                        for (let i = 0; i < scoreRadius.length; i++) {
+                            if (scoreRadius[i].Radius < 0.01) {
+                                throw new Error("Radius must be larger than 0.01");
+                            }
+                        }
+                        trackingPoint.ScoresRadius = scoreRadius;
+                    }
+                    catch (e) {
+                        toastr.error("ERROR: Invalid Scores Radius values");
+                    }
                 }
 
                 // notify other component to do something when we update a tracking point

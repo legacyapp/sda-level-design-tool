@@ -207,6 +207,14 @@ export class App {
 
     public notify(message: Message, data: any) {
         switch (message) {
+            case Message.MOVE_DETAIL_UPDATED:
+                {
+                    const move = data as Move;
+                    this.applicationState.currentMove = move;
+                    const [currentFrame] = this.playerUIController.getCurrentFrameAndTime();
+                    this.playerUIController.setCurrentFrame(currentFrame);
+                }
+                break;
             case Message.MOVES_ITEM_CLICKED:
                 {
                     const move = data as Move;
@@ -296,7 +304,7 @@ export class App {
                 {
                     this.playerUIController.pause();
                     const trackingPoint = data as TrackingPoint;
-                    if (trackingPoint.Frame) {
+                    if (trackingPoint.Frame >= 0) {
                         this.playerUIController.setCurrentFrame(trackingPoint.Frame);
                     }
                 }

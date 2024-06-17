@@ -44,6 +44,9 @@ export class PlayerWrapper {
 
         const sefl = this;
         this.player.ready(function () {
+            $("#playVideoIcon").removeClass("hidden");
+            $("#pauseVideoIcon").addClass("hidden");
+
             // not all browsers supports requestVideoFrameCallback
             // we should use Chrome now
             if ("requestVideoFrameCallback" in HTMLVideoElement.prototype) {
@@ -55,16 +58,12 @@ export class PlayerWrapper {
             $('#playVideo').on("click", function () {
                 if (sefl.isPlaying) {
                     sefl.player.pause();
-                    $("#playVideoIcon").removeClass("hidden");
-                    $("#pauseVideoIcon").addClass("hidden");
                     const currentTime = sefl.player.currentTime();
                     const currentFrame = Math.round(currentTime * sefl.videoFrameRate);
                     $("#currentTime").text(currentTime);
                     $("#currentFrame").text(currentFrame);
                 } else {
                     sefl.player.play();
-                    $("#playVideoIcon").addClass("hidden");
-                    $("#pauseVideoIcon").removeClass("hidden");
                 }
             });
 
@@ -80,8 +79,16 @@ export class PlayerWrapper {
         });
 
         this.isPlaying = false;
-        this.player.on(['waiting', 'pause'], () => sefl.isPlaying = false);
-        this.player.on('playing', () => sefl.isPlaying = true);
+        this.player.on(['waiting', 'pause'], () => {
+            sefl.isPlaying = false;
+            $("#playVideoIcon").removeClass("hidden");
+            $("#pauseVideoIcon").addClass("hidden");
+        });
+        this.player.on('playing', () => {
+            sefl.isPlaying = true;
+            $("#playVideoIcon").addClass("hidden");
+            $("#pauseVideoIcon").removeClass("hidden");
+        });
     }
 
     setVideoSource(videoSource: string) {
