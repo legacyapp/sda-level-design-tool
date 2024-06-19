@@ -1,5 +1,4 @@
-import { TrackingPoint, JointType, MovementType, Position, MoveAction, LevelData, VideoInfo, Move } from "./Beat";
-import { v4 as uuidv4 } from 'uuid';
+import { TrackingPoint, JointType, Position } from "./Beat";
 
 function convertBeat(oldBeat: any) {
     const newBeat = new TrackingPoint();

@@ -1,4 +1,3 @@
-import { Stage } from 'konva/lib/Stage';
 import { LevelData, Move, MoveAction, Position, ScoreRadius, TrackingPoint } from './Beat';
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, Firestore, doc, updateDoc, setDoc, FirestoreDataConverter } from 'firebase/firestore/lite';
