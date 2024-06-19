@@ -5,7 +5,8 @@ import { GetColors } from "./util";
 import { DrawingUtils, PoseLandmarker } from "@mediapipe/tasks-vision";
 import { ApplicationState, Message, NotifyDelegate } from "./App";
 import { v4 as uuidv4 } from 'uuid';
-import { Text } from "konva/lib/shapes/Text";
+
+const TRACKING_POINT_RADIUS_CONVERT_RATIO = 0.0197;
 
 interface TrackDrawingBeat {
     StartFrame: number,
@@ -38,6 +39,18 @@ export class LevelData {
                 }
             }
         }
+    }
+
+    getMoves(currentFrame: number): Move[] {
+        const moves: Move[] = [];
+
+        this.Moves.forEach(move => {
+            if (move.StartFrame <= currentFrame && currentFrame <= move.EndFrame) {
+                moves.push(move);
+            }
+        });
+
+        return moves;
     }
 }
 
@@ -489,26 +502,26 @@ export class DrawingTrackingPoints {
                 const p = moveAction.TrackingPoints[i];
                 if (p.ScoresRadius && p.ScoresRadius.length > 0) {
                     for (let j = 0; j < p.ScoresRadius.length; j++) {
-                        if (move.IsShowScoreRadius || moveAction.IsShowScoreRadius || p.IsShowScoreRadius) {
+                        if (this.ApplicationState.isPlaying || move.IsShowScoreRadius || moveAction.IsShowScoreRadius || p.IsShowScoreRadius) {
                             const circle = this.buildScoreRadiusCircle(
                                 { id: p.ID, moveActionId: moveAction.ID },
                                 p.Pos.X * videoWidth,
                                 p.Pos.Y * videoHeight,
                                 { stroke: color.stroke, fill: null },
-                                p.ScoresRadius[j].Radius * videoWidth * 0.0266);
+                                p.ScoresRadius[j].Radius * videoWidth * TRACKING_POINT_RADIUS_CONVERT_RATIO);
                             scoreRadiusCircles.push(circle);
                         }
                     }
 
                 } else if (moveAction.ScoresRadius && moveAction.ScoresRadius.length > 0) {
                     for (let j = 0; j < moveAction.ScoresRadius.length; j++) {
-                        if (move.IsShowScoreRadius || moveAction.IsShowScoreRadius || p.IsShowScoreRadius) {
+                        if (this.ApplicationState.isPlaying || move.IsShowScoreRadius || moveAction.IsShowScoreRadius || p.IsShowScoreRadius) {
                             const circle = this.buildScoreRadiusCircle(
                                 { id: p.ID, moveActionId: moveAction.ID },
                                 p.Pos.X * videoWidth,
                                 p.Pos.Y * videoHeight,
                                 { stroke: color.stroke, fill: null },
-                                moveAction.ScoresRadius[j].Radius * videoWidth * 0.0266);
+                                moveAction.ScoresRadius[j].Radius * videoWidth * TRACKING_POINT_RADIUS_CONVERT_RATIO);
                             scoreRadiusCircles.push(circle);
                         }
                     }
@@ -549,7 +562,9 @@ export class DrawingTrackingPoints {
     draw(currentFrame: number, videoWidth: number, videoHeight: number, forceToRedraw: boolean, isPlaying: boolean) {
         // Draw beat data in each frame
         this.updateStageStyleFunc(videoWidth, videoHeight);
+
         // find TrackingPoints to draw at the current frame
+        this.ApplicationState.isPlaying = isPlaying;
         this.ApplicationState.levelData.Moves.forEach((move: Move) => {
             move.MoveActions.forEach(moveAction => {
                 let startFrame: number = move.MoveActions[0].TrackingPoints[0].Frame;
@@ -572,22 +587,9 @@ export class DrawingTrackingPoints {
                 }
 
                 if (startFrame <= currentFrame && currentFrame <= endFrame) {
-                    // we need to check forceToRedraw in case we want to re-draw on the current frame that already drew
-                    if (forceToRedraw) { // TODO: remove forceToRedraw. We always force to redraw
-                        if (isPlaying || (this.ApplicationState.currentMove && this.ApplicationState.currentMove.ID === move.ID)) {
-                            this.destroyCircles(moveAction);
-                            this.drawMoveAction(move, moveAction, videoWidth, videoHeight);
-                        } else {
-                            this.destroyCircles(moveAction);
-                        }
-                    } else {
-                        if (isPlaying || (this.ApplicationState.currentMove && this.ApplicationState.currentMove.ID === move.ID)) {
-                            this.destroyCircles(moveAction);
-                            this.drawMoveAction(move, moveAction, videoWidth, videoHeight);
-                        } else {
-                            this.destroyCircles(moveAction);
-                        }
-                    }
+                    // TODO: we need to check in case we want to re-draw on the current frame that already drew
+                    this.destroyCircles(moveAction);
+                    this.drawMoveAction(move, moveAction, videoWidth, videoHeight);
                 } else {
                     this.destroyCircles(moveAction);
                 }

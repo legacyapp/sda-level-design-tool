@@ -1,9 +1,12 @@
-import { Move, MoveAction, MovementType, TrackingPoint } from "./Beat";
-import Handlebars, { Exception } from "handlebars";
+import { Move, MoveAction, TrackingPoint } from "./Beat";
+import Handlebars from "handlebars";
 import $ from "jquery";
 import { ApplicationState, Message, NotifyDelegate } from "./App";
-import { deepGet, deepSet, dropLastN, parseNumber } from "./util";
+import { deepGet, deepSet, parseNumber } from "./util";
 import toastr from "toastr"
+
+const BG_HIGHLIGHT_PLAYING = "bg-gray-200";
+const BG_MOVE_CLICKED = "bg-gray-300";
 
 export class LevelUIController {
     private applicationState: ApplicationState;
@@ -34,9 +37,12 @@ export class LevelUIController {
                 const move = self.applicationState.levelData.Moves.find(m => m.ID === moveId);
                 self.renderMoveDetail(move);
 
+                // Remove class that added when played video
+                $("#allMoves li").removeClass(BG_HIGHLIGHT_PLAYING);
+
                 // Remove previous clicked item style and add style to new clicked item
-                $("#allMoves li").removeClass('bg-gray-300');
-                $(this).addClass("bg-gray-300");
+                $("#allMoves li").removeClass(BG_MOVE_CLICKED);
+                $(this).addClass(BG_MOVE_CLICKED);
 
                 // Show Move Detail Form;
                 $("#moveDetailForm").removeClass("hidden");
@@ -384,5 +390,40 @@ export class LevelUIController {
     focusOnMove(move: Move) {
         $("#" + move.ID).trigger("click");
     }
+
+    videoFrameCallback(currentFrame: number, videoWidth: number, videoHeight: number) {
+        const moves = this.applicationState.levelData.getMoves(currentFrame);
+        if (moves && moves.length > 0) {
+            moves.forEach(m => {
+                $("#allMoves li").removeClass(BG_HIGHLIGHT_PLAYING);
+                $("#" + m.ID).addClass(BG_HIGHLIGHT_PLAYING);
+                this.scrollIntoViewIfNeeded($("#" + m.ID)[0]);
+            });
+        } else {
+            $("#allMoves li").removeClass(BG_HIGHLIGHT_PLAYING);
+        }
+    }
+
+    private scrollIntoViewIfNeeded(element) {
+        if (element) {
+            const rect = element.getBoundingClientRect();
+            const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+            const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+
+            // Check if the element is in the viewport
+            const isInViewport = (
+                rect.top >= 0 &&
+                rect.left >= 0 &&
+                rect.bottom <= windowHeight &&
+                rect.right <= windowWidth
+            );
+
+            if (!isInViewport) {
+                // Scroll the element into view
+                element.scrollIntoView();
+            }
+        }
+    }
+
 }
 

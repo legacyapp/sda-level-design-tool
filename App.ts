@@ -33,6 +33,7 @@ export class ApplicationState {
     levelData: LevelData;
     frameData: FrameData;
     currentMove: Move;
+    isPlaying: boolean = false;
 
     constructor(frameData, levelData) {
         this.frameData = frameData;
@@ -162,7 +163,9 @@ export class App {
                     height: 1920,
                     fluid: true,
                     fill: true,
-                    //responsive: true
+                    //responsive: true,
+                    playbackRates: [0.1, 0.25, 0.5, 1, 1.5, 2],
+                    inactivityTimeout: 0
                 },
                 InitVideoSource: this.applicationState.levelData.VideoInfo.VideoUrl,
                 VideoFrameRate: this.applicationState.levelData.VideoInfo.FrameRate
@@ -179,6 +182,7 @@ export class App {
         // Render UI
         this.levelUIController = new LevelUIController(this.applicationState, this.notify.bind(this));
         this.levelUIController.render();
+        this.playerUIController.setVideoFrameCallback(this.levelUIController.videoFrameCallback.bind(this.levelUIController));
 
         const self = this;
         $("#save").off("click");
