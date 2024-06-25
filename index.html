@@ -16,7 +16,7 @@
 
 <body>
     <script id="movesTemplate" type="text/x-handlebars-template">
-        <ul class="w-full divide-y divide-gray-200 mt-2 h-[calc(100vh-18rem)] overflow-y-auto">
+        <ul class="w-full divide-y divide-gray-200 mt-2 h-[calc(100vh-21rem)] overflow-y-auto">
             {{#each Moves}}
                 <li id="{{ID}}" data-id="{{ID}}" class="group p-2 hover:bg-gray-200">
                     <div class="flex items-center space-x-4 rtl:space-x-reverse">
@@ -604,8 +604,36 @@
             </div>
         </div>
         <div
-            class="basis-3/4 rounded-lg flex flex-col items-top shadow-lg flex flex-col space-y-2 border border-solid p-4">
-            <h2 class="text-xl font-extrabold leading-none tracking-tight text-gray-900 py-2">Moves</h2>
+            class="basis-3/4 rounded-lg flex flex-col items-top shadow-lg flex flex-col space-y-2 border border-solid px-4 py-2">
+            <div class="flex flex-row justify-between">
+                <h2 class="text-lg font-extrabold leading-none tracking-tight text-gray-900 py-2">Tracking Adjust Setting</h2>
+                <button type="button" id="save"
+                class="w-28 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none ">
+                Save
+            </button>
+            </div>
+
+            <div class="flex flex-row space-x-4">
+                <div class="basis-1/4 flex flex-row">
+                    <div class="basis-36 grow-0 shrink-0 flex items-center">
+                        <label for="bestFitFrameAdjust" class="text-sm font-medium text-gray-900 ">Best Fit Frame Adjust</label>
+                    </div>
+                    <div class="basis-full relative flex items-center">
+                        <input type="number" id="bestFitFrameAdjust"
+                        class="text-sm basis-full h-8 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <div class="basis-1/4 flex flex-row">
+                    <div class="basis-32 grow-0 shrink-0 flex items-center">
+                        <label for="framesAdjust" class="text-sm font-medium text-gray-900 ">Frames Adjust</label>
+                    </div>
+                    <div class="basis-full relative flex items-center">
+                        <input type="text" id="framesAdjust"
+                        class="text-sm basis-full h-8 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+            </div>
+            <h2 class="text-lg font-extrabold leading-none tracking-tight text-gray-900 py-2">Moves</h2>
             <div class="flex flex-row space-x-4">
                 <div class="basis-1/4 flex flex-row">
                     <button id="addNewMove" type="button"
@@ -620,10 +648,6 @@
                             Add New Action
                         </button>
                     </div>
-                    <button type="button" id="save"
-                        class="w-28 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 focus:outline-none ">
-                        Save
-                    </button>
                     <button type="button" id="copy"
                         class="hidden w-28 py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">
                         Copy
@@ -632,17 +656,17 @@
             </div>
             <div class="flex flex-row space-x-4">
                 <div class="basis-1/4 rounded-lg flex flex-col items-top shadow-lg py-4 px-2 border border-solid">
-                    <h3 class=" text-lg font-extrabold leading-none tracking-tight text-gray-900">All Moves</h3>
+                    <h3 class=" text-medium font-extrabold leading-none tracking-tight text-gray-900">All Moves</h3>
                     <div id="allMoves">
                         <!-- Render All Moves here -->
                     </div>
 
                 </div>
                 <div
-                    class="basis-3/4 rounded-lg flex items-top shadow-lg flex-col p-4 border border-solid h-[calc(100vh-14rem)] overflow-y-auto">
+                    class="basis-3/4 rounded-lg flex items-top shadow-lg flex-col p-4 border border-solid h-[calc(100vh-18rem)] overflow-y-auto">
                     <div id="moveDetailHeader" class="flex justify-between items-center">
                         <div>
-                            <h3 class="mb-2 text-lg font-extrabold leading-none tracking-tight text-blue-700">Move Detail</h3>
+                            <h3 class="mb-2 text-medium font-extrabold leading-none tracking-tight text-blue-700">Move Detail</h3>
                         </div>
                         <div class="flex items-centerr">
                             <input id="moveDetailIsShowScoreRadius" type="checkbox" {{checked IsShowScoreRadius}}
@@ -668,8 +692,7 @@
                             <div class="mt-2 flex flex-row space-x-10">
                                 <div class="basis-1/2 flex flex-row">
                                     <div class="basis-24 grow-0 shrink-0 flex items-center">
-                                        <label for="moveStartTime" class="text-sm font-medium text-gray-900 ">Start
-                                            Time</label>
+                                        <label for="moveStartTime" class="text-sm font-medium text-gray-900 ">Start Time</label>
                                     </div>
                                     <div class="basis-full relative flex items-center">
                                         <button type="button" id="decrement-button" disabled

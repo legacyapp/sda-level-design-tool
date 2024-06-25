@@ -1,4 +1,4 @@
-import { LevelData, Move, MoveAction, Position, ScoreRadius, TrackingPoint } from './Beat';
+import { LevelData, Move, MoveAction, Position, ScoreRadius, TrackingPoint, TrackingAdjustSetting } from './Beat';
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, Firestore, doc, updateDoc, setDoc, FirestoreDataConverter } from 'firebase/firestore/lite';
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
@@ -84,7 +84,23 @@ const levelConverter = {
             };
         });
 
+        const trackingAdjustSetting = new TrackingAdjustSetting();
+        if (level.levelData.TrackingAdjustSetting) {
+            if (level.levelData.TrackingAdjustSetting.BestFitFrameAdjust >= 0) {
+                trackingAdjustSetting.BestFitFrameAdjust = level.levelData.TrackingAdjustSetting.BestFitFrameAdjust;
+            }
+
+            if (level.levelData.TrackingAdjustSetting.FramesAdjust) {
+                trackingAdjustSetting.FramesAdjust = level.levelData.TrackingAdjustSetting.FramesAdjust;
+            }
+
+        }
+
         const firestoreObj = {
+            TrackingAdjustSetting: {
+                BestFitFrameAdjust: trackingAdjustSetting.BestFitFrameAdjust,
+                FramesAdjust: trackingAdjustSetting.FramesAdjust
+            },
             levelData: {
                 //ID: level.levelData.ID,
                 VideoInfo: videoInfo,
@@ -176,6 +192,19 @@ const levelConverter = {
             });
 
             levelData.Moves = moves;
+        }
+
+        if (data.TrackingAdjustSetting) {
+            const trackingAdjustSetting = new TrackingAdjustSetting();
+            if (data.TrackingAdjustSetting.BestFitFrameAdjust >= 0) {
+                trackingAdjustSetting.BestFitFrameAdjust = data.TrackingAdjustSetting.BestFitFrameAdjust;
+            }
+
+            if (data.TrackingAdjustSetting.FramesAdjust) {
+                trackingAdjustSetting.FramesAdjust = data.TrackingAdjustSetting.FramesAdjust;
+            }
+
+            levelData.TrackingAdjustSetting = trackingAdjustSetting;
         }
 
         return levelData;
