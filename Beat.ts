@@ -22,6 +22,7 @@ export class LevelData {
     ID: string;
     Title: string;
     Moves: Move[] = [];
+    TrackingAdjustSetting: TrackingAdjustSetting;
 
     sort() {
         this.Moves = this.Moves.sort(function (a, b) {
@@ -52,6 +53,11 @@ export class LevelData {
 
         return moves;
     }
+}
+
+export class TrackingAdjustSetting {
+    BestFitFrameAdjust: number;
+    FramesAdjust: number[]
 }
 
 export class Move {
