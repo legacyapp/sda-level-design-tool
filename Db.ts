@@ -84,29 +84,30 @@ const levelConverter = {
             };
         });
 
-        const trackingAdjustSetting = new TrackingAdjustSetting();
-        if (level.levelData.TrackingAdjustSetting) {
-            if (level.levelData.TrackingAdjustSetting.BestFitFrameAdjust >= 0) {
-                trackingAdjustSetting.BestFitFrameAdjust = level.levelData.TrackingAdjustSetting.BestFitFrameAdjust;
-            }
-
-            if (level.levelData.TrackingAdjustSetting.FramesAdjust) {
-                trackingAdjustSetting.FramesAdjust = level.levelData.TrackingAdjustSetting.FramesAdjust;
-            }
-
-        }
-
-        const firestoreObj = {
-            TrackingAdjustSetting: {
-                BestFitFrameAdjust: trackingAdjustSetting.BestFitFrameAdjust,
-                FramesAdjust: trackingAdjustSetting.FramesAdjust
-            },
+        const firestoreObj: any = {
             levelData: {
                 //ID: level.levelData.ID,
                 VideoInfo: videoInfo,
                 Moves: moves
             }
         };
+
+
+        if (level.levelData.TrackingAdjustSetting) {
+            if (!firestoreObj.TrackingAdjustSetting) {
+                firestoreObj.TrackingAdjustSetting = {};
+            }
+
+            if (level.levelData.TrackingAdjustSetting.BestFitFrameAdjust >= 0) {
+                firestoreObj.TrackingAdjustSetting.BestFitFrameAdjust = level.levelData.TrackingAdjustSetting.BestFitFrameAdjust;
+            } else {
+                firestoreObj.TrackingAdjustSetting.BestFitFrameAdjust = -1;
+            }
+
+            if (Array.isArray(level.levelData.TrackingAdjustSetting.FramesAdjust)) {
+                firestoreObj.TrackingAdjustSetting.FramesAdjust = level.levelData.TrackingAdjustSetting.FramesAdjust;
+            }
+        }
 
         return firestoreObj;
     },
@@ -196,11 +197,11 @@ const levelConverter = {
 
         if (data.TrackingAdjustSetting) {
             const trackingAdjustSetting = new TrackingAdjustSetting();
-            if (data.TrackingAdjustSetting.BestFitFrameAdjust >= 0) {
+            if (Number.isInteger(data.TrackingAdjustSetting.BestFitFrameAdjust)) {
                 trackingAdjustSetting.BestFitFrameAdjust = data.TrackingAdjustSetting.BestFitFrameAdjust;
             }
 
-            if (data.TrackingAdjustSetting.FramesAdjust) {
+            if (Array.isArray(data.TrackingAdjustSetting.FramesAdjust)) {
                 trackingAdjustSetting.FramesAdjust = data.TrackingAdjustSetting.FramesAdjust;
             }
 
