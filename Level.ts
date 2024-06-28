@@ -89,6 +89,7 @@ export class LevelUIController {
         $("#actions").off("click", ".deleteTrackingPoint");
         $("#addNewAction").off("click");
         $(".add-tracking-point").off("click");
+        $(".sort-tracking-point").off("click");
         $(".deleteAction").off("click");
         $("#actions #decrement-button").off("click");
         $("#actions #increment-button").off("click");
@@ -129,23 +130,35 @@ export class LevelUIController {
 
             if (input && step) {
                 const trackingPoint = self.applicationState.currentMove.MoveActions.flatMap(p => p.TrackingPoints).find(b => b.ID === input.data("id"));
-                // update the trackingPoint object and other dependencies
-                const newValue = deepGet(trackingPoint, input.data("path")) + (factor * step);
-                deepSet(trackingPoint, input.data("path"), newValue);
-                input.val(newValue);
 
-                if (input.data("path") === "Frame") {
-                    trackingPoint.Time = trackingPoint.Frame / self.applicationState.levelData.VideoInfo.FrameRate;
-                    $("#" + trackingPoint.ID + "-Time").val(trackingPoint.Time);
+                if (trackingPoint) {
+                    // update the trackingPoint object and other dependencies
+                    let newValue = deepGet(trackingPoint, input.data("path")) + (factor * step);
+                    newValue = newValue || 0;
+                    deepSet(trackingPoint, input.data("path"), newValue);
+                    input.val(newValue);
+
+                    if (input.data("path") === "Frame") {
+                        trackingPoint.Time = trackingPoint.Frame / self.applicationState.levelData.VideoInfo.FrameRate;
+                        $("#" + trackingPoint.ID + "-Time").val(trackingPoint.Time);
+                    }
+
+                    if (input.data("path") === "Time") {
+                        trackingPoint.Frame = Math.round(trackingPoint.Time * self.applicationState.levelData.VideoInfo.FrameRate);
+                        $("#" + trackingPoint.ID + "-Frame").val(trackingPoint.Frame);
+                    }
+
+                    // notify other component to do something when we update a tracking point
+                    self.notify(Message.MOVE_DETAIL_TRACKINGPOINT_UPDATED, trackingPoint);
+                } else {
+                    const moveAction = self.applicationState.currentMove.MoveActions.find(m => m.ID === $(input).data("id"));
+                    let newValue = deepGet(moveAction, input.data("path")) + (factor * step);
+                    newValue = newValue || 0;
+                    deepSet(moveAction, input.data("path"), newValue);
+                    input.val(newValue);
+                    self.notify(Message.MOVE_DETAIL_ACTION_UPDATED, moveAction);
                 }
 
-                if (input.data("path") === "Time") {
-                    trackingPoint.Frame = Math.round(trackingPoint.Time * self.applicationState.levelData.VideoInfo.FrameRate);
-                    $("#" + trackingPoint.ID + "-Frame").val(trackingPoint.Frame);
-                }
-
-                // notify other component to do something when we update a tracking point
-                self.notify(Message.MOVE_DETAIL_TRACKINGPOINT_UPDATED, trackingPoint);
                 // update start/end frame/time of move detail
                 self.updateMoveDetail();
             }
@@ -205,6 +218,7 @@ export class LevelUIController {
             $("#actionList").append(html);
 
             $(".add-tracking-point").off("click");
+            $(".sort-tracking-point").off("click");
             self.handAddNewTrackingPoint(move, self);
 
             $(".deleteAction").off("click");
@@ -268,9 +282,9 @@ export class LevelUIController {
 
     private handAddNewTrackingPoint(move: Move, self: this) {
         $(".add-tracking-point").on("click", function (event) {
-            const trackingPoint = TrackingPoint.build(0, 0);
             const moveActionID = $(this).data("id");
             const moveAction = move.MoveActions.find(m => m.ID === moveActionID);
+            const trackingPoint = TrackingPoint.build(0, 0, moveAction.TrackingPoints.length);
             moveAction.TrackingPoints.push(trackingPoint);
 
             self.notify(Message.MOVE_DETAIL_TRACKINGPOINT_ADDED, moveAction);
@@ -290,6 +304,23 @@ export class LevelUIController {
             self.handleIncrementDecrementClickEvent(self, "#actions #increment-button", "value-change-step", 1);
             toastr.success("Added New Tracking Point Successfully.");
         });
+
+        $(".sort-tracking-point").on("click", function (event) {
+            const moveActionID = $(this).data("id");
+            const moveAction = move.MoveActions.find(m => m.ID === moveActionID);
+            moveAction.TrackingPoints.sort((a, b) => {
+                if (!(typeof a.Index === 'number' && a.Index > 0)) {
+                    a.Index = 0;
+                }
+
+                if (!(typeof b.Index === 'number' && b.Index > 0)) {
+                    b.Index = 0;
+                }
+
+                return a.Index - b.Index;
+            });
+            self.renderMoveDetail(self.applicationState.currentMove)
+        });
     }
 
     private handleInputEvent(self: this, containerSelector: string) {
@@ -308,11 +339,11 @@ export class LevelUIController {
                 }
                 else if (path === "ScoresRadius") {
                     try {
-                        const scoreRadius = JSON.parse($(this).val());
-                        for (let i = 0; i < scoreRadius.length; i++) {
-                            if (scoreRadius[i].Radius < 0.01) {
-                                throw new Error("Radius must be larger than 0.01");
-                            }
+                        let scoreRadius;
+                        if (!$(this).val()!) {
+                            scoreRadius = [];
+                        } else {
+                            scoreRadius = JSON.parse($(this).val());
                         }
                         moveAction.ScoresRadius = scoreRadius;
                         self.notify(Message.MOVE_DETAIL_ACTION_UPDATED, moveAction);

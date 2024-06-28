@@ -62,13 +62,16 @@ const levelConverter = {
                     };
                 });
 
+                const threshold = ma.Threshold >= 100 ? ma.Threshold : 100;
+
                 return {
                     ID: ma.ID,
                     Name: ma.Name,
                     Joint: ma.Joint,
                     IsMajor: ma.IsMajor,
                     TrackingPoints: trackingPoints,
-                    ScoresRadius: scoreRadiues
+                    ScoresRadius: scoreRadiues,
+                    Threshold: threshold
                 };
             })
 
@@ -155,6 +158,9 @@ const levelConverter = {
                     moveAction.IsMajor = ma.IsMajor;
                     moveAction.TrackingPoints = trackingPoints;
                     moveAction.ScoresRadius = scoreRadiues;
+                    if (ma.Threshold >= 0) {
+                        moveAction.Threshold = ma.Threshold;
+                    }
 
                     return moveAction;
                 })

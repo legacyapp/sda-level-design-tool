@@ -244,6 +244,7 @@ export class MoveAction {
     TrackingPoints: TrackingPoint[] = [];
     ScoresRadius: ScoreRadius[] = [];
     IsShowScoreRadius: boolean = false;
+    Threshold: number;
 
     // Index is for UI rendering, not save to database
     Index: number;
@@ -261,8 +262,9 @@ export class MoveAction {
         newMoveAction.IsMajor = false;
         newMoveAction.ScoresRadius = [{ "Scoring": 100, "Radius": 3 }];
         newMoveAction.Index = 0;
+        newMoveAction.Threshold = 100;
 
-        const trackingPoint = TrackingPoint.build(currentFrame, currentTime);
+        const trackingPoint = TrackingPoint.build(currentFrame, currentTime, 0);
 
         newMoveAction.TrackingPoints.push(trackingPoint);
 
@@ -279,10 +281,11 @@ export class TrackingPoint {
     HoldTime: number;
     ScoresRadius: ScoreRadius[] = [];
     IsShowScoreRadius: boolean = false;
+    Index: number;
 
     constructor() { }
 
-    static build(currentFrame: number, currentTime): TrackingPoint {
+    static build(currentFrame: number, currentTime, index:number): TrackingPoint {
         const trackingPoint = new TrackingPoint();
         trackingPoint.ID = uuidv4();
         const position = new Position();
@@ -292,6 +295,7 @@ export class TrackingPoint {
         trackingPoint.Frame = currentFrame;
         trackingPoint.Time = currentTime;
         trackingPoint.HoldTime = 2;
+        trackingPoint.Index = index;
 
         return trackingPoint;
     }
