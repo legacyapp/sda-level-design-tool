@@ -73,3 +73,24 @@ export function parseNumber(str) {
 export function dropLastN(arr: any, n = 1) {
     return arr.slice(0, -n);
 }
+
+export function scrollIntoViewIfNeeded(element) {
+    if (element) {
+        const rect = element.getBoundingClientRect();
+        const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+        const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+
+        // Check if the element is in the viewport
+        const isInViewport = (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= windowHeight &&
+            rect.right <= windowWidth
+        );
+
+        if (!isInViewport) {
+            // Scroll the element into view
+            element.scrollIntoView();
+        }
+    }
+}

@@ -220,7 +220,7 @@
     <script id="trackingPointsTemplate" type="text/x-handlebars-template">
         <div class="rounded-lg flex items-top shadow-lg flex-col px-4 border border-solid mt-2">
             <!-- All Tracking Points of an Action -->
-            <ul id="trackingPoints-{{ID}}" class="w-full divide-y divide-gray-200 mt-2">
+            <ul id="trackingPoints-{{ID}}" class="sortable-list w-full divide-y divide-gray-200 mt-2">
                 {{#each TrackingPoints}}
                     {{> aTrackingPointTemplate}}
                 {{/each}}
@@ -233,8 +233,8 @@
             <div class="flex flex-col">
                 <div class="flex justify-between items-center">
                     <div class="flex justify-start items-center">
-                        <h4 class="mt-2 font-bold leading-none tracking-tight text-purple-700">
-                            Tracking Point
+                        <h4 class="handle mt-2 font-bold leading-none tracking-tight text-purple-700"  title="Click here to drag Tracking Point to other position">
+                            {{Index}} - Tracking Point (click here to drag this to new position)
                         </h4>
                         <div class="deleteTrackingPoint mt-2 ml-6 rounded-lg hover:bg-red-200 p-1" data-id="{{ID}}">
                             <svg class="w-4 h-4 text-red-800" aria-hidden="true"
