@@ -2,8 +2,9 @@ import { Move, MoveAction, TrackingAdjustSetting, TrackingPoint } from "./Beat";
 import Handlebars from "handlebars";
 import $ from "jquery";
 import { ApplicationState, Message, NotifyDelegate } from "./App";
-import { deepGet, deepSet, parseNumber } from "./util";
-import toastr from "toastr"
+import { deepGet, deepSet, parseNumber, scrollIntoViewIfNeeded } from "./util";
+import toastr from "toastr";
+import Sortable from 'sortablejs';
 
 const BG_HIGHLIGHT_PLAYING = "bg-gray-200";
 const BG_MOVE_CLICKED = "bg-gray-300";
@@ -11,6 +12,7 @@ const BG_MOVE_CLICKED = "bg-gray-300";
 export class LevelUIController {
     private applicationState: ApplicationState;
     private notify: NotifyDelegate;
+    private sortableList: Sortable[] = [];
 
     constructor(applicationState: ApplicationState, notify: NotifyDelegate) {
         this.applicationState = applicationState;
@@ -89,6 +91,7 @@ export class LevelUIController {
         $("#actions").off("click", ".deleteTrackingPoint");
         $("#addNewAction").off("click");
         $(".add-tracking-point").off("click");
+        $(".sort-tracking-point").off("click");
         $(".deleteAction").off("click");
         $("#actions #decrement-button").off("click");
         $("#actions #increment-button").off("click");
@@ -111,7 +114,7 @@ export class LevelUIController {
         const html = template(move);
         $("#actions").html(html);
 
-        this.handAddNewTrackingPoint(move, self);
+        this.handTrackingPointButtonsEvents(move, self);
         this.handleAddNewAction(move, self);
         this.handleDeleteMoveAction(self, ".deleteAction");
         this.handleInputEvent(self, "#actions"); // Handle all "input" event of all actions inputs
@@ -120,6 +123,54 @@ export class LevelUIController {
         this.handleChangeEvent(self, "#moveDetailHeader");
         this.handleIncrementDecrementClickEvent(self, "#actions #decrement-button", "value-change-step", -1);
         this.handleIncrementDecrementClickEvent(self, "#actions #increment-button", "value-change-step", 1);
+
+        if (self.sortableList && self.sortableList.length > 0) {
+            self.sortableList.forEach(s => s.destroy());
+            self.sortableList = [];
+        }
+        if (move.MoveActions.length > 0) {
+            move.MoveActions.forEach(ma => {
+                this.createSortableForMoveAction(ma, self);
+            });
+
+        }
+    }
+
+    private createSortableForMoveAction(ma: MoveAction, self: this) {
+        const sortableElement = document.getElementById("trackingPoints-" + ma.ID);
+        const sortable = new Sortable(sortableElement, {
+            id: ma.ID,
+            animation: 150,
+            handle: '.handle',
+            chosenClass: 'sortable-chosen',
+            dragClass: 'sortable-drag',
+            onEnd: function (event) {
+                var items = document.querySelectorAll("#trackingPoints-" + ma.ID + " li");
+                Array.from(items).forEach((item, index) => {
+                    let id = item.id;
+                    if (id.startsWith("trackingPoint-")) {
+                        id = id.substring("trackingPoint-".length);
+                    }
+                    const trackingPoint = ma.TrackingPoints.find(p => p.ID === id);
+                    if (!trackingPoint) {
+                        toastr.error("ERROR: Cannot find a tracking point by Id: ", id);
+                    } else {
+                        trackingPoint.Index = index;
+                    }
+
+                    return {
+                        item: id,
+                        index: index
+                    };
+                });
+                ma.sortTrackingPoints();
+                // Have to re-render a move detail here  because we want to display the new index of all tracking points
+                self.renderMoveDetail(self.applicationState.currentMove);
+                self.notify(Message.MOVE_DETAIL_UPDATED, self.applicationState.currentMove);
+            }
+        });
+
+        self.sortableList.push(sortable);
     }
 
     private handleIncrementDecrementClickEvent(self: this, containerSelector: string, stepAttrName: string, factor: number) {
@@ -129,23 +180,35 @@ export class LevelUIController {
 
             if (input && step) {
                 const trackingPoint = self.applicationState.currentMove.MoveActions.flatMap(p => p.TrackingPoints).find(b => b.ID === input.data("id"));
-                // update the trackingPoint object and other dependencies
-                const newValue = deepGet(trackingPoint, input.data("path")) + (factor * step);
-                deepSet(trackingPoint, input.data("path"), newValue);
-                input.val(newValue);
 
-                if (input.data("path") === "Frame") {
-                    trackingPoint.Time = trackingPoint.Frame / self.applicationState.levelData.VideoInfo.FrameRate;
-                    $("#" + trackingPoint.ID + "-Time").val(trackingPoint.Time);
+                if (trackingPoint) {
+                    // update the trackingPoint object and other dependencies
+                    let newValue = deepGet(trackingPoint, input.data("path")) + (factor * step);
+                    newValue = newValue || 0;
+                    deepSet(trackingPoint, input.data("path"), newValue);
+                    input.val(newValue);
+
+                    if (input.data("path") === "Frame") {
+                        trackingPoint.Time = trackingPoint.Frame / self.applicationState.levelData.VideoInfo.FrameRate;
+                        $("#" + trackingPoint.ID + "-Time").val(trackingPoint.Time);
+                    }
+
+                    if (input.data("path") === "Time") {
+                        trackingPoint.Frame = Math.round(trackingPoint.Time * self.applicationState.levelData.VideoInfo.FrameRate);
+                        $("#" + trackingPoint.ID + "-Frame").val(trackingPoint.Frame);
+                    }
+
+                    // notify other component to do something when we update a tracking point
+                    self.notify(Message.MOVE_DETAIL_TRACKINGPOINT_UPDATED, trackingPoint);
+                } else {
+                    const moveAction = self.applicationState.currentMove.MoveActions.find(m => m.ID === $(input).data("id"));
+                    let newValue = deepGet(moveAction, input.data("path")) + (factor * step);
+                    newValue = newValue || 0;
+                    deepSet(moveAction, input.data("path"), newValue);
+                    input.val(newValue);
+                    self.notify(Message.MOVE_DETAIL_ACTION_UPDATED, moveAction);
                 }
 
-                if (input.data("path") === "Time") {
-                    trackingPoint.Frame = Math.round(trackingPoint.Time * self.applicationState.levelData.VideoInfo.FrameRate);
-                    $("#" + trackingPoint.ID + "-Frame").val(trackingPoint.Frame);
-                }
-
-                // notify other component to do something when we update a tracking point
-                self.notify(Message.MOVE_DETAIL_TRACKINGPOINT_UPDATED, trackingPoint);
                 // update start/end frame/time of move detail
                 self.updateMoveDetail();
             }
@@ -205,7 +268,8 @@ export class LevelUIController {
             $("#actionList").append(html);
 
             $(".add-tracking-point").off("click");
-            self.handAddNewTrackingPoint(move, self);
+            $(".sort-tracking-point").off("click");
+            self.handTrackingPointButtonsEvents(move, self);
 
             $(".deleteAction").off("click");
             self.handleDeleteMoveAction(self, ".deleteAction");
@@ -215,7 +279,7 @@ export class LevelUIController {
             self.handleIncrementDecrementClickEvent(self, "#actions #decrement-button", "value-change-step", -1);
             self.handleIncrementDecrementClickEvent(self, "#actions #increment-button", "value-change-step", 1);
 
-            toastr.success("Added New Action Successfully.");
+            self.createSortableForMoveAction(newMoveAction, self);
 
             const element = document.getElementById("MoveAction-" + newMoveAction.ID);
             element && element.scrollIntoView({
@@ -223,6 +287,8 @@ export class LevelUIController {
                 block: 'center',
                 inline: 'center'
             });
+
+            toastr.success("Added New Action Successfully.");
         });
     }
 
@@ -239,6 +305,7 @@ export class LevelUIController {
                 $("#MoveAction-" + moveAction.ID).remove();
                 self.notify(Message.MOVE_DETAIL_ACTION_DELETED, moveAction);
             }
+            self.renderMoveDetail(self.applicationState.currentMove);
             toastr.success("Deleted Move Action Successfully.");
         });
     }
@@ -256,9 +323,18 @@ export class LevelUIController {
                     }
 
                     currentMove.MoveActions[i].TrackingPoints = currentMove.MoveActions[i].TrackingPoints.filter(p => p.ID !== trackingPointId);
+                    self.notify(Message.MOVE_DETAIL_TRACKINGPOINT_DELETED, trackingPoint);
+                    let sortable = self.sortableList.find(s => s.options.id === currentMove.MoveActions[i].ID);
+                    if (sortable) {
+                        sortable.destroy();
+                        sortable = undefined;
+                        self.sortableList = self.sortableList.filter(s => s.options.id !== currentMove.MoveActions[i].ID);
+                        self.createSortableForMoveAction(currentMove.MoveActions[i], self);
+                    }
 
                     $("#trackingPoint-" + trackingPoint.ID).remove();
-                    self.notify(Message.MOVE_DETAIL_TRACKINGPOINT_DELETED, trackingPoint);
+
+                    self.renderMoveDetail(self.applicationState.currentMove);
                     return;
                 }
             }
@@ -266,11 +342,11 @@ export class LevelUIController {
         });
     }
 
-    private handAddNewTrackingPoint(move: Move, self: this) {
+    private handTrackingPointButtonsEvents(move: Move, self: this) {
         $(".add-tracking-point").on("click", function (event) {
-            const trackingPoint = TrackingPoint.build(0, 0);
             const moveActionID = $(this).data("id");
             const moveAction = move.MoveActions.find(m => m.ID === moveActionID);
+            const trackingPoint = TrackingPoint.build(0, 0, moveAction.TrackingPoints.length);
             moveAction.TrackingPoints.push(trackingPoint);
 
             self.notify(Message.MOVE_DETAIL_TRACKINGPOINT_ADDED, moveAction);
@@ -290,6 +366,14 @@ export class LevelUIController {
             self.handleIncrementDecrementClickEvent(self, "#actions #increment-button", "value-change-step", 1);
             toastr.success("Added New Tracking Point Successfully.");
         });
+
+        $(".sort-tracking-point").on("click", function (event) {
+            const moveActionID = $(this).data("id");
+            const moveAction = move.MoveActions.find(m => m.ID === moveActionID);
+            moveAction.sortTrackingPoints();
+            self.renderMoveDetail(self.applicationState.currentMove);
+            self.notify(Message.MOVE_DETAIL_UPDATED, self.applicationState.currentMove);
+        });
     }
 
     private handleInputEvent(self: this, containerSelector: string) {
@@ -306,13 +390,16 @@ export class LevelUIController {
                 if (path === "Name") {
                     moveAction.Name = $(this).val();
                 }
+                else if (path === "Threshold") {
+                    moveAction.Threshold = parseInt($(this).val());
+                }
                 else if (path === "ScoresRadius") {
                     try {
-                        const scoreRadius = JSON.parse($(this).val());
-                        for (let i = 0; i < scoreRadius.length; i++) {
-                            if (scoreRadius[i].Radius < 0.01) {
-                                throw new Error("Radius must be larger than 0.01");
-                            }
+                        let scoreRadius;
+                        if (!$(this).val()!) {
+                            scoreRadius = [];
+                        } else {
+                            scoreRadius = JSON.parse($(this).val());
                         }
                         moveAction.ScoresRadius = scoreRadius;
                         self.notify(Message.MOVE_DETAIL_ACTION_UPDATED, moveAction);
@@ -431,33 +518,11 @@ export class LevelUIController {
             moves.forEach(m => {
                 $("#allMoves li").removeClass(BG_HIGHLIGHT_PLAYING);
                 $("#" + m.ID).addClass(BG_HIGHLIGHT_PLAYING);
-                this.scrollIntoViewIfNeeded($("#" + m.ID)[0]);
+                scrollIntoViewIfNeeded($("#" + m.ID)[0]);
             });
         } else {
             $("#allMoves li").removeClass(BG_HIGHLIGHT_PLAYING);
         }
     }
-
-    private scrollIntoViewIfNeeded(element) {
-        if (element) {
-            const rect = element.getBoundingClientRect();
-            const windowHeight = window.innerHeight || document.documentElement.clientHeight;
-            const windowWidth = window.innerWidth || document.documentElement.clientWidth;
-
-            // Check if the element is in the viewport
-            const isInViewport = (
-                rect.top >= 0 &&
-                rect.left >= 0 &&
-                rect.bottom <= windowHeight &&
-                rect.right <= windowWidth
-            );
-
-            if (!isInViewport) {
-                // Scroll the element into view
-                element.scrollIntoView();
-            }
-        }
-    }
-
 }
 

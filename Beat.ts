@@ -12,6 +12,8 @@ interface TrackDrawingBeat {
     StartFrame: number,
     EndFrame: number,
     Circles: Konva.Circle[],
+    CirclesTexts: Konva.Text[],
+    CirclesConnectingLine: Konva.Line[],
     ScoreRadiusCircles: Konva.Circle[]
 };
 
@@ -52,6 +54,21 @@ export class LevelData {
         });
 
         return moves;
+    }
+
+    public getAllMoveAction() {
+        if (this.Moves && this.Moves.length > 0) {
+            const allMoveActions: MoveAction[] = [];
+            this.Moves.forEach(m => {
+                m.MoveActions.forEach(ma => {
+                    allMoveActions.push(ma);
+                });
+            });
+
+            return allMoveActions;
+        }
+
+        return [];
     }
 }
 
@@ -250,6 +267,7 @@ export class MoveAction {
     TrackingPoints: TrackingPoint[] = [];
     ScoresRadius: ScoreRadius[] = [];
     IsShowScoreRadius: boolean = false;
+    Threshold: number;
 
     // Index is for UI rendering, not save to database
     Index: number;
@@ -267,12 +285,27 @@ export class MoveAction {
         newMoveAction.IsMajor = false;
         newMoveAction.ScoresRadius = [{ "Scoring": 100, "Radius": 3 }];
         newMoveAction.Index = 0;
+        newMoveAction.Threshold = 100;
 
-        const trackingPoint = TrackingPoint.build(currentFrame, currentTime);
+        const trackingPoint = TrackingPoint.build(currentFrame, currentTime, 0);
 
         newMoveAction.TrackingPoints.push(trackingPoint);
 
         return newMoveAction;
+    }
+
+    sortTrackingPoints() {
+        this.TrackingPoints.sort((a, b) => {
+            if (!(typeof a.Index === 'number' && a.Index > 0)) {
+                a.Index = 0;
+            }
+
+            if (!(typeof b.Index === 'number' && b.Index > 0)) {
+                b.Index = 0;
+            }
+
+            return a.Index - b.Index;
+        });
     }
 }
 
@@ -285,10 +318,11 @@ export class TrackingPoint {
     HoldTime: number;
     ScoresRadius: ScoreRadius[] = [];
     IsShowScoreRadius: boolean = false;
+    Index: number;
 
     constructor() { }
 
-    static build(currentFrame: number, currentTime): TrackingPoint {
+    static build(currentFrame: number, currentTime, index: number): TrackingPoint {
         const trackingPoint = new TrackingPoint();
         trackingPoint.ID = uuidv4();
         const position = new Position();
@@ -298,6 +332,7 @@ export class TrackingPoint {
         trackingPoint.Frame = currentFrame;
         trackingPoint.Time = currentTime;
         trackingPoint.HoldTime = 2;
+        trackingPoint.Index = index;
 
         return trackingPoint;
     }
@@ -355,6 +390,8 @@ export class DrawingTrackingPoints {
         x: number,
         y: number,
         color: { stroke: string, fill: string },
+        circleText: string,
+        circleTextSize: number,
         radius = 20
     ) {
         var circle = new Konva.Circle({
@@ -369,7 +406,6 @@ export class DrawingTrackingPoints {
             // Add custom data
             data: data
         });
-        this.layer.add(circle);
 
         const self = this;
         // add hover styling
@@ -419,9 +455,64 @@ export class DrawingTrackingPoints {
                     }
                 });
             }
+
+            text.position({
+                x: circle.x(),
+                y: circle.y()
+            });
+            self.layer.batchDraw();
         });
 
-        return circle;
+        // Define the text
+        var text = new Konva.Text({
+            text: circleText,
+            fontSize: circleTextSize,
+            fill: 'white',
+            draggable: true,
+            data: data
+        });
+
+        // Center the text inside the circle
+        text.offsetX(text.width() / 2);
+        text.offsetY(text.height() / 2);
+        text.x(circle.x());
+        text.y(circle.y());
+
+        text.on('mouseover', function (e) {
+            circle.fire('mouseover', e);
+        });
+
+        text.on('mouseout', function (e) {
+            circle.fire('mouseout', e);
+        });
+
+        // Forward drag events from text to circle
+        text.on('dragmove', e => {
+            circle.position({
+                x: text.x(),
+                y: text.y()
+            });
+            circle.fire('dragmove', e); // Manually trigger the dragmove event on the circle
+            this.layer.batchDraw();
+        });
+
+        // Forward click event from text to circle
+        text.on('click', function (e) {
+            circle.fire('click', e);
+        });
+
+        text.on('dragstart', function (e) {
+            circle.fire('dragstart', e);
+        });
+
+        text.on('dragend', function (e) {
+            circle.fire('dragend', e);
+        });
+
+        this.layer.add(circle);
+        this.layer.add(text);
+
+        return [circle, text];
     }
 
     private buildScoreRadiusCircle(
@@ -490,18 +581,73 @@ export class DrawingTrackingPoints {
         return circle;
     }
 
+    private calculateIntersectionPoints(circles: Konva.Circle[]) {
+        var points = [];
+        for (var i = 0; i < circles.length - 1; i++) {
+            var startCircle = circles[i];
+            var endCircle = circles[i + 1];
+            var startPoint = this.getIntersectionPoint(startCircle, endCircle);
+            var endPoint = this.getIntersectionPoint(endCircle, startCircle);
+            points.push([startPoint, endPoint]);
+        }
+        return points;
+    }
+
+    // Function to get intersection point between circle edge and line
+    private getIntersectionPoint(circle1, circle2) {
+        var dx = circle2.x() - circle1.x();
+        var dy = circle2.y() - circle1.y();
+        var angle = Math.atan2(dy, dx);
+        return {
+            x: circle1.x() + circle1.radius() * Math.cos(angle),
+            y: circle1.y() + circle1.radius() * Math.sin(angle)
+        };
+    }
+
+    // Function to create line segments
+    private createLineSegments(circles, lines, stroke, data: any) {
+        for (var i = 0; i < circles.length - 1; i++) {
+            var line = new Konva.Line({
+                points: [],
+                stroke: stroke,
+                strokeWidth: 2,
+                lineCap: 'round',
+                lineJoin: 'round',
+                dash: [4, 4, 0, 4],
+                opacity: 0.6,
+                data: data
+            });
+            lines.push(line);
+            this.layer.add(line);
+        }
+    }
 
     private drawMoveAction(move: Move, moveAction: MoveAction, videoWidth: number, videoHeight: number) {
         const color = GetColors(moveAction.Joint);
 
         if (moveAction.TrackingPoints && moveAction.TrackingPoints.length > 0) {
-            const trackingPointCircles = moveAction.TrackingPoints.map((p) => {
-                return this.buildTrackingPointCircle(
+            const trackingPointCircles = [];
+            const trackingPointTexts = [];
+
+            moveAction.TrackingPoints.forEach((p, i) => {
+                const radius = (i === 0 || i == moveAction.TrackingPoints.length - 1) ? 20 : 17;
+                const circleText = (i === 0) ? "S" : i === moveAction.TrackingPoints.length - 1 ? "E" : "A" + i;
+                const circleTextSize = (i === 0 || i == moveAction.TrackingPoints.length - 1) ? 24 : 18;
+
+                const [circle, text] = this.buildTrackingPointCircle(
                     { id: p.ID, moveActionId: moveAction.ID },
                     p.Pos.X * videoWidth,
                     p.Pos.Y * videoHeight,
-                    color);
+                    color,
+                    circleText,
+                    circleTextSize,
+                    radius);
+
+                trackingPointCircles.push(circle);
+                trackingPointTexts.push(text);
             });
+
+            const lines = this.drawConnectingLines(trackingPointCircles, color, { id: moveAction.ID });
 
             let scoreRadiusCircles: Konva.Circle[] = [];
             for (let i = 0; i < moveAction.TrackingPoints.length; i++) {
@@ -538,10 +684,37 @@ export class DrawingTrackingPoints {
                 StartFrame: moveAction.TrackingPoints[0].Frame,
                 EndFrame: moveAction.TrackingPoints[moveAction.TrackingPoints.length - 1].Frame, // TODO: should calculate = Frame + Hold Time
                 Circles: trackingPointCircles,
+                CirclesTexts: trackingPointTexts,
+                CirclesConnectingLine: lines,
                 ScoreRadiusCircles: scoreRadiusCircles
             };
             this.trackMoveActions[moveAction.ID] = trackDrawingBeat;
         }
+    }
+
+    private drawConnectingLines(trackingPointCircles: any[], color: { stroke: string; fill: string; }, data) {
+        var lines = [];
+
+        const updateLines = () => {
+            var points = this.calculateIntersectionPoints(trackingPointCircles);
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                var pointPair = points[i];
+                line.points([pointPair[0].x, pointPair[0].y, pointPair[1].x, pointPair[1].y]);
+            }
+            this.layer.batchDraw();
+        };
+
+        // Add dragmove event listeners to the circles
+        trackingPointCircles.forEach(circle => {
+            circle.on('dragmove', updateLines);
+        });
+
+        // Create the line segments
+        this.createLineSegments(trackingPointCircles, lines, color.stroke, data);
+        // Initial draw
+        updateLines();
+        return lines;
     }
 
     private updateStageStyleFunc(videoWidth: number, videoHeight: number) {
@@ -572,20 +745,11 @@ export class DrawingTrackingPoints {
         // find TrackingPoints to draw at the current frame
         this.ApplicationState.isPlaying = isPlaying;
         this.ApplicationState.levelData.Moves.forEach((move: Move) => {
-            move.MoveActions.forEach(moveAction => {
-                let startFrame: number = move.MoveActions[0].TrackingPoints[0].Frame;
-                let endFrame: number = move.MoveActions[0].TrackingPoints[0].Frame;
+            move.updateStartAndEndFrameTime();
 
-                move.MoveActions.forEach(m => {
-                    m.TrackingPoints.forEach(p => {
-                        if (p.Frame <= startFrame) {
-                            startFrame = p.Frame;
-                        }
-                        if (p.Frame >= endFrame) {
-                            endFrame = p.Frame;
-                        }
-                    });
-                });
+            move.MoveActions.forEach(moveAction => {
+                let startFrame:number = move.StartFrame;
+                let endFrame: number = move.EndFrame;
 
                 if (moveAction.TrackingPoints.length === 1) {
                     const holdTime = moveAction.TrackingPoints[0].HoldTime ? moveAction.TrackingPoints[0].HoldTime : 2;
@@ -594,51 +758,102 @@ export class DrawingTrackingPoints {
 
                 if (startFrame <= currentFrame && currentFrame <= endFrame) {
                     // TODO: we need to check in case we want to re-draw on the current frame that already drew
-                    this.destroyCircles(moveAction);
+                    this.destroyCircles(moveAction.ID);
                     this.drawMoveAction(move, moveAction, videoWidth, videoHeight);
                 } else {
-                    this.destroyCircles(moveAction);
+                    this.destroyCircles(moveAction.ID);
                 }
             });
         });
 
-
+        const destroyMoveAction = [];
+        const allMoveActions = this.ApplicationState.levelData.getAllMoveAction();
+        for (const [key, value] of Object.entries(this.trackMoveActions)) {
+            const moveAction = allMoveActions.find(m => m.ID === key);
+            if (!moveAction) {
+                destroyMoveAction.push(key);
+            }
+        }
+        destroyMoveAction.forEach(moveActionId => {
+            this.destroyCircles(moveActionId);
+        });
     }
 
     destroyOrphanPoints(trackingPointIDs: Array<string>) {
         trackingPointIDs.forEach(Id => {
             for (const [key, value] of Object.entries(this.trackMoveActions)) {
-                const trackMoveAction = value as any;
-                let isFound = false;
+                const trackMoveAction = value as TrackDrawingBeat;
+                const moveActionIds = [];
+
                 for (let i = 0; i < trackMoveAction.Circles.length; i++) {
                     if (trackMoveAction.Circles[i].getAttr('data').id === Id) {
+                        const moveActionId = moveActionIds.find(m => m == trackMoveAction.Circles[i].getAttr('data').moveActionId);
+                        if (!moveActionId) {
+                            moveActionIds.push(trackMoveAction.Circles[i].getAttr('data').moveActionId);
+                        }
+
                         trackMoveAction.Circles[i].destroy();
                         trackMoveAction.Circles[i] = undefined;
-                        isFound = true;
                     }
                 }
-
                 trackMoveAction.Circles = trackMoveAction.Circles.filter(c => c !== undefined);
+
+                for (let i = 0; i < trackMoveAction.ScoreRadiusCircles.length; i++) {
+                    if (trackMoveAction.ScoreRadiusCircles[i].getAttr('data').id === Id) {
+                        trackMoveAction.ScoreRadiusCircles[i].destroy();
+                        trackMoveAction.ScoreRadiusCircles[i] = undefined;
+                    }
+                }
+                trackMoveAction.ScoreRadiusCircles = trackMoveAction.ScoreRadiusCircles.filter(c => c !== undefined);
+
+
+                for (let i = 0; i < trackMoveAction.CirclesTexts.length; i++) {
+                    if (trackMoveAction.CirclesTexts[i].getAttr('data').id === Id) {
+                        trackMoveAction.CirclesTexts[i].destroy();
+                        trackMoveAction.CirclesTexts[i] = undefined;
+                    }
+                }
+                trackMoveAction.CirclesTexts = trackMoveAction.CirclesTexts.filter(c => c !== undefined);
+
+                if (moveActionIds.length > 0) {
+                    moveActionIds.forEach(moveActionId => {
+                        for (let i = 0; i < trackMoveAction.CirclesConnectingLine.length; i++) {
+                            if (trackMoveAction.CirclesConnectingLine[i].getAttr('data').id === moveActionId) {
+                                trackMoveAction.CirclesConnectingLine[i].destroy();
+                                trackMoveAction.CirclesConnectingLine[i] = undefined;
+                            }
+                        }
+                        trackMoveAction.CirclesConnectingLine = trackMoveAction.CirclesConnectingLine.filter(c => c !== undefined);
+                    });
+                }
             }
         });
     }
 
-    private destroyCircles(p: MoveAction) {
-        if (!this.trackMoveActions[p.ID]) {
+    private destroyCircles(moveActionId: string) {
+        if (!this.trackMoveActions[moveActionId]) {
             return;
         }
 
-        const trackDrawingMoveAction = this.trackMoveActions[p.ID];
+        const trackDrawingMoveAction = this.trackMoveActions[moveActionId];
         if (trackDrawingMoveAction.Circles && trackDrawingMoveAction.Circles.length > 0) {
             trackDrawingMoveAction.Circles.forEach(c => c.destroy());
+        }
+
+        if (trackDrawingMoveAction.CirclesTexts && trackDrawingMoveAction.CirclesTexts.length > 0) {
+            trackDrawingMoveAction.CirclesTexts.forEach(c => c.destroy());
+        }
+
+        if (trackDrawingMoveAction.CirclesConnectingLine && trackDrawingMoveAction.CirclesConnectingLine.length > 0) {
+            trackDrawingMoveAction.CirclesConnectingLine.forEach(c => c.destroy());
         }
 
         if (trackDrawingMoveAction.ScoreRadiusCircles && trackDrawingMoveAction.ScoreRadiusCircles.length > 0) {
             trackDrawingMoveAction.ScoreRadiusCircles.forEach(c => c.destroy());
         }
 
-        this.trackMoveActions[p.ID] = undefined;
-        delete this.trackMoveActions[p.ID];
+        this.trackMoveActions[moveActionId] = undefined;
+        delete this.trackMoveActions[moveActionId];
     }
 }
 

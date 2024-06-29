@@ -52,7 +52,8 @@ const levelConverter = {
                         Time: tp.Time,
                         Frame: tp.Frame,
                         HoldTime: tp.HoldTime,
-                        ScoresRadius: scoreRadiues
+                        ScoresRadius: scoreRadiues,
+                        Index: tp.Index || 0
                     };
                 });
                 const scoreRadiues = ma.ScoresRadius.map(s => {
@@ -62,13 +63,16 @@ const levelConverter = {
                     };
                 });
 
+                const threshold = ma.Threshold >= 0 ? ma.Threshold : 100;
+
                 return {
                     ID: ma.ID,
                     Name: ma.Name,
                     Joint: ma.Joint,
                     IsMajor: ma.IsMajor,
                     TrackingPoints: trackingPoints,
-                    ScoresRadius: scoreRadiues
+                    ScoresRadius: scoreRadiues,
+                    Threshold: threshold
                 };
             })
 
@@ -135,7 +139,7 @@ const levelConverter = {
         if (data.levelData && data.levelData.Moves) {
             const moves = data.levelData.Moves.map(m => {
                 const moveActions = m.MoveActions.map(ma => {
-                    const trackingPoints = ma.TrackingPoints.map(tp => {
+                    const trackingPoints = ma.TrackingPoints.map((tp, i) => {
                         const trackingPoint = new TrackingPoint();
 
                         trackingPoint.ID = tp.ID;
@@ -145,6 +149,7 @@ const levelConverter = {
                         trackingPoint.Time = tp.Time;
                         trackingPoint.Frame = tp.Frame;
                         trackingPoint.HoldTime = tp.HoldTime;
+                        trackingPoint.Index = (tp.Index === undefined || tp.Index === null) ? i : tp.Index;
                         if (tp.ScoresRadius && tp.ScoresRadius.length > 0) {
                             const scoreRadiues = tp.ScoresRadius.map(s => {
                                 const scoreRadius = new ScoreRadius();
@@ -172,6 +177,9 @@ const levelConverter = {
                     moveAction.IsMajor = ma.IsMajor;
                     moveAction.TrackingPoints = trackingPoints;
                     moveAction.ScoresRadius = scoreRadiues;
+                    if (ma.Threshold >= 0) {
+                        moveAction.Threshold = ma.Threshold;
+                    }
 
                     return moveAction;
                 })

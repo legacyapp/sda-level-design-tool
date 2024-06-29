@@ -144,10 +144,66 @@
                                     class="text-sm text-sm basis-full h-8 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
 
                             </div>
-                            <div class="flex flex-col mt-6">
+                            <div class="mt-2 flex flex-row space-x-10">
+                                <div class="basis-1/2 flex flex-row">
+                                    <div class="basis-24 grow-0 shrink-0 flex items-center">
+                                        <label for="threshold" class="text-sm font-medium text-gray-900 ">Threshold</label>
+                                    </div>
+                                    <div class="basis-full relative flex items-center">
+                                        <button type="button"
+                                            id="decrement-button"
+                                            data-input-counter-decrement="quantity-input"
+                                            class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                            <svg class="w-2 h-2 text-gray-900 "
+                                                aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 18 2">
+                                                <path stroke="currentColor"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M1 1h16" />
+                                            </svg>
+                                        </button>
+                                        <input type="number"
+                                            id="{{ID}}-Threshold"
+                                            value="{{Threshold}}"
+                                            data-id="{{ID}}"
+                                            data-path="Threshold"
+                                            data-value-change-step="1"
+                                            data-input-counter
+                                            aria-describedby="helper-text-explanation"
+                                            class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                            required />
+                                        <button type="button"
+                                            id="increment-button"
+                                            data-input-counter-increment="quantity-input"
+                                            class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                            <svg class="w-2 h-2 text-gray-900 "
+                                                aria-hidden="true"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 18 18">
+                                                <path stroke="currentColor"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M9 1v16M1 9h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="basis-1/2 flex flex-row"></div>
+                            </div>
+                            <div class="flex flex-row mt-6 space-x-4">
                                 <button data-id="{{ID}}" type="button"
                                     class="add-tracking-point h-10 w-40 text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm focus:outline-none ">
                                     Add Tracking Point
+                                </button>
+                                <button data-id="{{ID}}" type="button"
+                                    class="sort-tracking-point h-10 w-56 text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm focus:outline-none ">
+                                    Sort Tracking Points by Index
                                 </button>
                             </div>
                             <div id="TrackingPoints-{{ID}}">
@@ -164,7 +220,7 @@
     <script id="trackingPointsTemplate" type="text/x-handlebars-template">
         <div class="rounded-lg flex items-top shadow-lg flex-col px-4 border border-solid mt-2">
             <!-- All Tracking Points of an Action -->
-            <ul id="trackingPoints-{{ID}}" class="w-full divide-y divide-gray-200 mt-2">
+            <ul id="trackingPoints-{{ID}}" class="sortable-list w-full divide-y divide-gray-200 mt-2">
                 {{#each TrackingPoints}}
                     {{> aTrackingPointTemplate}}
                 {{/each}}
@@ -177,8 +233,8 @@
             <div class="flex flex-col">
                 <div class="flex justify-between items-center">
                     <div class="flex justify-start items-center">
-                        <h4 class="mt-2 font-bold leading-none tracking-tight text-purple-700">
-                            Tracking Point
+                        <h4 class="handle mt-2 font-bold leading-none tracking-tight text-purple-700"  title="Click here to drag Tracking Point to other position">
+                            {{Index}} - Tracking Point (click here to drag this to new position)
                         </h4>
                         <div class="deleteTrackingPoint mt-2 ml-6 rounded-lg hover:bg-red-200 p-1" data-id="{{ID}}">
                             <svg class="w-4 h-4 text-red-800" aria-hidden="true"
@@ -478,6 +534,61 @@
                         class="text-sm text-sm basis-full h-8 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
 
                 </div>
+                <div class="mt-2 flex flex-row space-x-10">
+                    <div class="basis-1/2 flex flex-row">
+                        <div
+                            class="basis-24 grow-0 shrink-0 flex items-center">
+                            <label for="{{ID}}-Index"
+                                class="text-sm font-medium text-gray-900 ">Index</label>
+                        </div>
+                        <div
+                            class="basis-full relative flex items-center">
+                            <button type="button"
+                                id="decrement-button"
+                                data-input-counter-decrement="quantity-input"
+                                class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                <svg class="w-2 h-2 text-gray-900 "
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 18 2">
+                                    <path stroke="currentColor"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M1 1h16" />
+                                </svg>
+                            </button>
+                            <input type="number"
+                                id="{{ID}}-Index"
+                                value="{{Index}}"
+                                data-id="{{ID}}"
+                                data-path="Index"
+                                data-value-change-step="1"
+                                data-input-counter
+                                aria-describedby="helper-text-explanation"
+                                class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                required />
+                            <button type="button"
+                                id="increment-button"
+                                data-input-counter-increment="quantity-input"
+                                class="bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                <svg class="w-2 h-2 text-gray-900 "
+                                    aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 18 18">
+                                    <path stroke="currentColor"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M9 1v16M1 9h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="basis-1/2 flex flex-row"></div>
+                </div>
             </div>
         </li>
     </script>
@@ -692,7 +803,7 @@
                             <div class="mt-2 flex flex-row space-x-10">
                                 <div class="basis-1/2 flex flex-row">
                                     <div class="basis-24 grow-0 shrink-0 flex items-center">
-                                        <label for="moveStartTime" class="text-sm font-medium text-gray-900 ">Start Time</label>
+                                        <label for="moveStartTime" class="text-sm font-medium text-gray-900 ">Star Time</label>
                                     </div>
                                     <div class="basis-full relative flex items-center">
                                         <button type="button" id="decrement-button" disabled

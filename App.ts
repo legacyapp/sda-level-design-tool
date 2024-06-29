@@ -74,25 +74,6 @@ export class App {
         return this.database.saveLevelData(this.CurrentDocumentId, this.applicationState.levelData);
     }
 
-    // async loadBeatDataFromOldDatabase(levelDataUrl: string) {
-    //     const videoBeatResponse = await fetch(levelDataUrl);
-    //     const videoBeat = await videoBeatResponse.json();
-    //     console.log(videoBeat)
-
-    //     const frameDataResponse = await fetch(videoBeat.danceVideo.frameDataUrl);
-    //     const frameData = await frameDataResponse.json();
-
-
-    //     NormalizedLandmarks(frameData);
-
-    //     const levelData = ConvertToLevelData(frameData, videoBeat);
-
-    //     return {
-    //         FrameData: frameData,
-    //         LevelData: levelData
-    //     }
-    // }
-
     async loadBeatDataFromOldDatabase(videoBeat, frameData) {
         NormalizedLandmarks(frameData);
 
@@ -188,18 +169,6 @@ export class App {
         $("#save").off("click");
         $("#save").on("click", function (event) {
             $("#loading-screen").removeClass("hidden");
-            const jsonString = JSON.stringify(self.applicationState.levelData, null, 2);
-            // // Copy the JSON string to the clipboard
-            // navigator.clipboard.writeText(jsonString)
-            //     .then(() => {
-            //         console.log('JSON string copied to clipboard');
-            //         //console.log(jsonString);
-            //     })
-            //     .catch(err => {
-            //         toastr.error('ERROR copying JSON string to clipboard:' + err);
-            //         console.error('Error copying JSON string to clipboard:', err);
-            //     });
-
             self.saveLevelData().then(result => {
                 $("#loading-screen").addClass("hidden");
                 toastr.success("Saved Successfully.");
@@ -256,7 +225,8 @@ export class App {
                         }
                     }
                     this.applicationState.levelData.Moves.splice(indexToRemove, 1);
-                    this.drawingTrackingPoint.destroyOrphanPoints(move.MoveActions.flatMap(p => p.TrackingPoints).map(p => p.ID));
+                    const [currentFrame] = this.playerUIController.getCurrentFrameAndTime();
+                    this.playerUIController.setCurrentFrame(currentFrame);
                 }
                 break;
 
@@ -299,8 +269,8 @@ export class App {
             case Message.MOVE_DETAIL_ACTION_DELETED:
                 {
                     this.playerUIController.pause();
-                    const moveAction = data as MoveAction;
-                    this.drawingTrackingPoint.destroyOrphanPoints(moveAction.TrackingPoints.map(p => p.ID));
+                    const [currentFrame] = this.playerUIController.getCurrentFrameAndTime();
+                    this.playerUIController.setCurrentFrame(currentFrame);
                 }
                 break;
 
@@ -318,7 +288,9 @@ export class App {
                 {
                     this.playerUIController.pause();
                     const trackingPoint = data as TrackingPoint;
-                    this.drawingTrackingPoint.destroyOrphanPoints([trackingPoint.ID]);
+                    //this.drawingTrackingPoint.destroyOrphanPoints([trackingPoint.ID]);
+                    const [currentFrame] = this.playerUIController.getCurrentFrameAndTime();
+                    this.playerUIController.setCurrentFrame(currentFrame);
                 }
                 break;
 
