@@ -1,4 +1,4 @@
-import { LevelData, Move, MoveAction, Position, ScoreRadius, TrackingPoint } from './Beat';
+import { LevelData, Move, MoveAction, Position, ScoreRadius, TrackingPoint, TrackingAdjustSetting } from './Beat';
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, Firestore, doc, updateDoc, setDoc, FirestoreDataConverter } from 'firebase/firestore/lite';
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
@@ -88,13 +88,30 @@ const levelConverter = {
             };
         });
 
-        const firestoreObj = {
+        const firestoreObj: any = {
             levelData: {
                 //ID: level.levelData.ID,
                 VideoInfo: videoInfo,
                 Moves: moves
             }
         };
+
+
+        if (level.levelData.TrackingAdjustSetting) {
+            if (!firestoreObj.TrackingAdjustSetting) {
+                firestoreObj.TrackingAdjustSetting = {};
+            }
+
+            if (level.levelData.TrackingAdjustSetting.BestFitFrameAdjust >= 0) {
+                firestoreObj.TrackingAdjustSetting.BestFitFrameAdjust = level.levelData.TrackingAdjustSetting.BestFitFrameAdjust;
+            } else {
+                firestoreObj.TrackingAdjustSetting.BestFitFrameAdjust = -1;
+            }
+
+            if (Array.isArray(level.levelData.TrackingAdjustSetting.FramesAdjust)) {
+                firestoreObj.TrackingAdjustSetting.FramesAdjust = level.levelData.TrackingAdjustSetting.FramesAdjust;
+            }
+        }
 
         return firestoreObj;
     },
@@ -184,6 +201,19 @@ const levelConverter = {
             });
 
             levelData.Moves = moves;
+        }
+
+        if (data.TrackingAdjustSetting) {
+            const trackingAdjustSetting = new TrackingAdjustSetting();
+            if (Number.isInteger(data.TrackingAdjustSetting.BestFitFrameAdjust)) {
+                trackingAdjustSetting.BestFitFrameAdjust = data.TrackingAdjustSetting.BestFitFrameAdjust;
+            }
+
+            if (Array.isArray(data.TrackingAdjustSetting.FramesAdjust)) {
+                trackingAdjustSetting.FramesAdjust = data.TrackingAdjustSetting.FramesAdjust;
+            }
+
+            levelData.TrackingAdjustSetting = trackingAdjustSetting;
         }
 
         return levelData;
