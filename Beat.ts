@@ -74,7 +74,20 @@ export class LevelData {
 
 export class TrackingAdjustSetting {
     BestFitFrameAdjust: number;
-    FramesAdjust: number[]
+    FramesAdjustScale: FrameAdjust[] = [];
+    FramesStopAdjustPosition: FrameAdjust[] = [];
+}
+
+export class FrameAdjust {
+    Index: number;
+    StartFrame: number;
+    EndFrame: number;
+
+    constructor(startFrame: number, endFrame: number, index: number) {
+        this.StartFrame = startFrame;
+        this.EndFrame = endFrame;
+        this.Index = index;
+    }
 }
 
 export class Move {
@@ -748,7 +761,7 @@ export class DrawingTrackingPoints {
             move.updateStartAndEndFrameTime();
 
             move.MoveActions.forEach(moveAction => {
-                let startFrame:number = move.StartFrame;
+                let startFrame: number = move.StartFrame;
                 let endFrame: number = move.EndFrame;
 
                 if (moveAction.TrackingPoints.length === 1) {

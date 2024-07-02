@@ -7,6 +7,8 @@ import { deepGet } from "./util";
 import { Database } from "./Db";
 import { NormalizedLandmarks } from "./Converter";
 import toastr from "toastr"
+import { MainTabsUIController } from "./Tab";
+import { SettingsUIController } from "./Settings";
 
 export interface NotifyDelegate {
     (message: Message, data: any): void;
@@ -51,6 +53,8 @@ export class App {
     drawingTrackingPoint: DrawingTrackingPoints;
     drawingLandmarks: DrawingLandmarks;
     levelUIController: LevelUIController;
+    mainTabsUIController: MainTabsUIController;
+    settingsUIController: SettingsUIController;
 
     database: Database;
 
@@ -160,10 +164,18 @@ export class App {
         this.playerUIController.setVideoFrameCallback(this.drawingTrackingPoint.draw.bind(this.drawingTrackingPoint));
         this.playerUIController.setVideoFrameCallback(this.drawingLandmarks.draw.bind(this.drawingLandmarks));
 
+        // Tabs UI
+        this.mainTabsUIController = new MainTabsUIController(this. applicationState);
+        this.mainTabsUIController.render();
+
         // Render UI
         this.levelUIController = new LevelUIController(this.applicationState, this.notify.bind(this));
         this.levelUIController.render();
         this.playerUIController.setVideoFrameCallback(this.levelUIController.videoFrameCallback.bind(this.levelUIController));
+
+        // Settings UI
+        this.settingsUIController = new SettingsUIController(this.applicationState, this.notify.bind(this));
+        this.settingsUIController.render();
 
         const self = this;
         $("#save").off("click");

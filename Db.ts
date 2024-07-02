@@ -1,4 +1,4 @@
-import { LevelData, Move, MoveAction, Position, ScoreRadius, TrackingPoint, TrackingAdjustSetting } from './Beat';
+import { LevelData, Move, MoveAction, Position, ScoreRadius, TrackingPoint, TrackingAdjustSetting, FrameAdjust } from './Beat';
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, Firestore, doc, updateDoc, setDoc, FirestoreDataConverter } from 'firebase/firestore/lite';
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
@@ -108,8 +108,26 @@ const levelConverter = {
                 firestoreObj.TrackingAdjustSetting.BestFitFrameAdjust = -1;
             }
 
-            if (Array.isArray(level.levelData.TrackingAdjustSetting.FramesAdjust)) {
-                firestoreObj.TrackingAdjustSetting.FramesAdjust = level.levelData.TrackingAdjustSetting.FramesAdjust;
+            if (level.levelData.TrackingAdjustSetting.FramesAdjustScale && level.levelData.TrackingAdjustSetting.FramesAdjustScale.length > 0) {
+                firestoreObj.TrackingAdjustSetting.FramesAdjustScale = level.levelData.TrackingAdjustSetting.FramesAdjustScale.map(f => {
+                    return {
+                        StartFrame: f.StartFrame,
+                        EndFrame: f.EndFrame
+                    };
+                });
+            } else {
+                firestoreObj.TrackingAdjustSetting.FramesAdjustScale = [];
+            }
+
+            if (level.levelData.TrackingAdjustSetting.FramesStopAdjustPosition && level.levelData.TrackingAdjustSetting.FramesStopAdjustPosition.length > 0) {
+                firestoreObj.TrackingAdjustSetting.FramesStopAdjustPosition = level.levelData.TrackingAdjustSetting.FramesStopAdjustPosition.map(f => {
+                    return {
+                        StartFrame: f.StartFrame,
+                        EndFrame: f.EndFrame
+                    };
+                });
+            } else {
+                firestoreObj.TrackingAdjustSetting.FramesStopAdjustPosition = [];
             }
         }
 
@@ -209,8 +227,18 @@ const levelConverter = {
                 trackingAdjustSetting.BestFitFrameAdjust = data.TrackingAdjustSetting.BestFitFrameAdjust;
             }
 
-            if (Array.isArray(data.TrackingAdjustSetting.FramesAdjust)) {
-                trackingAdjustSetting.FramesAdjust = data.TrackingAdjustSetting.FramesAdjust;
+            if (data.TrackingAdjustSetting.FramesAdjustScale && data.TrackingAdjustSetting.FramesAdjustScale.length > 0) {
+                const framesAdjustScale = data.TrackingAdjustSetting.FramesAdjustScale.map((f, i) => {
+                    return new FrameAdjust(f.StartFrame, f.EndFrame, i);
+                });
+                trackingAdjustSetting.FramesAdjustScale = framesAdjustScale;
+            }
+
+            if (data.TrackingAdjustSetting.FramesStopAdjustPosition && data.TrackingAdjustSetting.FramesStopAdjustPosition.length > 0) {
+                const framesStopAdjustPosition = data.TrackingAdjustSetting.FramesStopAdjustPosition.map((f, i) => {
+                    return new FrameAdjust(f.StartFrame, f.EndFrame, i);
+                });
+                trackingAdjustSetting.FramesStopAdjustPosition = framesStopAdjustPosition;
             }
 
             levelData.TrackingAdjustSetting = trackingAdjustSetting;
@@ -219,8 +247,6 @@ const levelConverter = {
         return levelData;
     }
 };
-
-
 
 export class Database {
     private app: FirebaseApp;
