@@ -472,25 +472,11 @@ export class LevelUIController {
 
     public renderAdjustFrame() {
         $("#bestFitFrameAdjust").off("input");
-        $("#framesAdjust").off("input");
 
         if (!this.applicationState.levelData.TrackingAdjustSetting) {
             this.applicationState.levelData.TrackingAdjustSetting = new TrackingAdjustSetting();
         }
         const self = this;
-        $("#framesAdjust").val(JSON.stringify(self.applicationState.levelData.TrackingAdjustSetting.FramesAdjust));
-        $("#framesAdjust").on("input", function (event) {
-            try {
-                if (!$(this).val()) {
-                    self.applicationState.levelData.TrackingAdjustSetting.FramesAdjust = [];
-                } else {
-                    const value = JSON.parse($(this).val() as string);
-                    self.applicationState.levelData.TrackingAdjustSetting.FramesAdjust = value;
-                }
-            } catch (e) {
-                toastr.error("ERROR: Invalid FramesAdjust value!");
-            }
-        });
 
         $("#bestFitFrameAdjust").val(self.applicationState.levelData.TrackingAdjustSetting.BestFitFrameAdjust);
         $("#bestFitFrameAdjust").on("input", function (event) {
