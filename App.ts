@@ -28,7 +28,8 @@ export enum Message {
     PLAYER_TRACKINGPOINT_UPDATE,
     PLAYER_TRACKINGPOINT_MOUSEOVER,
     PLAYER_TRACKINGPOINT_MOUSEOUT,
-    PLAYER_TRACKINGPOINT_CLICK
+    PLAYER_TRACKINGPOINT_CLICK,
+    SETTING_FRAME_ADJUST_UPDATED
 }
 
 export class ApplicationState {
@@ -165,7 +166,7 @@ export class App {
         this.playerUIController.setVideoFrameCallback(this.drawingLandmarks.draw.bind(this.drawingLandmarks));
 
         // Tabs UI
-        this.mainTabsUIController = new MainTabsUIController(this. applicationState);
+        this.mainTabsUIController = new MainTabsUIController(this.applicationState);
         this.mainTabsUIController.render();
 
         // Render UI
@@ -341,6 +342,15 @@ export class App {
                         block: 'center',
                         inline: 'center'
                     });
+                }
+                break;
+            case Message.SETTING_FRAME_ADJUST_UPDATED:
+                {
+                    this.playerUIController.pause();
+                    const frame = data as number;
+                    if (frame >= 0) {
+                        this.playerUIController.setCurrentFrame(frame);
+                    }
                 }
                 break;
             default:

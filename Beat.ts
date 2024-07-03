@@ -82,11 +82,13 @@ export class FrameAdjust {
     Index: number;
     StartFrame: number;
     EndFrame: number;
+    SettingName: string;
 
-    constructor(startFrame: number, endFrame: number, index: number) {
+    constructor(startFrame: number, endFrame: number, index: number, settingName: string) {
         this.StartFrame = startFrame;
         this.EndFrame = endFrame;
         this.Index = index;
+        this.SettingName = settingName;
     }
 }
 

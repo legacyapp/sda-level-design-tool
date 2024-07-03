@@ -229,14 +229,14 @@ const levelConverter = {
 
             if (data.TrackingAdjustSetting.FramesAdjustScale && data.TrackingAdjustSetting.FramesAdjustScale.length > 0) {
                 const framesAdjustScale = data.TrackingAdjustSetting.FramesAdjustScale.map((f, i) => {
-                    return new FrameAdjust(f.StartFrame, f.EndFrame, i);
+                    return new FrameAdjust(f.StartFrame, f.EndFrame, i, "FramesAdjustScale");
                 });
                 trackingAdjustSetting.FramesAdjustScale = framesAdjustScale;
             }
 
             if (data.TrackingAdjustSetting.FramesStopAdjustPosition && data.TrackingAdjustSetting.FramesStopAdjustPosition.length > 0) {
                 const framesStopAdjustPosition = data.TrackingAdjustSetting.FramesStopAdjustPosition.map((f, i) => {
-                    return new FrameAdjust(f.StartFrame, f.EndFrame, i);
+                    return new FrameAdjust(f.StartFrame, f.EndFrame, i, "FramesStopAdjustPosition");
                 });
                 trackingAdjustSetting.FramesStopAdjustPosition = framesStopAdjustPosition;
             }

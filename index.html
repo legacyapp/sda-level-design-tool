@@ -16,7 +16,7 @@
 
 <body>
     <script id="movesTemplate" type="text/x-handlebars-template">
-        <ul class="w-full divide-y divide-gray-200 mt-2 h-[calc(100vh-18rem)] overflow-y-auto">
+        <ul class="w-full divide-y divide-gray-200 mt-2 h-[calc(100vh-18.5rem)] overflow-y-auto">
             {{#each Moves}}
                 <li id="{{ID}}" data-id="{{ID}}" class="group p-2 hover:bg-gray-200">
                     <div class="flex items-center space-x-4 rtl:space-x-reverse">
@@ -624,8 +624,8 @@
         <li class="p-2">
             <div class="flex flex-row space-x-10 items-center">
                 <div class="basis-1/4 flex flex-row">
-                    <div class="basis-36 grow-0 shrink-0 flex items-center">
-                        <label for="FramesAdjustScale-{{Index}}-StartFrame"
+                    <div class="basis-24 grow-0 shrink-0 flex items-center">
+                        <label for="{{SettingName}}-{{Index}}-StartFrame"
                             class="text-sm font-medium text-gray-900">Start
                             Frame</label>
                     </div>
@@ -640,7 +640,7 @@
                                     stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
                             </svg>
                         </button>
-                        <input type="number" id="FramesAdjustScale-{{Index}}-StartFrame" value="{{StartFrame}}"
+                        <input type="number" id="{{SettingName}}-{{Index}}-StartFrame" value="{{StartFrame}}"
                             data-id="{{Index}}" data-path="StartFrame" data-value-change-step="1"
                             data-input-counter aria-describedby="helper-text-explanation"
                             class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
@@ -656,11 +656,18 @@
                                     d="M9 1v16M1 9h16" />
                             </svg>
                         </button>
+
+                        <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+                            </svg>
+                            <span class="sr-only">Icon description</span>
+                            </button>
                     </div>
                 </div>
                 <div class="basis-1/4 flex flex-row">
-                    <div class="basis-36 grow-0 shrink-0 flex items-center">
-                        <label for="FramesAdjustScale-{{ID}}-EndFrame"
+                    <div class="basis-24 grow-0 shrink-0 flex items-center">
+                        <label for="{{SettingName}}-{{Index}}-EndFrame"
                             class="text-sm font-medium text-gray-900 ">End
                             Frame</label>
                     </div>
@@ -675,7 +682,7 @@
                                     stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
                             </svg>
                         </button>
-                        <input type="number" id="FramesAdjustScale-{{Index}}-EndFrame" value="{{EndFrame}}"
+                        <input type="number" id="{{SettingName}}-{{Index}}-EndFrame" value="{{EndFrame}}"
                             data-id="{{Index}}" data-path="EndFrame" data-value-change-step="1"
                             data-input-counter aria-describedby="helper-text-explanation"
                             class="text-sm bg-gray-50 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
@@ -887,7 +894,7 @@
 
                             </div>
                             <div
-                                class="basis-3/4 rounded-lg flex items-top shadow-lg flex-col p-4 border border-solid h-[calc(100vh-15rem)] overflow-y-auto">
+                                class="basis-3/4 rounded-lg flex items-top shadow-lg flex-col p-4 border border-solid h-[calc(100vh-15.5rem)] overflow-y-auto">
                                 <div id="moveDetailHeader" class="flex justify-between items-center">
                                     <div>
                                         <h3
@@ -1066,7 +1073,7 @@
                             </div>
                         </div>
                     </div>
-                    <div id="videoSetting" class="hidden tabContent">
+                    <div id="videoSetting" class="hidden tabContent h-[calc(100vh-10rem)] overflow-y-auto">
                         <div class="flex flex-row justify-between">
                             <h2 class="text-lg font-extrabold leading-none tracking-tight text-gray-900 py-2">Tracking
                                 Adjust

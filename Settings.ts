@@ -1,4 +1,4 @@
-import { ApplicationState, NotifyDelegate } from "./App";
+import { ApplicationState, Message, NotifyDelegate } from "./App";
 import Handlebars from "handlebars";
 import $ from "jquery";
 import { deepGet, deepSet, parseNumber, scrollIntoViewIfNeeded } from "./util";
@@ -11,6 +11,7 @@ export class SettingsUIController {
 
     constructor(applicationState: ApplicationState, notify: NotifyDelegate) {
         this.applicationState = applicationState;
+        this.notify = notify;
     }
 
     public render() {
@@ -60,6 +61,8 @@ export class SettingsUIController {
                     newValue = newValue || 0;
                     deepSet(frameAdjust, input.data("path"), newValue);
                     input.val(newValue);
+
+                    self.notify(Message.SETTING_FRAME_ADJUST_UPDATED, newValue);
                 }
             }
         });
@@ -80,7 +83,7 @@ export class SettingsUIController {
         $(buttonSelector).on("click", function () {
             const length = self.applicationState.levelData.TrackingAdjustSetting[settingName].length;
             const lastElement = self.applicationState.levelData.TrackingAdjustSetting[settingName][length - 1];
-            const frameAdjust = new FrameAdjust(0, 0, lastElement ? lastElement.Index + 1 : 0);
+            const frameAdjust = new FrameAdjust(0, 0, lastElement ? lastElement.Index + 1 : 0, settingName);
             self.applicationState.levelData.TrackingAdjustSetting[settingName].push(frameAdjust);
 
             const source = $("#startEndFramesTemplate").html();
