@@ -43,6 +43,7 @@ export class PlayerWrapper {
         this.videoFrameRate = videoConfiguration.VideoFrameRate;
 
         const sefl = this;
+        // @ts-ignore
         this.player.ready(function () {
             $("#playVideoIcon").removeClass("hidden");
             $("#pauseVideoIcon").addClass("hidden");
