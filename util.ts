@@ -94,3 +94,18 @@ export function scrollIntoViewIfNeeded(element) {
         }
     }
 }
+
+export interface ParentChildMessage {
+    type: string;
+    data?: any;
+}
+
+export enum MessageTypes {
+    ChildReady = "CHILD_READY",
+    ChildSave = "CHILD_SAVE",
+    ChildRequestSongDataConfig = "CHILD_REQUEST_SONG_DATA_CONFIG",
+    ParentReady = "PARENT_READY",
+    ParentSendBlueprintVersion = "PARENT_SEND_BLUEPRINT_VERSION",
+    ParentSendSongDataConfig = "PARENT_SEND_SONG_DATA_CONFIG",
+    ParentSaveLevelData = "PARENT_SAVE_LEVEL_DATA"
+  }
