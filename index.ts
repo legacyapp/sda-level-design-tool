@@ -40,6 +40,7 @@ $(function () {
 					});
 					$("#versionSelectionContainer").html(html);
 
+					$("#versionSelectionContainer").off("change");
 					$("#versionSelectionContainer").on("change", "select", function (event) {
 						$("#loading-screen").removeClass("hidden");
 						const version = receivedData.find(v => v.name === $(this).val());
@@ -94,6 +95,7 @@ $(function () {
 							const html = template(videoSelectionData);
 							$("#videoSelectionContainer").html(html);
 
+							$("#videoSelectionContainer").off("change");
 							$("#videoSelectionContainer").on("change", "select", function (event) {
 								$("#loading-screen").removeClass("hidden");
 								const video = app.AllLevelDatas.find(l => l.id === $(this).val());
@@ -143,5 +145,13 @@ $(function () {
 			}
 		}
 	});
+
+	if (!INTEGRATE_BLUEPRINT_TOOL) {
+		const messageToParent: ParentChildMessage = {
+			type: MessageTypes.ParentSendSongDataConfig,
+			data: undefined
+		}
+		window.postMessage(messageToParent, '*');
+	}
 });
 
