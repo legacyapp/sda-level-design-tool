@@ -1,6 +1,8 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const Dotenv = require('dotenv-webpack');
+
 module.exports = {
   entry: './index.ts',
   mode: 'development',
@@ -22,11 +24,15 @@ module.exports = {
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
-  plugins: [new HtmlWebpackPlugin({
-    title: 'Level Design Tool',
-    filename: 'index.html',
-    template: 'index.html'
-  }), new MiniCssExtractPlugin({ filename: "style.css" })],
+  plugins: [
+    new Dotenv(),
+    new HtmlWebpackPlugin({
+      title: 'Level Design Tool',
+      filename: 'index.html',
+      template: 'index.html'
+    }),
+    new MiniCssExtractPlugin({ filename: "style.css" })
+  ],
   output: {
     filename: 'index.js',
     path: path.resolve(__dirname, 'dist'),

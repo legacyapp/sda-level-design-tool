@@ -7,13 +7,11 @@ import { NormalizedLandmarks } from "./Converter";
 import Handlebars from "handlebars";
 import { convertToLevelData, MessageTypes, ParentChildMessage, renamePropertiesInDepth } from "./util";
 
-const INTEGRATE_BLUEPRINT_TOOL = true;
-
 const app = new App();
 app.Init();
 
 $(function () {
-  if (INTEGRATE_BLUEPRINT_TOOL) {
+  if (process.env.APP_INTEGRATE_BLUEPRINT_TOOL) {
     // Listen for messages from the parent window
     window.addEventListener('message', (event: MessageEvent) => {
       const message = event.data as ParentChildMessage;
@@ -70,7 +68,7 @@ $(function () {
                   Videos: []
                 };
 
-                if (INTEGRATE_BLUEPRINT_TOOL) {
+                if (process.env.APP_INTEGRATE_BLUEPRINT_TOOL) {
                   if (receivedData.data && receivedData.data.length > 0) {
                     videoSelectionData.Videos = receivedData.data.map((s, i) => {
                       return {
