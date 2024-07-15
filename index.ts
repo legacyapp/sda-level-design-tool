@@ -5,7 +5,7 @@ import { App, ApplicationState } from "./App";
 import { LevelData, VideoInfo } from "./Beat";
 import { NormalizedLandmarks } from "./Converter";
 import Handlebars from "handlebars";
-import { MessageTypes, ParentChildMessage } from "./util";
+import { convertToLevelData, MessageTypes, ParentChildMessage, renamePropertiesInDepth } from "./util";
 
 const INTEGRATE_BLUEPRINT_TOOL = true;
 
@@ -98,43 +98,87 @@ $(function () {
 							$("#videoSelectionContainer").off("change");
 							$("#videoSelectionContainer").on("change", "select", function (event) {
 								$("#loading-screen").removeClass("hidden");
-								const video = app.AllLevelDatas.find(l => l.id === $(this).val());
-
-
-								if (video) {
-									app.getJson(video.danceVideo.frameDataUrl)
-										.then(frameData => {
-											const levelData = video.data;
-											const videoInfo = new VideoInfo();
-
-											videoInfo.FrameRate = frameData.frame_rate;
-											videoInfo.Height = frameData.size[0];
-											videoInfo.Width = frameData.size[1];
-											videoInfo.VideoUrl = video.danceVideo.videoUrl;
-											levelData.VideoInfo = videoInfo;
-
-											NormalizedLandmarks(frameData);
-											const applicationState = new ApplicationState(frameData, levelData);
-
-											app.CurrentDocumentId = video.id;
-											app.run(applicationState);
-										});
+								const messageToParent: ParentChildMessage = {
+									type: MessageTypes.ChildRequestLevelData,
+									data: {
+										songId: $(this).val()
+									}
 								}
+								window.parent.postMessage(messageToParent, '*');
+
+								// const video = app.AllLevelDatas.find(l => l.id === $(this).val());
+
+								// if (video) {
+								// 	app.getJson(video.danceVideo.frameDataUrl)
+								// 		.then(frameData => {
+								// 			const levelData = video.data;
+								// 			const videoInfo = new VideoInfo();
+
+								// 			videoInfo.FrameRate = frameData.frame_rate;
+								// 			videoInfo.Height = frameData.size[0];
+								// 			videoInfo.Width = frameData.size[1];
+								// 			videoInfo.VideoUrl = video.danceVideo.videoUrl;
+								// 			levelData.VideoInfo = videoInfo;
+
+								// 			NormalizedLandmarks(frameData);
+								// 			const applicationState = new ApplicationState(frameData, levelData);
+
+								// 			app.CurrentDocumentId = video.id;
+								// 			app.run(applicationState);
+								// 		});
+								// }
 							});
 
 							// trigger select the first video in the selection
-							$("#videoSelection").val(videoSelectionData.Videos[0].DocumentId).trigger("change");
+							if (videoSelectionData.Videos && videoSelectionData.Videos.length > 0) {
+								$("#videoSelection").val(videoSelectionData.Videos[0].DocumentId).trigger("change");
+							}
 							$("#loading-screen").addClass("hidden");
 						});
 
 					break;
 				}
+				case MessageTypes.ParentSendLevelData: {
+					let receivedData = message.data;
+					const video = app.AllLevelDatas.find(l => l.id === receivedData.songId);
+					if (video) {
+						app.getJson(video.danceVideo.frameDataUrl)
+							.then(frameData => {
+								let levelData = receivedData.levelData?.data;
+								if (!levelData) {
+									levelData = video.data;
+								} else {
+									levelData = renamePropertiesInDepth(levelData);
+									levelData = convertToLevelData(receivedData.songId, {
+										levelData: levelData,
+										info: null
+									});
+								}
+
+								const videoInfo = new VideoInfo();
+
+								videoInfo.FrameRate = frameData.frame_rate;
+								videoInfo.Height = frameData.size[0];
+								videoInfo.Width = frameData.size[1];
+								videoInfo.VideoUrl = video.danceVideo.videoUrl;
+								levelData.VideoInfo = videoInfo;
+
+								NormalizedLandmarks(frameData);
+								const applicationState = new ApplicationState(frameData, levelData);
+
+								app.CurrentDocumentId = video.id;
+								app.run(applicationState);
+							});
+					}
+
+					break;
+				}
 				case MessageTypes.ParentSaveLevelData: {
-					const receivedData = message.data;
 					if (message.data.ok) {
 						toastr.success("Level Data Saved Successfully.");
 					} else {
-						toastr.error(receivedData);
+						toastr.error("ERROR: cannot save level data to blueprint. See console log for detail.");
+						console.log(message);
 					}
 
 					break;

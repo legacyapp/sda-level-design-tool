@@ -2,6 +2,7 @@ import { LevelData, Move, MoveAction, Position, ScoreRadius, TrackingPoint, Trac
 import { FirebaseApp, initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, Firestore, doc, updateDoc, setDoc, FirestoreDataConverter } from 'firebase/firestore/lite';
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import { convertToLevelData } from './util';
 
 const collectionName = "level_gear_demo";
 
@@ -139,112 +140,7 @@ const levelConverter = {
         return new Level(data.levelData);
     },
     fromFirestoreData(id, data) {
-        const levelData = new LevelData();
-
-        levelData.ID = id;
-        levelData.Title = data.info?.songTitle
-
-        if (data.levelData && data.levelData.VideoInfo) {
-            const videoInfo = {
-                FrameRate: data.levelData.VideoInfo.FrameRate,
-                Height: data.levelData.VideoInfo.Height,
-                Width: data.levelData.VideoInfo.Width,
-                VideoUrl: data.levelData.VideoInfo.VideoUrl,
-            }
-            levelData.VideoInfo = videoInfo;
-        }
-
-        if (data.levelData && data.levelData.Moves) {
-            const moves = data.levelData.Moves.map(m => {
-                const moveActions = m.MoveActions.map(ma => {
-                    const trackingPoints = ma.TrackingPoints.map((tp, i) => {
-                        const trackingPoint = new TrackingPoint();
-
-                        trackingPoint.ID = tp.ID;
-                        trackingPoint.Pos = new Position();
-                        trackingPoint.Pos.X = tp.Pos.X;
-                        trackingPoint.Pos.Y = tp.Pos.Y;
-                        trackingPoint.Time = tp.Time;
-                        trackingPoint.Frame = tp.Frame;
-                        trackingPoint.HoldTime = tp.HoldTime;
-                        trackingPoint.Index = (tp.Index === undefined || tp.Index === null) ? i : tp.Index;
-                        if (tp.ScoresRadius && tp.ScoresRadius.length > 0) {
-                            const scoreRadiues = tp.ScoresRadius.map(s => {
-                                const scoreRadius = new ScoreRadius();
-                                scoreRadius.Radius = s.Radius;
-                                scoreRadius.Scoring = s.Scoring;
-                                return scoreRadius;
-                            });
-                            trackingPoint.ScoresRadius = scoreRadiues;
-                        }
-
-                        return trackingPoint;
-                    });
-                    const scoreRadiues = ma.ScoresRadius.map(s => {
-                        const scoreRadius = new ScoreRadius();
-                        scoreRadius.Radius = s.Radius;
-                        scoreRadius.Scoring = s.Scoring;
-                        return scoreRadius;
-                    });
-
-                    const moveAction = new MoveAction();
-
-                    moveAction.ID = ma.ID;
-                    moveAction.Name = ma.Name ? ma.Name : "";
-                    moveAction.Joint = ma.Joint;
-                    moveAction.IsMajor = ma.IsMajor;
-                    moveAction.TrackingPoints = trackingPoints;
-                    moveAction.ScoresRadius = scoreRadiues;
-                    if (ma.Threshold >= 0) {
-                        moveAction.Threshold = ma.Threshold;
-                    }
-
-                    return moveAction;
-                })
-
-                const move = new Move();
-
-                move.ID = m.ID
-                move.Name = m.Name;
-                move.StartTime = m.StartTime;
-                move.EndTime = m.EndTime;
-                move.StartFrame = m.StartFrame || 0;
-                move.EndFrame = m.EndFrame || 0;
-                move.MoveActions = moveActions;
-
-                // If the start frame/time and the end frame/time are incorrect, we should re-calculate them.
-                move.updateStartAndEndFrameTime();
-
-                return move;
-            });
-
-            levelData.Moves = moves;
-        }
-
-        if (data.TrackingAdjustSetting) {
-            const trackingAdjustSetting = new TrackingAdjustSetting();
-            if (Number.isInteger(data.TrackingAdjustSetting.BestFitFrameAdjust)) {
-                trackingAdjustSetting.BestFitFrameAdjust = data.TrackingAdjustSetting.BestFitFrameAdjust;
-            }
-
-            if (data.TrackingAdjustSetting.FramesAdjustScale && data.TrackingAdjustSetting.FramesAdjustScale.length > 0) {
-                const framesAdjustScale = data.TrackingAdjustSetting.FramesAdjustScale.map((f, i) => {
-                    return new FrameAdjust(f.StartFrame, f.EndFrame, i, "FramesAdjustScale");
-                });
-                trackingAdjustSetting.FramesAdjustScale = framesAdjustScale;
-            }
-
-            if (data.TrackingAdjustSetting.FramesStopAdjustPosition && data.TrackingAdjustSetting.FramesStopAdjustPosition.length > 0) {
-                const framesStopAdjustPosition = data.TrackingAdjustSetting.FramesStopAdjustPosition.map((f, i) => {
-                    return new FrameAdjust(f.StartFrame, f.EndFrame, i, "FramesStopAdjustPosition");
-                });
-                trackingAdjustSetting.FramesStopAdjustPosition = framesStopAdjustPosition;
-            }
-
-            levelData.TrackingAdjustSetting = trackingAdjustSetting;
-        }
-
-        return levelData;
+        return convertToLevelData(id, data);
     }
 };
 
