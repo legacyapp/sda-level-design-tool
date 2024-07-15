@@ -232,21 +232,22 @@ export function convertToLevelData(id, data) {
         levelData.Moves = moves;
     }
 
-    if (data.TrackingAdjustSetting) {
+    const trackingAdjustSettingFromDb = data.TrackingAdjustSetting || data.levelData?.TrackingAdjustSetting;
+    if (trackingAdjustSettingFromDb) {
         const trackingAdjustSetting = new TrackingAdjustSetting();
-        if (Number.isInteger(data.TrackingAdjustSetting.BestFitFrameAdjust)) {
-            trackingAdjustSetting.BestFitFrameAdjust = data.TrackingAdjustSetting.BestFitFrameAdjust;
+        if (Number.isInteger(trackingAdjustSettingFromDb.BestFitFrameAdjust)) {
+            trackingAdjustSetting.BestFitFrameAdjust = trackingAdjustSettingFromDb.BestFitFrameAdjust;
         }
 
-        if (data.TrackingAdjustSetting.FramesAdjustScale && data.TrackingAdjustSetting.FramesAdjustScale.length > 0) {
-            const framesAdjustScale = data.TrackingAdjustSetting.FramesAdjustScale.map((f, i) => {
+        if (trackingAdjustSettingFromDb.FramesAdjustScale && trackingAdjustSettingFromDb.FramesAdjustScale.length > 0) {
+            const framesAdjustScale = trackingAdjustSettingFromDb.FramesAdjustScale.map((f, i) => {
                 return new FrameAdjust(f.StartFrame, f.EndFrame, i, "FramesAdjustScale");
             });
             trackingAdjustSetting.FramesAdjustScale = framesAdjustScale;
         }
 
-        if (data.TrackingAdjustSetting.FramesStopAdjustPosition && data.TrackingAdjustSetting.FramesStopAdjustPosition.length > 0) {
-            const framesStopAdjustPosition = data.TrackingAdjustSetting.FramesStopAdjustPosition.map((f, i) => {
+        if (trackingAdjustSettingFromDb.FramesStopAdjustPosition && trackingAdjustSettingFromDb.FramesStopAdjustPosition.length > 0) {
+            const framesStopAdjustPosition = trackingAdjustSettingFromDb.FramesStopAdjustPosition.map((f, i) => {
                 return new FrameAdjust(f.StartFrame, f.EndFrame, i, "FramesStopAdjustPosition");
             });
             trackingAdjustSetting.FramesStopAdjustPosition = framesStopAdjustPosition;

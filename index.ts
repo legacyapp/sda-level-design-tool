@@ -152,6 +152,11 @@ $(function () {
                     levelData = video.data;
                   }
 
+                  if (!levelData) {
+                    levelData = new LevelData();
+                    levelData.ID = receivedData.songId;
+                  }
+
                   const videoInfo = new VideoInfo();
 
                   videoInfo.FrameRate = frameData.frame_rate;
