@@ -13,189 +13,211 @@ const app = new App();
 app.Init();
 
 $(function () {
-	// Listen for messages from the parent window
-	window.addEventListener('message', (event: MessageEvent) => {
-		const message = event.data as ParentChildMessage;
+  if (INTEGRATE_BLUEPRINT_TOOL) {
+    // Listen for messages from the parent window
+    window.addEventListener('message', (event: MessageEvent) => {
+      const message = event.data as ParentChildMessage;
 
-		if (message && message.type) {
-			switch (message.type) {
-				case MessageTypes.ParentReady: {
-					// Notify the parent that the child is ready
-					const messageToParent: ParentChildMessage = {
-						type: MessageTypes.ChildReady
-					}
-					window.parent.postMessage(messageToParent, '*');
-					break;
-				}
+      if (message && message.type) {
+        switch (message.type) {
+          case MessageTypes.ParentReady: {
+            // Notify the parent that the child is ready
+            const messageToParent: ParentChildMessage = {
+              type: MessageTypes.ChildReady
+            }
+            window.parent.postMessage(messageToParent, '*');
+            break;
+          }
 
-				case MessageTypes.ParentSendBlueprintVersion: {
-					// Access the data sent from the parent window
-					const receivedData = message.data;
+          case MessageTypes.ParentSendBlueprintVersion: {
+            // Access the data sent from the parent window
+            const receivedData = message.data;
 
-					const source = $("#versionSelectionTemplate").html();
-					const template = Handlebars.compile(source);
+            const source = $("#versionSelectionTemplate").html();
+            const template = Handlebars.compile(source);
 
-					const html = template({
-						Versions: receivedData
-					});
-					$("#versionSelectionContainer").html(html);
+            const html = template({
+              Versions: receivedData
+            });
+            $("#versionSelectionContainer").html(html);
 
-					$("#versionSelectionContainer").off("change");
-					$("#versionSelectionContainer").on("change", "select", function (event) {
-						$("#loading-screen").removeClass("hidden");
-						const version = receivedData.find(v => v.name === $(this).val());
-						const messageToParent: ParentChildMessage = {
-							type: MessageTypes.ChildRequestSongDataConfig,
-							data: {
-								version: version.name
-							}
-						}
-						window.parent.postMessage(messageToParent, '*');
+            $("#versionSelectionContainer").off("change");
+            $("#versionSelectionContainer").on("change", "select", function (event) {
+              $("#loading-screen").removeClass("hidden");
+              const version = receivedData.find(v => v.name === $(this).val());
+              const messageToParent: ParentChildMessage = {
+                type: MessageTypes.ChildRequestSongDataConfig,
+                data: {
+                  version: version.name
+                }
+              }
+              window.parent.postMessage(messageToParent, '*');
 
-					});
+            });
 
-					// trigger select the first video in the selection
-					$("#versionSelection").val(receivedData[0].name).trigger("change");
+            // trigger select the first video in the selection
+            $("#versionSelection").val(receivedData[0].name).trigger("change");
 
-					break;
-				}
-				case MessageTypes.ParentSendSongDataConfig: {
-					const receivedData = message.data;
+            break;
+          }
+          case MessageTypes.ParentSendSongDataConfig: {
+            const receivedData = message.data;
 
-					app.loadAllLevelDatas()
-						.then(allLevelDatas => {
+            app.loadAllLevelDatas()
+              .then(allLevelDatas => {
 
-							const videoSelectionData = {
-								Videos: []
-							};
+                const videoSelectionData = {
+                  Videos: []
+                };
 
-							if (INTEGRATE_BLUEPRINT_TOOL) {
-								if (receivedData.data && receivedData.data.length > 0) {
-									videoSelectionData.Videos = receivedData.data.map((s, i) => {
-										return {
-											Index: i,
-											DocumentId: s.objId,
-											Title: s.data.info.songTitle
-										};
-									});
-								}
-							} else {
-								videoSelectionData.Videos = allLevelDatas.map((l, i) => {
-									return {
-										Index: i,
-										DocumentId: l.id,
-										Title: l.data.Title
-									}
-								});
-							}
+                if (INTEGRATE_BLUEPRINT_TOOL) {
+                  if (receivedData.data && receivedData.data.length > 0) {
+                    videoSelectionData.Videos = receivedData.data.map((s, i) => {
+                      return {
+                        Index: i,
+                        DocumentId: s.objId,
+                        Title: s.data.info.songTitle
+                      };
+                    });
+                  }
+                } else {
+                  videoSelectionData.Videos = allLevelDatas.map((l, i) => {
+                    return {
+                      Index: i,
+                      DocumentId: l.id,
+                      Title: l.data.Title
+                    }
+                  });
+                }
 
-							// Render video selection
-							const source = $("#videoSelectionTemplate").html();
-							const template = Handlebars.compile(source);
-							const html = template(videoSelectionData);
-							$("#videoSelectionContainer").html(html);
+                // Render video selection
+                const source = $("#videoSelectionTemplate").html();
+                const template = Handlebars.compile(source);
+                const html = template(videoSelectionData);
+                $("#videoSelectionContainer").html(html);
 
-							$("#videoSelectionContainer").off("change");
-							$("#videoSelectionContainer").on("change", "select", function (event) {
-								$("#loading-screen").removeClass("hidden");
-								const messageToParent: ParentChildMessage = {
-									type: MessageTypes.ChildRequestLevelData,
-									data: {
-										songId: $(this).val()
-									}
-								}
-								window.parent.postMessage(messageToParent, '*');
+                $("#videoSelectionContainer").off("change");
+                $("#videoSelectionContainer").on("change", "select", function (event) {
+                  $("#loading-screen").removeClass("hidden");
+                  const messageToParent: ParentChildMessage = {
+                    type: MessageTypes.ChildRequestLevelData,
+                    data: {
+                      songId: $(this).val()
+                    }
+                  }
+                  window.parent.postMessage(messageToParent, '*');
+                });
 
-								// const video = app.AllLevelDatas.find(l => l.id === $(this).val());
+                // trigger select the first video in the selection
+                if (videoSelectionData.Videos && videoSelectionData.Videos.length > 0) {
+                  $("#videoSelection").val(videoSelectionData.Videos[0].DocumentId).trigger("change");
+                }
+                $("#loading-screen").addClass("hidden");
+              });
 
-								// if (video) {
-								// 	app.getJson(video.danceVideo.frameDataUrl)
-								// 		.then(frameData => {
-								// 			const levelData = video.data;
-								// 			const videoInfo = new VideoInfo();
+            break;
+          }
+          case MessageTypes.ParentSendLevelData: {
+            let receivedData = message.data;
+            const video = app.AllLevelDatas.find(l => l.id === receivedData.songId);
+            if (video) {
+              app.getJson(video.danceVideo.frameDataUrl)
+                .then(frameData => {
+                  let levelData = receivedData.levelData?.data;
+                  if (!levelData) {
+                    levelData = video.data;
+                  } else {
+                    levelData = renamePropertiesInDepth(levelData);
+                    levelData = convertToLevelData(receivedData.songId, {
+                      levelData: levelData,
+                      info: null
+                    });
+                  }
 
-								// 			videoInfo.FrameRate = frameData.frame_rate;
-								// 			videoInfo.Height = frameData.size[0];
-								// 			videoInfo.Width = frameData.size[1];
-								// 			videoInfo.VideoUrl = video.danceVideo.videoUrl;
-								// 			levelData.VideoInfo = videoInfo;
+                  const videoInfo = new VideoInfo();
 
-								// 			NormalizedLandmarks(frameData);
-								// 			const applicationState = new ApplicationState(frameData, levelData);
+                  videoInfo.FrameRate = frameData.frame_rate;
+                  videoInfo.Height = frameData.size[0];
+                  videoInfo.Width = frameData.size[1];
+                  videoInfo.VideoUrl = video.danceVideo.videoUrl;
+                  levelData.VideoInfo = videoInfo;
 
-								// 			app.CurrentDocumentId = video.id;
-								// 			app.run(applicationState);
-								// 		});
-								// }
-							});
+                  NormalizedLandmarks(frameData);
+                  const applicationState = new ApplicationState(frameData, levelData);
 
-							// trigger select the first video in the selection
-							if (videoSelectionData.Videos && videoSelectionData.Videos.length > 0) {
-								$("#videoSelection").val(videoSelectionData.Videos[0].DocumentId).trigger("change");
-							}
-							$("#loading-screen").addClass("hidden");
-						});
+                  app.CurrentDocumentId = video.id;
+                  app.run(applicationState);
+                });
+            }
 
-					break;
-				}
-				case MessageTypes.ParentSendLevelData: {
-					let receivedData = message.data;
-					const video = app.AllLevelDatas.find(l => l.id === receivedData.songId);
-					if (video) {
-						app.getJson(video.danceVideo.frameDataUrl)
-							.then(frameData => {
-								let levelData = receivedData.levelData?.data;
-								if (!levelData) {
-									levelData = video.data;
-								} else {
-									levelData = renamePropertiesInDepth(levelData);
-									levelData = convertToLevelData(receivedData.songId, {
-										levelData: levelData,
-										info: null
-									});
-								}
+            break;
+          }
+          case MessageTypes.ParentSaveLevelData: {
+            if (message.data.ok) {
+              toastr.success("Level Data Saved Successfully.");
+            } else {
+              toastr.error("ERROR: cannot save level data to blueprint. See console log for detail.");
+              console.log(message);
+            }
 
-								const videoInfo = new VideoInfo();
+            break;
+          }
+          default: {
+            break;
+          }
+        }
+      }
+    });
+  } else {
+    app.loadAllLevelDatas()
+      .then(allLevelDatas => {
 
-								videoInfo.FrameRate = frameData.frame_rate;
-								videoInfo.Height = frameData.size[0];
-								videoInfo.Width = frameData.size[1];
-								videoInfo.VideoUrl = video.danceVideo.videoUrl;
-								levelData.VideoInfo = videoInfo;
+        const videoSelectionData = {
+          Videos: []
+        };
 
-								NormalizedLandmarks(frameData);
-								const applicationState = new ApplicationState(frameData, levelData);
+        videoSelectionData.Videos = allLevelDatas.map((l, i) => {
+          return {
+            Index: i,
+            DocumentId: l.id,
+            Title: l.data.Title
+          }
+        });
 
-								app.CurrentDocumentId = video.id;
-								app.run(applicationState);
-							});
-					}
+        // Render tracking points
+        const source = $("#videoSelectionTemplate").html();
+        const template = Handlebars.compile(source);
 
-					break;
-				}
-				case MessageTypes.ParentSaveLevelData: {
-					if (message.data.ok) {
-						toastr.success("Level Data Saved Successfully.");
-					} else {
-						toastr.error("ERROR: cannot save level data to blueprint. See console log for detail.");
-						console.log(message);
-					}
+        const html = template(videoSelectionData);
+        $("#videoSelectionContainer").html(html);
 
-					break;
-				}
-				default: {
-					break;
-				}
-			}
-		}
-	});
+        $("#videoSelectionContainer").on("change", "select", function (event) {
+          $("#loading-screen").removeClass("hidden");
+          const video = app.AllLevelDatas.find(l => l.id === $(this).val());
 
-	if (!INTEGRATE_BLUEPRINT_TOOL) {
-		const messageToParent: ParentChildMessage = {
-			type: MessageTypes.ParentSendSongDataConfig,
-			data: undefined
-		}
-		window.postMessage(messageToParent, '*');
-	}
+          //  $("#videoSelection").prop("selectedIndex", 0);
+          app.getJson(video.danceVideo.frameDataUrl)
+            .then(frameData => {
+              const levelData = video.data;
+              const videoInfo = new VideoInfo();
+
+              videoInfo.FrameRate = frameData.frame_rate;
+              videoInfo.Height = frameData.size[0];
+              videoInfo.Width = frameData.size[1];
+              videoInfo.VideoUrl = video.danceVideo.videoUrl;
+              levelData.VideoInfo = videoInfo;
+
+              NormalizedLandmarks(frameData);
+              const applicationState = new ApplicationState(frameData, levelData);
+
+              app.CurrentDocumentId = video.id;
+              app.run(applicationState);
+            });
+        });
+
+        // trigger select the first video in the selection
+        $("#videoSelection").val(allLevelDatas[0].id).trigger("change");
+      });
+  }
 });
 
