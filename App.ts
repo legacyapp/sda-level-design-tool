@@ -49,6 +49,7 @@ export class App {
 
     public CurrentDocumentId: string;
     public AllLevelDatas;
+    public SongDataConfig;
 
     playerUIController: PlayerUIController;
     drawingTrackingPoint: DrawingTrackingPoints;
@@ -191,7 +192,7 @@ export class App {
 
             self.saveLevelData().then(result => {
                 $("#loading-screen").addClass("hidden");
-                toastr.success("Saved Successfully.");
+                toastr.success("Saved Level Data to Firebase Successfully.");
             });
         });
 

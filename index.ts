@@ -60,7 +60,7 @@ $(function () {
           }
           case MessageTypes.ParentSendSongDataConfig: {
             const receivedData = message.data;
-
+            app.SongDataConfig = receivedData.data;
             app.loadAllLevelDatas()
               .then(allLevelDatas => {
 
@@ -117,19 +117,33 @@ $(function () {
           }
           case MessageTypes.ParentSendLevelData: {
             let receivedData = message.data;
-            const video = app.AllLevelDatas.find(l => l.id === receivedData.songId);
+            let video;
+            let postUrl;
+            let videoUrl;
+
+            if (process.env.APP_INTEGRATE_BLUEPRINT_TOOL) {
+              video = app.SongDataConfig.find(s => s.objId === receivedData.songId);
+              postUrl = video.data.levelData.poseUrl;
+              videoUrl = video.data.levelData.videoUrl;
+            } else {
+              video = app.AllLevelDatas.find(l => l.id === receivedData.songId);
+              postUrl = video.danceVideo.frameDataUrl;
+              videoUrl = video.danceVideo.videoUrl;
+            }
+
             if (video) {
-              app.getJson(video.danceVideo.frameDataUrl)
+              app.getJson(postUrl)
                 .then(frameData => {
-                  let levelData = receivedData.levelData?.data;
-                  if (!levelData) {
-                    levelData = video.data;
-                  } else {
-                    levelData = renamePropertiesInDepth(levelData);
+                  let levelData;
+
+                  if (process.env.APP_INTEGRATE_BLUEPRINT_TOOL) {
+                    levelData = renamePropertiesInDepth(receivedData.levelData?.data);
                     levelData = convertToLevelData(receivedData.songId, {
                       levelData: levelData,
                       info: null
                     });
+                  } else {
+                    levelData = video.data;
                   }
 
                   const videoInfo = new VideoInfo();
@@ -137,13 +151,13 @@ $(function () {
                   videoInfo.FrameRate = frameData.frame_rate;
                   videoInfo.Height = frameData.size[0];
                   videoInfo.Width = frameData.size[1];
-                  videoInfo.VideoUrl = video.danceVideo.videoUrl;
+                  videoInfo.VideoUrl = videoUrl;
                   levelData.VideoInfo = videoInfo;
 
                   NormalizedLandmarks(frameData);
                   const applicationState = new ApplicationState(frameData, levelData);
 
-                  app.CurrentDocumentId = video.id;
+                  app.CurrentDocumentId = video.id || video.objId;
                   app.run(applicationState);
                 });
             }
@@ -152,7 +166,7 @@ $(function () {
           }
           case MessageTypes.ParentSaveLevelData: {
             if (message.data.ok) {
-              toastr.success("Level Data Saved Successfully.");
+              toastr.success("Saved Level Data to Blueprint Successfully.");
             } else {
               toastr.error("ERROR: cannot save level data to blueprint. See console log for detail.");
               console.log(message);
