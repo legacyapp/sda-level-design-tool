@@ -137,11 +137,17 @@ $(function () {
                   let levelData;
 
                   if (process.env.APP_INTEGRATE_BLUEPRINT_TOOL) {
-                    levelData = renamePropertiesInDepth(receivedData.levelData?.data);
-                    levelData = convertToLevelData(receivedData.songId, {
-                      levelData: levelData,
-                      info: null
-                    });
+                    if (receivedData.levelData?.data) {
+                      levelData = renamePropertiesInDepth(receivedData.levelData?.data);
+                      levelData = convertToLevelData(receivedData.songId, {
+                        levelData: levelData,
+                        info: null
+                      });
+                    } else {
+                      // try to load level data in firebase
+                      levelData = app.AllLevelDatas.find(l => l.id === receivedData.songId)?.data;
+                    }
+
                   } else {
                     levelData = video.data;
                   }
