@@ -103,21 +103,15 @@ const levelConverter = {
                 firestoreObj.TrackingAdjustSetting = {};
             }
 
-            if (level.levelData.TrackingAdjustSetting.BestFitFrameAdjust >= 0) {
-                firestoreObj.TrackingAdjustSetting.BestFitFrameAdjust = level.levelData.TrackingAdjustSetting.BestFitFrameAdjust;
-            } else {
-                firestoreObj.TrackingAdjustSetting.BestFitFrameAdjust = -1;
-            }
-
-            if (level.levelData.TrackingAdjustSetting.FramesAdjustScale && level.levelData.TrackingAdjustSetting.FramesAdjustScale.length > 0) {
-                firestoreObj.TrackingAdjustSetting.FramesAdjustScale = level.levelData.TrackingAdjustSetting.FramesAdjustScale.map(f => {
+            if (level.levelData.TrackingAdjustSetting.FramesStopAdjustScale && level.levelData.TrackingAdjustSetting.FramesStopAdjustScale.length > 0) {
+                firestoreObj.TrackingAdjustSetting.FramesStopAdjustScale = level.levelData.TrackingAdjustSetting.FramesStopAdjustScale.map(f => {
                     return {
                         StartFrame: f.StartFrame,
                         EndFrame: f.EndFrame
                     };
                 });
             } else {
-                firestoreObj.TrackingAdjustSetting.FramesAdjustScale = [];
+                firestoreObj.TrackingAdjustSetting.FramesStopAdjustScale = [];
             }
 
             if (level.levelData.TrackingAdjustSetting.FramesStopAdjustPosition && level.levelData.TrackingAdjustSetting.FramesStopAdjustPosition.length > 0) {

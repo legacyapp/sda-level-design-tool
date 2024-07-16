@@ -235,15 +235,12 @@ export function convertToLevelData(id, data) {
     const trackingAdjustSettingFromDb = data.TrackingAdjustSetting || data.levelData?.TrackingAdjustSetting;
     if (trackingAdjustSettingFromDb) {
         const trackingAdjustSetting = new TrackingAdjustSetting();
-        if (Number.isInteger(trackingAdjustSettingFromDb.BestFitFrameAdjust)) {
-            trackingAdjustSetting.BestFitFrameAdjust = trackingAdjustSettingFromDb.BestFitFrameAdjust;
-        }
 
-        if (trackingAdjustSettingFromDb.FramesAdjustScale && trackingAdjustSettingFromDb.FramesAdjustScale.length > 0) {
-            const framesAdjustScale = trackingAdjustSettingFromDb.FramesAdjustScale.map((f, i) => {
-                return new FrameAdjust(f.StartFrame, f.EndFrame, i, "FramesAdjustScale");
+        if (trackingAdjustSettingFromDb.FramesStopAdjustScale && trackingAdjustSettingFromDb.FramesStopAdjustScale.length > 0) {
+            const framesStopAdjustScale = trackingAdjustSettingFromDb.FramesStopAdjustScale.map((f, i) => {
+                return new FrameAdjust(f.StartFrame, f.EndFrame, i, "FramesStopAdjustScale");
             });
-            trackingAdjustSetting.FramesAdjustScale = framesAdjustScale;
+            trackingAdjustSetting.FramesStopAdjustScale = framesStopAdjustScale;
         }
 
         if (trackingAdjustSettingFromDb.FramesStopAdjustPosition && trackingAdjustSettingFromDb.FramesStopAdjustPosition.length > 0) {

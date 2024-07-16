@@ -73,8 +73,7 @@ export class LevelData {
 }
 
 export class TrackingAdjustSetting {
-    BestFitFrameAdjust: number;
-    FramesAdjustScale: FrameAdjust[] = [];
+    FramesStopAdjustScale: FrameAdjust[] = [];
     FramesStopAdjustPosition: FrameAdjust[] = [];
 }
 

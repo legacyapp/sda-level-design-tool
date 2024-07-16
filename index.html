@@ -618,9 +618,9 @@
             </select>
         </div>
     </script>
-    <script id="framesAdjustScaleTemplate" type="text/x-handlebars-template">
-        <ul id="framesAdjustScaleList" class="divide-y divide-gray-200">
-            {{#each FramesAdjustScale}}
+    <script id="framesStopAdjustScaleTemplate" type="text/x-handlebars-template">
+        <ul id="framesStopAdjustScaleList" class="divide-y divide-gray-200">
+            {{#each FramesStopAdjustScale}}
                 {{> startEndFramesTemplate}}
             {{/each}}
         </ul>
@@ -1086,35 +1086,17 @@
                                     Adjust
                                     Setting</h2>
                             </div>
-                            <div class="mt-2 flex flex-row space-x-10">
-                                <div class="flex flex-row space-x-4">
-                                    <div class="basis-1/4 flex flex-row">
-                                        <div class="basis-36 grow-0 shrink-0 flex items-center">
-                                            <label for="bestFitFrameAdjust"
-                                                class="text-sm font-medium text-gray-900 ">Best
-                                                Fit
-                                                Frame
-                                                Adjust</label>
-                                        </div>
-                                        <div class="basis-full relative flex items-center">
-                                            <input type="number" id="bestFitFrameAdjust"
-                                                class="text-sm basis-full h-8 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                             <div class="mt-2 flex flex-col">
                                 <h3 class="text-medium font-extrabold leading-none tracking-tight text-gray-900 py-2">
-                                    Frames
-                                    Adjust Scale</h3>
+                                    Frames Stop Adjust Scale</h3>
                                 <div class="flex flex-row">
-                                    <button id="addFramesAdjustScale" type="button"
+                                    <button id="addFramesStopAdjustScale" type="button"
                                         class="h-10 w-40 text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm focus:outline-none ">
                                         Add Start/End Frames
                                     </button>
                                 </div>
                             </div>
-                            <div id="framesAdjustScale"
+                            <div id="framesStopAdjustScale"
                                 class="rounded-lg flex items-top shadow-lg flex-col px-4 py-2 border border-solid mt-2">
                                 No Settings for Frames Adjust Scale.
                             </div>
