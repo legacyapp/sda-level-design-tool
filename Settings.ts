@@ -15,7 +15,7 @@ export class SettingsUIController {
     }
 
     public render() {
-        this.renderAdjustSettings("#framesAdjustScale", "FramesAdjustScale");
+        this.renderAdjustSettings("#framesStopAdjustScale", "FramesStopAdjustScale");
         this.renderAdjustSettings("#framesStopAdjustPosition", "FramesStopAdjustPosition");
     }
 
