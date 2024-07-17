@@ -6,7 +6,7 @@ const Dotenv = require('dotenv-webpack');
 module.exports = {
   entry: './index.ts',
   mode: 'development',
-  watch: true,
+  watch: false,
   module: {
     rules: [
       {
