@@ -2,7 +2,7 @@ import toastr from "toastr";
 import "./style.css";
 import $ from "jquery";
 import { App, ApplicationState } from "./App";
-import { LevelData, VideoInfo } from "./Beat";
+import { GameSettingCollection, LevelData, StreakComboConfig, VideoInfo } from "./Beat";
 import { NormalizedLandmarks } from "./Converter";
 import Handlebars from "handlebars";
 import { convertToLevelData, MessageTypes, ParentChildMessage, renamePropertiesInDepth } from "./util";
@@ -137,8 +137,8 @@ $(function () {
                   let levelData;
 
                   if (process.env.APP_INTEGRATE_BLUEPRINT_TOOL) {
-                    if (receivedData.levelData?.data) {
-                      levelData = renamePropertiesInDepth(receivedData.levelData?.data);
+                    if (receivedData.blueprint?.levelData?.data) {
+                      levelData = renamePropertiesInDepth(receivedData.blueprint?.levelData?.data);
                       levelData = convertToLevelData(receivedData.songId, {
                         levelData: levelData,
                         info: null
@@ -146,6 +146,10 @@ $(function () {
                     } else {
                       // try to load level data in firebase
                       levelData = app.AllLevelDatas.find(l => l.id === receivedData.songId)?.data;
+                    }
+
+                    if (receivedData.blueprint?.gameSetting?.data) {
+                      GameSettingCollection.m_dictStreak = receivedData.blueprint?.gameSetting?.data[0].data.streakConfig.streakComboConfig;
                     }
 
                   } else {
