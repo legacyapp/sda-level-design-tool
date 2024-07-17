@@ -261,6 +261,7 @@ export class App {
                     trackingPoint.Frame = currentFrame;
                     trackingPoint.Time = currentFrame / this.applicationState.levelData.VideoInfo.FrameRate;
                     this.drawingTrackingPoint.draw(currentFrame, size.width, size.height, true, this.playerUIController.isPlaying);
+                    this.levelUIController.renderMaxScore();
                 }
                 break;
 
@@ -275,6 +276,7 @@ export class App {
                         p.Time = currentTime;
                     });
                     this.drawingTrackingPoint.draw(currentFrame, size.width, size.height, false, this.playerUIController.isPlaying);
+                    this.levelUIController.renderMaxScore();
                 }
                 break;
 
@@ -284,6 +286,7 @@ export class App {
                     const [currentFrame] = this.playerUIController.getCurrentFrameAndTime();
                     const size = this.playerUIController.getContainerSize();
                     this.drawingTrackingPoint.draw(currentFrame, size.width, size.height, true, this.playerUIController.isPlaying);
+                    this.levelUIController.renderMaxScore();
                 }
                 break;
 
@@ -292,6 +295,7 @@ export class App {
                     this.playerUIController.pause();
                     const [currentFrame] = this.playerUIController.getCurrentFrameAndTime();
                     this.playerUIController.setCurrentFrame(currentFrame);
+                    this.levelUIController.renderMaxScore();
                 }
                 break;
 
@@ -302,6 +306,7 @@ export class App {
                     if (trackingPoint.Frame >= 0) {
                         this.playerUIController.setCurrentFrame(trackingPoint.Frame);
                     }
+                    this.levelUIController.renderMaxScore();
                 }
                 break;
 
@@ -312,6 +317,7 @@ export class App {
                     //this.drawingTrackingPoint.destroyOrphanPoints([trackingPoint.ID]);
                     const [currentFrame] = this.playerUIController.getCurrentFrameAndTime();
                     this.playerUIController.setCurrentFrame(currentFrame);
+                    this.levelUIController.renderMaxScore();
                 }
                 break;
 
@@ -324,6 +330,7 @@ export class App {
                     trackingPoint.Pos.Y = data.Position.y / size.height;
 
                     this.levelUIController.updateTrackingPointUI(trackingPoint);
+                    this.levelUIController.renderMaxScore();
                 }
                 break;
 

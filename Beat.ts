@@ -17,6 +17,80 @@ interface TrackDrawingBeat {
     ScoreRadiusCircles: Konva.Circle[]
 };
 
+export class StreakComboConfig {
+    streakLevel: number;
+    streakValue: number;
+    streakMultiplier: number;
+}
+
+export class GameSettingCollection {
+    public static m_dictStreak: StreakComboConfig[] = [
+        {
+            streakLevel: 0,
+            streakValue: 0,
+            streakMultiplier: 1
+        },
+        {
+            streakLevel: 1,
+            streakValue: 100,
+            streakMultiplier: 1.5
+        },
+        {
+            streakLevel: 2,
+            streakValue: 120,
+            streakMultiplier: 2
+        },
+        {
+            streakLevel: 3,
+            streakValue: 130,
+            streakMultiplier: 2.5
+        },
+        {
+            streakLevel: 4,
+            streakValue: 140,
+            streakMultiplier: 3
+        },
+        {
+            streakLevel: 5,
+            streakValue: 150,
+            streakMultiplier: 4
+        },
+        {
+            streakLevel: 6,
+            streakValue: 200,
+            streakMultiplier: 5
+        }
+    ];
+
+    public static m_streakMultiplierDefault = 1;
+
+    public static getStreakLevel(streakValue: number) {
+        for (let i = this.m_dictStreak.length - 1; i >= 0; i--) {
+            const streakConfig = this.m_dictStreak[i];
+            if (streakValue > streakConfig.streakValue) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    public static getStreakMultiplier(streakLevel: number) {
+        const streakConfig = this.m_dictStreak[streakLevel];
+        if (streakConfig) {
+            return streakConfig.streakMultiplier;
+        }
+        return this.m_streakMultiplierDefault;
+    }
+}
+
+export class StreakLevel {
+    public static GetMultiplier(streak: number) {
+        const streakLevel = GameSettingCollection.getStreakLevel(streak);
+
+        return GameSettingCollection.getStreakMultiplier(streakLevel);
+    }
+}
+
 export class LevelData {
     VideoInfo: VideoInfo;
     // *** NEW DATA STRUCTURE ***
@@ -69,6 +143,108 @@ export class LevelData {
         }
 
         return [];
+    }
+
+    public getMaxScoreOfLevel() {
+        let maxScore = 0;
+        let maxMajorScore = 0;
+        let maxMajorScoreNoCombos = 0;
+
+        if (this.Moves) {
+            for (let i = 0; i < this.Moves.length; i++) {
+                const move = this.Moves[i];
+                maxScore += this.getMaxScoreOfMove(move) * StreakLevel.GetMultiplier(i);
+                maxMajorScore += this.getMaxScoreOfMajorMove(move) * StreakLevel.GetMultiplier(i); // for debug
+                maxMajorScoreNoCombos += this.getMaxScoreOfMajorMove(move); // for debug
+            }
+        }
+
+        return {
+            maxScore,
+            maxMajorScore,
+            maxMajorScoreNoCombos
+        }
+    }
+
+    public getMaxScoreOfMove(move: Move) {
+        let score = 0;
+
+        for (let actionID = 0; actionID < move.MoveActions.length; actionID++) {
+            const moveAction = move.MoveActions[actionID];
+            const scores = moveAction.ScoresRadius;
+            let maxScoreInAction = 0;
+
+            const trackingPoints = moveAction.TrackingPoints;
+            let maxAllPointScore = 0;
+            if (trackingPoints) {
+                for (let pIndex = 0; pIndex < trackingPoints.length; pIndex++) {
+                    let maxPointScore = 0;
+                    const pScores = trackingPoints[pIndex].ScoresRadius;
+
+                    if (pScores) {
+                        for (let pScoresIndex = 0; pScoresIndex < pScores.length; pScoresIndex++) {
+                            if (maxPointScore < pScores[pScoresIndex].Scoring) {
+                                maxPointScore = pScores[pScoresIndex].Scoring;
+                            }
+                        }
+                    }
+                    maxAllPointScore += maxPointScore;
+                }
+            }
+
+            if (scores && maxAllPointScore <= 0) {
+                for (let scoreID = 0; scoreID < scores.length; scoreID++) {
+                    if (maxScoreInAction < scores[scoreID].Scoring) {
+                        maxScoreInAction = scores[scoreID].Scoring;
+                    }
+                }
+            }
+            score += maxAllPointScore > 0 ? maxAllPointScore : maxScoreInAction;
+        }
+
+        return score;
+    }
+
+    public getMaxScoreOfMajorMove(move: Move) {
+        let score = 0;
+
+        for (let actionID = 0; actionID < move.MoveActions.length; actionID++) {
+            if (!move.MoveActions[actionID].IsMajor) {
+                continue;
+            }
+
+            const moveAction = move.MoveActions[actionID];
+            const scores = moveAction.ScoresRadius;
+            let maxScoreInAction = 0;
+            const trackingPoints = moveAction.TrackingPoints;
+            let maxAllPointScore = 0;
+
+            if (trackingPoints) {
+                for (let pIndex = 0; pIndex < trackingPoints.length; pIndex++) {
+                    let maxPointScore = 0;
+                    const pScores = trackingPoints[pIndex].ScoresRadius;
+                    if (pScores) {
+                        for (let pScoresIndex = 0; pScoresIndex < pScores.length; pScoresIndex++) {
+                            if (maxPointScore < pScores[pScoresIndex].Scoring) {
+                                maxPointScore = pScores[pScoresIndex].Scoring;
+                            }
+                        }
+                    }
+                    maxAllPointScore += maxPointScore;
+                }
+            }
+
+            if (scores && maxAllPointScore <= 0) {
+                for (let scoreID = 0; scoreID < scores.length; scoreID++) {
+                    if (maxScoreInAction < scores[scoreID].Scoring) {
+                        maxScoreInAction = scores[scoreID].Scoring;
+                    }
+                }
+            }
+            score += maxAllPointScore > 0 ? maxAllPointScore : maxScoreInAction;
+        }
+
+        return score;
     }
 }
 

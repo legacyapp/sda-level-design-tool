@@ -69,6 +69,8 @@ export class LevelUIController {
                     $("#moveDetailForm").addClass("hidden");
                     $("#addNewAction").addClass("hidden");
                 }
+
+                self.renderMaxScore();
                 toastr.success("Delete Move Successfully.");
             });
         }
@@ -229,6 +231,7 @@ export class LevelUIController {
             const trackingPoint = currentMove.MoveActions.flatMap(p => p.TrackingPoints).find(b => b.ID === $(this).data("id"));
             if ($(this).data("path") === "IsMajor") {
                 moveAction.IsMajor = this.checked;
+                self.renderMaxScore();
             }
             if ($(this).data("path") === "IsShowScoreRadius") {
                 if (moveAction) {
@@ -458,7 +461,7 @@ export class LevelUIController {
         $("#moveEndFrame").val(currentMove.EndFrame);
     }
 
-    render() {
+    public render() {
         const self = this;
         $("#addNewMove").off("click");
         $("#addNewMove").on("click", function (event) {
@@ -468,6 +471,7 @@ export class LevelUIController {
 
         this.renderMoveList();
         this.renderAdjustFrame();
+        this.renderMaxScore();
     }
 
     public renderAdjustFrame() {
@@ -476,16 +480,25 @@ export class LevelUIController {
         }
     }
 
-    updateTrackingPointUI(trackingPoint: TrackingPoint) {
+    public renderMaxScore() {
+        const score = this.applicationState.levelData.getMaxScoreOfLevel();
+        const usFormatter = new Intl.NumberFormat('en-US');
+
+        $("#maxScore").text("Max Score: " + usFormatter.format(score.maxScore));
+        // $("#maxMajorScore").text("Max Major Score: " + usFormatter.format(score.maxMajorScore));
+        // $("#maxMajorScoreNoCombos").text("Max Major Score No Combos: " + usFormatter.format(score.maxMajorScoreNoCombos));
+    }
+
+    public updateTrackingPointUI(trackingPoint: TrackingPoint) {
         $("#" + trackingPoint.ID + "-Pos-X").val(trackingPoint.Pos.X);
         $("#" + trackingPoint.ID + "-Pos-Y").val(trackingPoint.Pos.Y);
     }
 
-    focusOnMove(move: Move) {
+    public focusOnMove(move: Move) {
         $("#" + move.ID).trigger("click");
     }
 
-    videoFrameCallback(currentFrame: number, videoWidth: number, videoHeight: number) {
+    public videoFrameCallback(currentFrame: number, videoWidth: number, videoHeight: number) {
         const moves = this.applicationState.levelData.getMoves(currentFrame);
         if (moves && moves.length > 0) {
             moves.forEach(m => {
