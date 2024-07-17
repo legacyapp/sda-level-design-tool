@@ -10,8 +10,9 @@ import { convertToLevelData, MessageTypes, ParentChildMessage, renamePropertiesI
 const app = new App();
 app.Init();
 
+const isIntegrated = process.env.APP_INTEGRATE_BLUEPRINT_TOOL;
 $(function () {
-  if (process.env.APP_INTEGRATE_BLUEPRINT_TOOL) {
+  if (isIntegrated === "true") {
     // Listen for messages from the parent window
     window.addEventListener('message', (event: MessageEvent) => {
       const message = event.data as ParentChildMessage;
@@ -239,6 +240,8 @@ $(function () {
 
               app.CurrentDocumentId = video.id;
               app.run(applicationState);
+
+              $("#loading-screen").addClass("hidden");
             });
         });
 

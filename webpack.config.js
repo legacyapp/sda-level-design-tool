@@ -6,7 +6,7 @@ const Dotenv = require('dotenv-webpack');
 module.exports = {
   entry: './index.ts',
   mode: 'development',
-  watch: false,
+  watch: true,
   module: {
     rules: [
       {
@@ -25,7 +25,11 @@ module.exports = {
     extensions: ['.tsx', '.ts', '.js'],
   },
   plugins: [
-    new Dotenv(),
+    new Dotenv({
+      path: './.env', // Path to .env file (this is the default)
+      systemvars: true, // Load system environment variables
+      ignoreStub: true, // Avoid stubbing process.env
+    }),
     new HtmlWebpackPlugin({
       title: 'Level Design Tool',
       filename: 'index.html',
@@ -45,5 +49,6 @@ module.exports = {
     hot: true,
     compress: true,
     historyApiFallback: true,
-  }
+  },
+  cache: false,
 };
