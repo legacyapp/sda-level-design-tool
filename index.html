@@ -592,10 +592,22 @@
             </div>
         </li>
     </script>
-
+    <script id="versionSelectionTemplate" type="text/x-handlebars-template">
+        <div class="w-20 grow-0 shrink-0 flex content-start">
+            <label for="small-input" class="text-medium font-medium text-gray-900 ">Versions</label>
+        </div>
+        <div class="w-full relative flex items-center">
+            <select id="versionSelection"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-1.5">
+                {{#each Versions}}
+                <option value="{{name}}">{{name}}</option>
+                {{/each}}
+            </select>
+        </div>
+    </script>
     <script id="videoSelectionTemplate" type="text/x-handlebars-template">
         <div class="w-20 grow-0 shrink-0 flex content-start">
-            <label for="small-input" class="text-lg font-medium text-gray-900 ">Videos</label>
+            <label for="small-input" class="text-medium font-medium text-gray-900 ">Videos</label>
         </div>
         <div class="w-full relative flex items-center">
             <select id="videoSelection"
@@ -722,18 +734,6 @@
     </div>
     </div>
 
-    <div class="flex flex-row space-x-4 mb-4">
-        <div class="basis-1/4 w-full flex justify-start grow-0 shrink-0 mx-4 content-center">
-            <h1 class="basis-1/2 ml-6 mb-2 text-2xl font-extrabold leading-none tracking-tight text-gray-900">
-                Level Design Tool
-            </h1>
-        </div>
-
-        <div id="videoSelectionContainer" class="w-96 grow-0 shrink-0 flex items-center">
-
-        </div>
-    </div>
-
     <div class="flex flex-row space-x-4">
         <div id="videoView" class="basis-1/4">
             <div class="sticky-element w-full flex justify-center">
@@ -814,294 +814,309 @@
                 </div>
             </div>
         </div>
-        <div
-            class="basis-3/4 rounded-lg flex flex-col items-top shadow-lg flex flex-col space-y-2 border border-solid px-4 py-2">
-            <div class="flex flex-row justify-between">
-                <ul id="main-tab-headers"
-                    class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 ">
-                    <li class="">
-                        <a href="#"
-                            class="inline-flex items-center justify-center p-3 border-b-2 text-blue-600 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500 group"
-                            aria-current="page" data-tabs-target="#leveDesignData">
-                            <svg class="w-4 h-4 me-2 text-blue-600 dark:text-blue-500" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
-                                <path
-                                    d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z" />
-                            </svg>Level Design Data
-                        </a>
-                    </li>
-                    <li class="">
-                        <a href="#"
-                            class="inline-flex items-center justify-center p-3 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 group"
-                            aria-current="page" data-tabs-target="#videoSetting">
-                            <svg class="w-4 h-4 me-2 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300"
-                                aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                                viewBox="0 0 20 20">
-                                <path
-                                    d="M5 11.424V1a1 1 0 1 0-2 0v10.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.228 3.228 0 0 0 0-6.152ZM19.25 14.5A3.243 3.243 0 0 0 17 11.424V1a1 1 0 0 0-2 0v10.424a3.227 3.227 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.243 3.243 0 0 0 2.25-3.076Zm-6-9A3.243 3.243 0 0 0 11 2.424V1a1 1 0 0 0-2 0v1.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0V8.576A3.243 3.243 0 0 0 13.25 5.5Z" />
-                            </svg>Settings
-                        </a>
-                    </li>
-
-                </ul>
-                <button type="button" id="save"
-                    class="w-28 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none ">
-                    Save
-                </button>
+        <div class="basis-3/4 flex flex-col">
+            <div class="flex flex-row space-x-6 mb-4">
+                <div id="versionSelectionContainer" class="w-64 grow-0 shrink-0 flex items-center">
+                </div>
+                <div id="videoSelectionContainer" class="w-96 grow-0 shrink-0 flex items-center">
+                </div>
             </div>
-            <div id="main-tab-contents">
-                <div>
-                    <div id="leveDesignData" class="tabContent">
-                        <div class="flex flex-row justify-start space-x-10">
-                            <label id="maxScore" class="text-sm text-gray-900 font-extrabold py-2">
-                            </label>
-                            <label id="maxMajorScore" class="text-sm text-gray-900 font-extrabold py-2"></label>
-                            <label id="maxMajorScoreNoCombos" class="text-sm text-gray-900 font-extrabold py-2"></label>
-                        </div>
-                        <div class="flex flex-row space-x-4">
-                            <div class="basis-1/4 flex flex-row">
-                                <button id="addNewMove" type="button"
-                                    class="basis-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2   focus:outline-none ">
-                                    Add New Move
-                                </button>
+            <div
+                class="rounded-lg flex flex-col items-top shadow-lg flex flex-col space-y-2 border border-solid px-4 py-2">
+                <div class="flex flex-row justify-between">
+                    <ul id="main-tab-headers"
+                        class="flex flex-wrap -mb-px text-sm font-medium text-center text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 ">
+                        <li class="">
+                            <a href="#"
+                                class="inline-flex items-center justify-center p-3 border-b-2 text-blue-600 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500 group"
+                                aria-current="page" data-tabs-target="#leveDesignData">
+                                <svg class="w-4 h-4 me-2 text-blue-600 dark:text-blue-500" aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+                                    <path
+                                        d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z" />
+                                </svg>Level Design Data
+                            </a>
+                        </li>
+                        <li class="">
+                            <a href="#"
+                                class="inline-flex items-center justify-center p-3 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300 group"
+                                aria-current="page" data-tabs-target="#videoSetting">
+                                <svg class="w-4 h-4 me-2 text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-300"
+                                    aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                                    viewBox="0 0 20 20">
+                                    <path
+                                        d="M5 11.424V1a1 1 0 1 0-2 0v10.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.228 3.228 0 0 0 0-6.152ZM19.25 14.5A3.243 3.243 0 0 0 17 11.424V1a1 1 0 0 0-2 0v10.424a3.227 3.227 0 0 0 0 6.152V19a1 1 0 1 0 2 0v-1.424a3.243 3.243 0 0 0 2.25-3.076Zm-6-9A3.243 3.243 0 0 0 11 2.424V1a1 1 0 0 0-2 0v1.424a3.228 3.228 0 0 0 0 6.152V19a1 1 0 1 0 2 0V8.576A3.243 3.243 0 0 0 13.25 5.5Z" />
+                                </svg>Settings
+                            </a>
+                        </li>
+
+                    </ul>
+                    <button type="button" id="save"
+                        class="w-28 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none ">
+                        Save
+                    </button>
+                </div>
+                <div id="main-tab-contents">
+                    <div>
+                        <div id="leveDesignData" class="tabContent">
+                            <div class="flex flex-row justify-start space-x-10">
+                                <label id="maxScore" class="text-sm text-gray-900 font-extrabold py-2">
+                                </label>
+                                <label id="maxMajorScore" class="text-sm text-gray-900 font-extrabold py-2"></label>
+                                <label id="maxMajorScoreNoCombos" class="text-sm text-gray-900 font-extrabold py-2"></label>
                             </div>
-                            <div class="basis-3/4 flex flex-row justify-between">
-                                <div class="flex flex-col">
-                                    <button id="addNewAction" type="button"
-                                        class="h-10 w-48 text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm focus:outline-none ">
-                                        Add New Action
+                            <div class="flex flex-row space-x-4">
+                                <div class="basis-1/4 flex flex-row">
+                                    <button id="addNewMove" type="button"
+                                        class="basis-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2   focus:outline-none ">
+                                        Add New Move
                                     </button>
                                 </div>
-                                <button type="button" id="copy"
-                                    class="hidden w-28 py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">
-                                    Copy
-                                </button>
-                            </div>
-                        </div>
-                        <div class="flex flex-row space-x-4">
-                            <div
-                                class="basis-1/4 rounded-lg flex flex-col items-top shadow-lg py-4 px-2 border border-solid">
-                                <h3 class=" text-medium font-extrabold leading-none tracking-tight text-gray-900">All
-                                    Moves
-                                </h3>
-                                <div id="allMoves">
-                                    <!-- Render All Moves here -->
-                                </div>
-
-                            </div>
-                            <div
-                                class="basis-3/4 rounded-lg flex items-top shadow-lg flex-col p-4 border border-solid h-[calc(100vh-15.5rem)] overflow-y-auto">
-                                <div id="moveDetailHeader" class="flex justify-between items-center">
-                                    <div>
-                                        <h3
-                                            class="mb-2 text-medium font-extrabold leading-none tracking-tight text-blue-700">
-                                            Move
-                                            Detail</h3>
-                                    </div>
-                                    <div class="flex items-centerr">
-                                        <input id="moveDetailIsShowScoreRadius" type="checkbox" {{checked
-                                            IsShowScoreRadius}} data-id="" data-path="IsShowScoreRadius" value=""
-                                            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ">
-                                        <label for="moveDetailIsShowScoreRadius"
-                                            class="ms-2 text-sm font-small text-gray-900">Show
-                                            Score Radius</label>
-                                    </div>
-                                </div>
-
-                                <form id="moveDetailForm" class="hidden">
+                                <div class="basis-3/4 flex flex-row justify-between">
                                     <div class="flex flex-col">
-                                        <div class="mt-2 flex flex-row">
-                                            <div class="basis-24 grow-0 shrink-0 flex items-center">
-                                                <label for="moveName"
-                                                    class="text-sm font-medium text-gray-900 ">Name</label>
-                                            </div>
-                                            <input type="text" id="moveName"
-                                                class="text-sm basis-full h-8 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
+                                        <button id="addNewAction" type="button"
+                                            class="h-10 w-48 text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm focus:outline-none ">
+                                            Add New Action
+                                        </button>
+                                    </div>
+                                    <button type="button" id="copy"
+                                        class="hidden w-28 py-2.5 px-5 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100">
+                                        Copy
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex flex-row space-x-4">
+                                <div
+                                    class="basis-1/4 rounded-lg flex flex-col items-top shadow-lg py-4 px-2 border border-solid">
+                                    <h3 class=" text-medium font-extrabold leading-none tracking-tight text-gray-900">
+                                        All
+                                        Moves
+                                    </h3>
+                                    <div id="allMoves">
+                                        <!-- Render All Moves here -->
+                                    </div>
 
+                                </div>
+                                <div
+                                    class="basis-3/4 rounded-lg flex items-top shadow-lg flex-col p-4 border border-solid h-[calc(100vh-15.5rem)] overflow-y-auto">
+                                    <div id="moveDetailHeader" class="flex justify-between items-center">
+                                        <div>
+                                            <h3
+                                                class="mb-2 text-medium font-extrabold leading-none tracking-tight text-blue-700">
+                                                Move
+                                                Detail</h3>
                                         </div>
-                                        <div class="mt-2 flex flex-row space-x-10">
-                                            <div class="basis-1/2 flex flex-row">
-                                                <div class="basis-24 grow-0 shrink-0 flex items-center">
-                                                    <label for="moveStartTime"
-                                                        class="text-sm font-medium text-gray-900 ">Star
-                                                        Time</label>
-                                                </div>
-                                                <div class="basis-full relative flex items-center">
-                                                    <button type="button" id="decrement-button" disabled
-                                                        data-input-counter-decrement="quantity-input"
-                                                        class="cursor-not-allowed bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
-                                                        <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
-                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                            viewBox="0 0 18 2">
-                                                            <path stroke="currentColor" stroke-linecap="round"
-                                                                stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
-                                                        </svg>
-                                                    </button>
-                                                    <input type="text" id="moveStartTime" data-input-counter disabled
-                                                        aria-describedby="helper-text-explanation"
-                                                        class="cursor-not-allowed text-sm bg-gray-200 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
-                                                        required />
-                                                    <button type="button" id="increment-button" disabled
-                                                        data-input-counter-increment="quantity-input"
-                                                        class="cursor-not-allowed  bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
-                                                        <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
-                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                            viewBox="0 0 18 18">
-                                                            <path stroke="currentColor" stroke-linecap="round"
-                                                                stroke-linejoin="round" stroke-width="2"
-                                                                d="M9 1v16M1 9h16" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div class="basis-1/2 flex flex-row">
-                                                <div class="basis-24 grow-0 shrink-0 flex items-center">
-                                                    <label for="moveEndTime"
-                                                        class="text-sm font-medium text-gray-900 ">End
-                                                        Time</label>
-                                                </div>
-                                                <div class="basis-full relative flex items-center">
-                                                    <button type="button" id="decrement-button"
-                                                        data-input-counter-decrement="quantity-input"
-                                                        class="cursor-not-allowed  bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
-                                                        <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
-                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                            viewBox="0 0 18 2">
-                                                            <path stroke="currentColor" stroke-linecap="round"
-                                                                stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
-                                                        </svg>
-                                                    </button>
-                                                    <input type="text" id="moveEndTime" data-input-counter disabled
-                                                        aria-describedby="helper-text-explanation"
-                                                        class="cursor-not-allowed text-sm bg-gray-200 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
-                                                        required />
-                                                    <button type="button" id="increment-button"
-                                                        data-input-counter-increment="quantity-input"
-                                                        class="cursor-not-allowed bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
-                                                        <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
-                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                            viewBox="0 0 18 18">
-                                                            <path stroke="currentColor" stroke-linecap="round"
-                                                                stroke-linejoin="round" stroke-width="2"
-                                                                d="M9 1v16M1 9h16" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="mt-2 flex flex-row space-x-10">
-                                            <div class="basis-1/2 flex flex-row">
-                                                <div class="basis-24 grow-0 shrink-0 flex items-center">
-                                                    <label for="moveStartFrame"
-                                                        class="text-sm font-medium text-gray-900 ">Start
-                                                        Frame</label>
-                                                </div>
-                                                <div class="basis-full relative flex items-center">
-                                                    <button type="button" id="decrement-button"
-                                                        data-input-counter-decrement="quantity-input"
-                                                        class="cursor-not-allowed  bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
-                                                        <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
-                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                            viewBox="0 0 18 2">
-                                                            <path stroke="currentColor" stroke-linecap="round"
-                                                                stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
-                                                        </svg>
-                                                    </button>
-                                                    <input type="text" id="moveStartFrame" data-input-counter disabled
-                                                        aria-describedby="helper-text-explanation"
-                                                        class="cursor-not-allowed text-sm bg-gray-200 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
-                                                        required />
-                                                    <button type="button" id="increment-button"
-                                                        data-input-counter-increment="quantity-input"
-                                                        class="cursor-not-allowed bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
-                                                        <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
-                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                            viewBox="0 0 18 18">
-                                                            <path stroke="currentColor" stroke-linecap="round"
-                                                                stroke-linejoin="round" stroke-width="2"
-                                                                d="M9 1v16M1 9h16" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div class="basis-1/2 flex flex-row">
-                                                <div class="basis-24 grow-0 shrink-0 flex items-center">
-                                                    <label for="moveEndFrame"
-                                                        class="text-sm font-medium text-gray-900 ">End
-                                                        Frame</label>
-                                                </div>
-                                                <div class="basis-full relative flex items-center">
-                                                    <button type="button" id="decrement-button"
-                                                        data-input-counter-decrement="quantity-input"
-                                                        class="cursor-not-allowed bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
-                                                        <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
-                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                            viewBox="0 0 18 2">
-                                                            <path stroke="currentColor" stroke-linecap="round"
-                                                                stroke-linejoin="round" stroke-width="2" d="M1 1h16" />
-                                                        </svg>
-                                                    </button>
-                                                    <input type="text" id="moveEndFrame" data-input-counter disabled
-                                                        aria-describedby="helper-text-explanation"
-                                                        class="cursor-not-allowed text-sm bg-gray-200 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
-                                                        required />
-                                                    <button type="button" id="increment-button"
-                                                        data-input-counter-increment="quantity-input"
-                                                        class="cursor-not-allowed bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
-                                                        <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
-                                                            xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                            viewBox="0 0 18 18">
-                                                            <path stroke="currentColor" stroke-linecap="round"
-                                                                stroke-linejoin="round" stroke-width="2"
-                                                                d="M9 1v16M1 9h16" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
-
+                                        <div class="flex items-centerr">
+                                            <input id="moveDetailIsShowScoreRadius" type="checkbox" {{checked
+                                                IsShowScoreRadius}} data-id="" data-path="IsShowScoreRadius" value=""
+                                                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 ">
+                                            <label for="moveDetailIsShowScoreRadius"
+                                                class="ms-2 text-sm font-small text-gray-900">Show
+                                                Score Radius</label>
                                         </div>
                                     </div>
-                                    <div id="actions">
-                                        <!-- Render a list of Action here -->
 
-                                    </div>
-                                </form>
+                                    <form id="moveDetailForm" class="hidden">
+                                        <div class="flex flex-col">
+                                            <div class="mt-2 flex flex-row">
+                                                <div class="basis-24 grow-0 shrink-0 flex items-center">
+                                                    <label for="moveName"
+                                                        class="text-sm font-medium text-gray-900 ">Name</label>
+                                                </div>
+                                                <input type="text" id="moveName"
+                                                    class="text-sm basis-full h-8 p-2 text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500">
+
+                                            </div>
+                                            <div class="mt-2 flex flex-row space-x-10">
+                                                <div class="basis-1/2 flex flex-row">
+                                                    <div class="basis-24 grow-0 shrink-0 flex items-center">
+                                                        <label for="moveStartTime"
+                                                            class="text-sm font-medium text-gray-900 ">Star
+                                                            Time</label>
+                                                    </div>
+                                                    <div class="basis-full relative flex items-center">
+                                                        <button type="button" id="decrement-button" disabled
+                                                            data-input-counter-decrement="quantity-input"
+                                                            class="cursor-not-allowed bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                                            <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
+                                                                xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                viewBox="0 0 18 2">
+                                                                <path stroke="currentColor" stroke-linecap="round"
+                                                                    stroke-linejoin="round" stroke-width="2"
+                                                                    d="M1 1h16" />
+                                                            </svg>
+                                                        </button>
+                                                        <input type="text" id="moveStartTime" data-input-counter
+                                                            disabled aria-describedby="helper-text-explanation"
+                                                            class="cursor-not-allowed text-sm bg-gray-200 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                                            required />
+                                                        <button type="button" id="increment-button" disabled
+                                                            data-input-counter-increment="quantity-input"
+                                                            class="cursor-not-allowed  bg-gray-100   hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                                            <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
+                                                                xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                viewBox="0 0 18 18">
+                                                                <path stroke="currentColor" stroke-linecap="round"
+                                                                    stroke-linejoin="round" stroke-width="2"
+                                                                    d="M9 1v16M1 9h16" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="basis-1/2 flex flex-row">
+                                                    <div class="basis-24 grow-0 shrink-0 flex items-center">
+                                                        <label for="moveEndTime"
+                                                            class="text-sm font-medium text-gray-900 ">End
+                                                            Time</label>
+                                                    </div>
+                                                    <div class="basis-full relative flex items-center">
+                                                        <button type="button" id="decrement-button"
+                                                            data-input-counter-decrement="quantity-input"
+                                                            class="cursor-not-allowed  bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                                            <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
+                                                                xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                viewBox="0 0 18 2">
+                                                                <path stroke="currentColor" stroke-linecap="round"
+                                                                    stroke-linejoin="round" stroke-width="2"
+                                                                    d="M1 1h16" />
+                                                            </svg>
+                                                        </button>
+                                                        <input type="text" id="moveEndTime" data-input-counter disabled
+                                                            aria-describedby="helper-text-explanation"
+                                                            class="cursor-not-allowed text-sm bg-gray-200 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                                            required />
+                                                        <button type="button" id="increment-button"
+                                                            data-input-counter-increment="quantity-input"
+                                                            class="cursor-not-allowed bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                                            <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
+                                                                xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                viewBox="0 0 18 18">
+                                                                <path stroke="currentColor" stroke-linecap="round"
+                                                                    stroke-linejoin="round" stroke-width="2"
+                                                                    d="M9 1v16M1 9h16" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mt-2 flex flex-row space-x-10">
+                                                <div class="basis-1/2 flex flex-row">
+                                                    <div class="basis-24 grow-0 shrink-0 flex items-center">
+                                                        <label for="moveStartFrame"
+                                                            class="text-sm font-medium text-gray-900 ">Start
+                                                            Frame</label>
+                                                    </div>
+                                                    <div class="basis-full relative flex items-center">
+                                                        <button type="button" id="decrement-button"
+                                                            data-input-counter-decrement="quantity-input"
+                                                            class="cursor-not-allowed  bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                                            <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
+                                                                xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                viewBox="0 0 18 2">
+                                                                <path stroke="currentColor" stroke-linecap="round"
+                                                                    stroke-linejoin="round" stroke-width="2"
+                                                                    d="M1 1h16" />
+                                                            </svg>
+                                                        </button>
+                                                        <input type="text" id="moveStartFrame" data-input-counter
+                                                            disabled aria-describedby="helper-text-explanation"
+                                                            class="cursor-not-allowed text-sm bg-gray-200 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                                            required />
+                                                        <button type="button" id="increment-button"
+                                                            data-input-counter-increment="quantity-input"
+                                                            class="cursor-not-allowed bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                                            <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
+                                                                xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                viewBox="0 0 18 18">
+                                                                <path stroke="currentColor" stroke-linecap="round"
+                                                                    stroke-linejoin="round" stroke-width="2"
+                                                                    d="M9 1v16M1 9h16" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="basis-1/2 flex flex-row">
+                                                    <div class="basis-24 grow-0 shrink-0 flex items-center">
+                                                        <label for="moveEndFrame"
+                                                            class="text-sm font-medium text-gray-900 ">End
+                                                            Frame</label>
+                                                    </div>
+                                                    <div class="basis-full relative flex items-center">
+                                                        <button type="button" id="decrement-button"
+                                                            data-input-counter-decrement="quantity-input"
+                                                            class="cursor-not-allowed bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-s-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                                            <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
+                                                                xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                viewBox="0 0 18 2">
+                                                                <path stroke="currentColor" stroke-linecap="round"
+                                                                    stroke-linejoin="round" stroke-width="2"
+                                                                    d="M1 1h16" />
+                                                            </svg>
+                                                        </button>
+                                                        <input type="text" id="moveEndFrame" data-input-counter disabled
+                                                            aria-describedby="helper-text-explanation"
+                                                            class="cursor-not-allowed text-sm bg-gray-200 border-x-0 border-gray-300 h-8 text-center text-gray-900 focus:ring-blue-500 focus:border-blue-500 block w-full py-2.5     "
+                                                            required />
+                                                        <button type="button" id="increment-button"
+                                                            data-input-counter-increment="quantity-input"
+                                                            class="cursor-not-allowed bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-e-lg p-2 h-8 focus:ring-gray-100  focus:ring-2 focus:outline-none">
+                                                            <svg class="w-2 h-2 text-gray-900 " aria-hidden="true"
+                                                                xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                viewBox="0 0 18 18">
+                                                                <path stroke="currentColor" stroke-linecap="round"
+                                                                    stroke-linejoin="round" stroke-width="2"
+                                                                    d="M9 1v16M1 9h16" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div id="actions">
+                                            <!-- Render a list of Action here -->
+
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div id="videoSetting" class="hidden tabContent h-[calc(100vh-10rem)] overflow-y-auto">
-                        <div class="flex flex-row justify-between">
-                            <h2 class="text-lg font-extrabold leading-none tracking-tight text-gray-900 py-2">Tracking
-                                Adjust
-                                Setting</h2>
-                        </div>
-                        <div class="mt-2 flex flex-col">
-                            <h3 class="text-medium font-extrabold leading-none tracking-tight text-gray-900 py-2">Frames
-                                Stop Adjust Scale</h3>
-                            <div class="flex flex-row">
-                                <button id="addFramesStopAdjustScale" type="button"
-                                    class="h-10 w-40 text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm focus:outline-none ">
-                                    Add Start/End Frames
-                                </button>
+                        <div id="videoSetting" class="hidden tabContent h-[calc(100vh-10rem)] overflow-y-auto">
+                            <div class="flex flex-row justify-between">
+                                <h2 class="text-lg font-extrabold leading-none tracking-tight text-gray-900 py-2">
+                                    Tracking
+                                    Adjust
+                                    Setting</h2>
                             </div>
-                        </div>
-                        <div id="framesStopAdjustScale"
-                            class="rounded-lg flex items-top shadow-lg flex-col px-4 py-2 border border-solid mt-2">
-                            No Settings for Frames Adjust Scale.
-                        </div>
-                        <div class="mt-2 flex flex-col">
-                            <h3 class="text-medium font-extrabold leading-none tracking-tight text-gray-900 py-2">Frames
-                                Stop Adjust Position</h3>
-                            <div class="flex flex-row">
-                                <button id="addFramesStopAdjustPosition" type="button"
-                                    class="h-10 w-40 text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm focus:outline-none ">
-                                    Add Start/End Frames
-                                </button>
+                            <div class="mt-2 flex flex-col">
+                                <h3 class="text-medium font-extrabold leading-none tracking-tight text-gray-900 py-2">
+                                    Frames Stop Adjust Scale</h3>
+                                <div class="flex flex-row">
+                                    <button id="addFramesStopAdjustScale" type="button"
+                                        class="h-10 w-40 text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm focus:outline-none ">
+                                        Add Start/End Frames
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        <div id="framesStopAdjustPosition"
-                            class="rounded-lg flex items-top shadow-lg flex-col px-4 py-2 border border-solid mt-2">
-                            No Settings for Frames Stop Adjust Position.
+                            <div id="framesStopAdjustScale"
+                                class="rounded-lg flex items-top shadow-lg flex-col px-4 py-2 border border-solid mt-2">
+                                No Settings for Frames Adjust Scale.
+                            </div>
+                            <div class="mt-2 flex flex-col">
+                                <h3 class="text-medium font-extrabold leading-none tracking-tight text-gray-900 py-2">
+                                    Frames
+                                    Stop Adjust Position</h3>
+                                <div class="flex flex-row">
+                                    <button id="addFramesStopAdjustPosition" type="button"
+                                        class="h-10 w-40 text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm focus:outline-none ">
+                                        Add Start/End Frames
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="framesStopAdjustPosition"
+                                class="rounded-lg flex items-top shadow-lg flex-col px-4 py-2 border border-solid mt-2">
+                                No Settings for Frames Stop Adjust Position.
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -3,10 +3,10 @@ import Handlebars from "handlebars";
 import { PlayerWrapper as PlayerUIController } from "./Player";
 import { LevelUIController } from "./Level";
 import $ from "jquery";
-import { deepGet } from "./util";
+import { deepGet, MessageTypes, ParentChildMessage } from "./util";
 import { Database } from "./Db";
 import { NormalizedLandmarks } from "./Converter";
-import toastr from "toastr"
+import toastr from "toastr";
 import { MainTabsUIController } from "./Tab";
 import { SettingsUIController } from "./Settings";
 
@@ -49,6 +49,7 @@ export class App {
 
     public CurrentDocumentId: string;
     public AllLevelDatas;
+    public SongDataConfig;
 
     playerUIController: PlayerUIController;
     drawingTrackingPoint: DrawingTrackingPoints;
@@ -182,9 +183,16 @@ export class App {
         $("#save").off("click");
         $("#save").on("click", function (event) {
             $("#loading-screen").removeClass("hidden");
+
+            const messageToParent: ParentChildMessage = {
+                type: MessageTypes.ChildSave,
+                data: self.applicationState.levelData
+            }
+            window.parent.postMessage(messageToParent, '*');
+
             self.saveLevelData().then(result => {
                 $("#loading-screen").addClass("hidden");
-                toastr.success("Saved Successfully.");
+                toastr.success("Saved Level Data to Firebase Successfully.");
             });
         });
 
