@@ -5,6 +5,11 @@ const Dotenv = require('dotenv-webpack');
 
 module.exports = {
   entry: './index.ts',
+  output: {
+    filename: '[name].[contenthash].js',
+    path: path.resolve(__dirname, 'dist'),
+    clean: true, // Clean the output directory before emit.
+  },
   mode: 'development',
   watch: false,
   module: {
@@ -35,7 +40,8 @@ module.exports = {
       filename: 'index.html',
       template: 'index.html'
     }),
-    new MiniCssExtractPlugin({ filename: "style.css" })
+    new MiniCssExtractPlugin({ filename: "style.css" }),
+    require('flowbite/plugin')
   ],
   output: {
     filename: 'index.js',
@@ -50,5 +56,5 @@ module.exports = {
     compress: true,
     historyApiFallback: true,
   },
-  cache: false,
+  cache: false
 };

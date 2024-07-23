@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "webpack": "webpack serve --mode development --env APP_INTEGRATE_BLUEPRINT_TOOL=true"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +15,7 @@
     "@mediapipe/tasks-vision": "^0.10.12",
     "@types/video.js": "^7.3.58",
     "firebase": "^10.12.0",
+    "flowbite": "^2.4.1",
     "handlebars": "^4.7.8",
     "jquery": "^3.7.1",
     "konva": "^9.3.6",

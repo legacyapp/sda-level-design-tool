@@ -95,22 +95,19 @@ export function scrollIntoViewIfNeeded(element) {
     }
 }
 
-export interface ParentChildMessage {
-    type: string;
-    data?: any;
-}
-
 export enum MessageTypes {
-    ChildReady = "CHILD_READY",
-    ChildSave = "CHILD_SAVE",
-    ChildRequestSongDataConfig = "CHILD_REQUEST_SONG_DATA_CONFIG",
-    ChildRequestLevelData = "CHILD_REQUEST_LEVEL_DATA",
-    ParentReady = "PARENT_READY",
-    ParentSendBlueprintVersion = "PARENT_SEND_BLUEPRINT_VERSION",
-    ParentSendLevelData = "PARENT_SEND_LEVEL_DATA",
-    ParentSendSongDataConfig = "PARENT_SEND_SONG_DATA_CONFIG",
-    ParentSaveLevelData = "PARENT_SAVE_LEVEL_DATA",
-}
+    ChildReady = 'CHILD_READY',
+    ChildSave = 'CHILD_SAVE',
+    ChildClone = "CHILD_CLONE",
+    ChildRequestSongDataConfig = 'CHILD_REQUEST_SONG_DATA_CONFIG',
+    ChildRequestLevelData = 'CHILD_REQUEST_LEVEL_DATA',
+    ParentReady = 'PARENT_READY',
+    ParentSendBlueprintVersion = 'PARENT_SEND_BLUEPRINT_VERSION',
+    ParentSendLevelData = 'PARENT_SEND_LEVEL_DATA',
+    ParentSendSongDataConfig = 'PARENT_SEND_SONG_DATA_CONFIG',
+    ParentSaveLevelData = 'PARENT_SAVE_LEVEL_DATA',
+    ParentClone = "ParentClone",
+  }
 
 export function getEnumNameFromValue(value: number): string | undefined {
     // Check if the value exists in the enum

@@ -5,7 +5,8 @@ import { App, ApplicationState } from "./App";
 import { GameSettingCollection, LevelData, StreakComboConfig, VideoInfo } from "./Beat";
 import { NormalizedLandmarks } from "./Converter";
 import Handlebars from "handlebars";
-import { convertToLevelData, MessageTypes, ParentChildMessage, renamePropertiesInDepth } from "./util";
+import { convertToLevelData, MessageTypes, renamePropertiesInDepth } from "./util";
+import { MessageData, ParentChildMessage } from "./Models";
 
 const app = new App();
 app.Init();
@@ -135,7 +136,7 @@ $(function () {
             if (video) {
               app.getJson(postUrl)
                 .then(frameData => {
-                  let levelData;
+                  let levelData: LevelData;
 
                   if (process.env.APP_INTEGRATE_BLUEPRINT_TOOL) {
                     if (receivedData.blueprint?.levelData?.data) {
@@ -190,6 +191,24 @@ $(function () {
 
             break;
           }
+
+          case MessageTypes.ParentClone: {
+            const data = message.data as MessageData;
+
+            if (data.ok) {
+              app.cloneModal.hide();
+              toastr.success("Clone Song Successfully.");
+              $("#versionSelection").val($("#versionSelection").val()).trigger("change");
+            } else {
+              toastr.error("ERROR: cannot clone this song. " + data.error.message);
+              console.log(message);
+            }
+
+            $("#loading-screen").addClass("hidden");
+
+            break;
+          }
+
           default: {
             break;
           }

@@ -3,12 +3,14 @@ import Handlebars from "handlebars";
 import { PlayerWrapper as PlayerUIController } from "./Player";
 import { LevelUIController } from "./Level";
 import $ from "jquery";
-import { deepGet, MessageTypes, ParentChildMessage } from "./util";
+import { deepGet, MessageTypes } from "./util";
 import { Database } from "./Db";
 import { NormalizedLandmarks } from "./Converter";
 import toastr from "toastr";
 import { MainTabsUIController } from "./Tab";
 import { SettingsUIController } from "./Settings";
+import { CloneSongRequest, ParentChildMessage } from "./Models";
+import { Modal } from 'flowbite'
 
 export interface NotifyDelegate {
     (message: Message, data: any): void;
@@ -57,6 +59,8 @@ export class App {
     levelUIController: LevelUIController;
     mainTabsUIController: MainTabsUIController;
     settingsUIController: SettingsUIController;
+
+    cloneModal: Modal;
 
     database: Database;
 
@@ -195,6 +199,33 @@ export class App {
                 toastr.success("Saved Level Data to Firebase Successfully.");
             });
         });
+
+        this.cloneModal = new Modal(document.querySelector('#cloneSongModal'));
+        $("#showCloneModal").off("click");
+        $("#showCloneModal").on("click", function (event) {
+            $("#targetSongId").val(self.applicationState.levelData.ID + " Clone");
+            $("#targetSongName").val($("#videoSelection option:selected").text() + " Clone");
+            self.cloneModal.toggle()
+        });
+
+        $("#clone").off("click");
+        $("#clone").on("click", function (event) {
+            $("#loading-screen").removeClass("hidden");
+
+            const messageToParent: ParentChildMessage = {
+                type: MessageTypes.ChildClone,
+                data: new CloneSongRequest(self.applicationState.levelData.ID, $("#targetSongId").val() as string, {
+                    "info.songTitle": $("#targetSongName").val()
+                })
+            }
+            window.parent.postMessage(messageToParent, '*');
+        });
+
+        $("#closeModal").off("click");
+        $("#closeModal").on("click", function (event) {
+            self.cloneModal.hide();
+        });
+
 
         $("#loading-screen").addClass("hidden");
     }
