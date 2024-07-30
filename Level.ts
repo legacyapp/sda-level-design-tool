@@ -70,9 +70,13 @@ export class LevelUIController {
                     $("#addNewAction").addClass("hidden");
                 }
 
+                $("#totalMoves").text("Total Moves: " + self.applicationState.levelData.Moves.length.toString());
+
                 self.renderMaxScore();
                 toastr.success("Delete Move Successfully.");
             });
+
+            $("#totalMoves").text("Total Moves: " + this.applicationState.levelData.Moves.length.toString());
         }
     }
 
@@ -465,6 +469,7 @@ export class LevelUIController {
         const self = this;
         $("#addNewMove").off("click");
         $("#addNewMove").on("click", function (event) {
+            $("#totalMoves").text("Total Moves: " + self.applicationState.levelData.Moves.length.toString());
             self.notify(Message.MOVES_ITEM_ADDED, undefined);
             toastr.success("Added New Move Successfully.");
         });
