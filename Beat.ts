@@ -473,7 +473,7 @@ export class MoveAction {
         newMoveAction.Name = "New Action";
         newMoveAction.Joint = JointType.Nose;
         newMoveAction.IsMajor = false;
-        newMoveAction.ScoresRadius = [{ "Scoring": 100, "Radius": 3 }];
+        newMoveAction.ScoresRadius = [{ "Scoring": 3000, "Radius": 5 }];
         newMoveAction.Index = 0;
         newMoveAction.Threshold = 100;
 
@@ -521,7 +521,7 @@ export class TrackingPoint {
         trackingPoint.Pos.Y = 0.25;
         trackingPoint.Frame = currentFrame;
         trackingPoint.Time = currentTime;
-        trackingPoint.HoldTime = 2;
+        trackingPoint.HoldTime = 1;
         trackingPoint.Index = index;
 
         return trackingPoint;
