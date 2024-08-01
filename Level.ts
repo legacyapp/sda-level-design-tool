@@ -20,6 +20,7 @@ export class LevelUIController {
         $("#allMoves").empty();
         $("#moveDetailForm").addClass("hidden");
         $("#addNewAction").addClass("hidden");
+        $("#cloneMove").addClass("hidden");
     }
 
     private renderMoveList() {
@@ -49,6 +50,7 @@ export class LevelUIController {
                 // Show Move Detail Form;
                 $("#moveDetailForm").removeClass("hidden");
                 $("#addNewAction").removeClass("hidden");
+                $("#cloneMove").removeClass("hidden");
                 self.notify(Message.MOVES_ITEM_CLICKED, move);
             });
 
@@ -62,12 +64,14 @@ export class LevelUIController {
                 if (!self.applicationState.currentMove || self.applicationState.currentMove.ID === moveId) {
                     $("#moveDetailForm").addClass("hidden");
                     $("#addNewAction").addClass("hidden");
+                    $("#cloneMove").addClass("hidden");
                 }
 
                 $("#" + moveId).remove();
                 if (!self.applicationState.levelData.Moves || self.applicationState.levelData.Moves.length === 0) {
                     $("#moveDetailForm").addClass("hidden");
                     $("#addNewAction").addClass("hidden");
+                    $("#cloneMove").addClass("hidden");
                 }
 
                 $("#totalMoves").text("Total Moves: " + self.applicationState.levelData.Moves.length.toString());
@@ -96,6 +100,7 @@ export class LevelUIController {
         $("#moveDetailHeader").off("change", "input");
         $("#actions").off("click", ".deleteTrackingPoint");
         $("#addNewAction").off("click");
+        $("#cloneMove").off("click");
         $(".add-tracking-point").off("click");
         $(".sort-tracking-point").off("click");
         $(".deleteAction").off("click");
@@ -122,6 +127,7 @@ export class LevelUIController {
 
         this.handTrackingPointButtonsEvents(move, self);
         this.handleAddNewAction(move, self);
+        this.handleCloneMove(move, self);
         this.handleDeleteMoveAction(self, ".deleteAction");
         this.handleInputEvent(self, "#actions"); // Handle all "input" event of all actions inputs
         this.handleDeleteTrackingPointEvent(self, "#actions");
@@ -299,6 +305,16 @@ export class LevelUIController {
         });
     }
 
+    private handleCloneMove(move: Move, self: this) {
+        $("#cloneMove").on("click", function (event) {
+            const clone = move.clone();
+
+            self.notify(Message.MOVES_ITEM_ADDED, clone);
+            toastr.success("Clone Move Successfully.");
+            $("#totalMoves").text("Total Moves: " + self.applicationState.levelData.Moves.length.toString());
+        });
+    }
+
     private handleDeleteMoveAction(self: this, containerSelector: string) {
         $(containerSelector).on("click", function (event) {
             const currentMove = self.applicationState.currentMove;
@@ -469,8 +485,8 @@ export class LevelUIController {
         const self = this;
         $("#addNewMove").off("click");
         $("#addNewMove").on("click", function (event) {
-            $("#totalMoves").text("Total Moves: " + self.applicationState.levelData.Moves.length.toString());
             self.notify(Message.MOVES_ITEM_ADDED, undefined);
+            $("#totalMoves").text("Total Moves: " + self.applicationState.levelData.Moves.length.toString());
             toastr.success("Added New Move Successfully.");
         });
 

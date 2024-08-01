@@ -315,6 +315,17 @@ export class Move {
 
         return newMove;
     }
+
+    clone(): Move {
+        const cloned = new Move();
+
+        cloned.ID = uuidv4();
+        cloned.Name = this.Name + " Clone";
+        cloned.MoveActions = this.MoveActions?.map(m => m.clone());
+        cloned.updateStartAndEndFrameTime();
+
+        return cloned;
+    }
 }
 
 export class VideoInfo {
@@ -497,6 +508,21 @@ export class MoveAction {
             return a.Index - b.Index;
         });
     }
+
+    clone(): MoveAction {
+        const cloned = new MoveAction();
+
+        cloned.ID = uuidv4();
+        cloned.Name = this.Name;
+        cloned.Joint = this.Joint;
+        cloned.IsMajor = this.IsMajor;
+        cloned.ScoresRadius = this.ScoresRadius?.map(s => { return { "Scoring": s.Scoring, "Radius": s.Radius }; });
+        cloned.Index = this.Index;
+        cloned.Threshold = this.Threshold;
+        cloned.TrackingPoints = this.TrackingPoints?.map(p => p.clone());
+
+        return cloned;
+    }
 }
 
 // should we rename to Point
@@ -526,11 +552,32 @@ export class TrackingPoint {
 
         return trackingPoint;
     }
+
+    clone(): TrackingPoint {
+        const cloned = new TrackingPoint();
+
+        cloned.ID = uuidv4();
+        cloned.Pos = this.Pos.clone();
+        cloned.Frame = this.Frame;
+        cloned.Time = this.Time;
+        cloned.HoldTime = this.HoldTime;
+        cloned.Index = this.Index;
+
+        return cloned;
+    }
 }
 
 export class Position {
     X: number;
     Y: number;
+
+    public clone(): Position {
+        const cloned = new Position();
+        cloned.X = this.X;
+        cloned.Y = this.Y;
+
+        return cloned;
+    }
 }
 
 export class ScoreRadius {

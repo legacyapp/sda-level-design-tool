@@ -252,7 +252,10 @@ export class App {
                 {
                     this.playerUIController.pause();
                     const [currentFrame, currentTime] = this.playerUIController.getCurrentFrameAndTime();
-                    const newMove = Move.build(currentFrame, currentTime);
+                    let newMove = data as Move;
+                    if (!newMove) {
+                        newMove = Move.build(currentFrame, currentTime);
+                    }
                     this.applicationState.currentMove = newMove;
                     this.applicationState.levelData.Moves.push(newMove);
                     this.applicationState.levelData.sort();
